@@ -35,7 +35,7 @@ class Ishipment extends App{
 	}
 	public function ReadActive()
 	{
-		$active =  $this->MongoRead('cards',['list'=> ['$nin' =>['Expense']]],['dateLastActivity' => -1],[]);
+		$active =  $this->MongoRead('cards',['list'=> ['$nin' =>['Expense']],'archived'=>['$ne'=>1]],['dateLastActivity' => -1],[]);
 		$date = new \DateTime('-6 days');
 		$closed = $this->MongoRead('cards',['list'=>'Expense','dayLastActivity'=>['$gt' => $date->format('Y-m-d')]  ],['dateLastActivity' => -1],[]);
 	    return array_merge($active->toArray(),$closed->toArray());

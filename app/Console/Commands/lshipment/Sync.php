@@ -12,7 +12,7 @@ class Sync extends Command
      *
      * @var string
      */
-protected $signature = 'Lshipment:sync {--rebuild=0}} {--beat=0}';
+protected $signature = 'Lshipment:sync {--rebuild=0} {--force=0} {--beat=0}';
 
     /**
      * The console command description.
@@ -34,10 +34,11 @@ protected $signature = 'Lshipment:sync {--rebuild=0}} {--beat=0}';
 	public function Permission()
 	{
 		$this->app = new Lshipment();
-		$rebuild = $this->option('rebuild');
-		if($rebuild == 1)
+		$this->rebuild = $this->option('rebuild');
+		$this->force = $this->option('force');
+		if(($this->rebuild == 1)||($this->force))
 			return true;
-		return $this->app->Permission(10); //update every 2 min;
+		return $this->app->Permission(10); //update every 10 min;
 	}
     
 	public function Preprocess()
@@ -135,7 +136,7 @@ protected $signature = 'Lshipment:sync {--rebuild=0}} {--beat=0}';
 					$this->UpdateCard($card,$name);
 					$this->app->SaveCard($card);
 				}
-				else if($card->dateLastActivity != $scard->dateLastActivity)
+				else if(($card->dateLastActivity != $scard->dateLastActivity)||($this->rebuild))
 				{
 					echo "Processing ticket $inprocess/$total ".$card->id."\n";
 					$card->list = $name;

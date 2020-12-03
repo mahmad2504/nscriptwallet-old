@@ -41,7 +41,7 @@ class App
 			else
 			{
 				$timeout++;
-				dump("timeout #",$timeout);
+				dump("timeout #".$timeout);
 				$this->Save(compact('timeout'));
 				return true;
 			}

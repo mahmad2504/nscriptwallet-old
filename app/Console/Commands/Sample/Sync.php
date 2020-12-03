@@ -13,7 +13,7 @@ class Sync extends Command
      *
      * @var string
      */
-protected $signature = 'sample:sync {--rebuild=0}} {--beat=0}';
+protected $signature = 'sample:sync {--rebuild=0} {--force=0} {--beat=0}';
 
     /**
      * The console command description.
@@ -35,9 +35,11 @@ protected $signature = 'sample:sync {--rebuild=0}} {--beat=0}';
     public function Permission()
 	{
 		$this->app = new Sample();
-		$rebuild = $this->option('rebuild');
-		if($rebuild == 1)
+		$this->rebuild = $this->option('rebuild');
+		$this->force = $this->option('force');
+		if(($this->rebuild == 1)||($this->force))
 			return true;
+	
 		return $this->app->Permission();
 	}
 	public function Preprocess()

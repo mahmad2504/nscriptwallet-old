@@ -12,7 +12,7 @@ class Sync extends Command
      *
      * @var string
      */
-protected $signature = 'ishipment:sync {--rebuild=0}} {--beat=0}';
+protected $signature = 'ishipment:sync {--rebuild=0} {--force=0} {--beat=0}';
 
     /**
      * The console command description.
@@ -35,13 +35,14 @@ protected $signature = 'ishipment:sync {--rebuild=0}} {--beat=0}';
 	{
 		$this->app = new Ishipment();
 		$this->rebuild = $this->option('rebuild');
-		if($this->rebuild == 1)
+		$this->force=$this->option('force');
+		if(($this->rebuild == 1)||($this->force))
 			return true;
 		return $this->app->Permission(10); //update every 2 min;
 	}
 	public function Preprocess()
 	{
-		
+
 	}
 	public function Postprocess()
 	{
