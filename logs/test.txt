@@ -1,0 +1,23 @@
+Updating Shipment and Customs Clearance
+Processing List Upcoming
+
+   ErrorException 
+
+  Undefined variable: sdf
+
+  at D:\xampp\htdocs\nscriptwallet\app\Console\Commands\ishipment\Sync.php:123
+    119▕ 			echo "Processing List ".$name."\n";
+    120▕ 			$cards = $this->trello->ListCards($listid);
+    121▕ 			$total = count($cards);
+    122▕ 			$inprocess = 1;
+  ➜ 123▕ 			$inprocess = $sdf;
+    124▕ 			foreach($cards as $card)
+    125▕ 			{
+    126▕ 				$card->dayLastActivity = explode("T",$card->dateLastActivity)[0];
+    127▕ 				$scard = $this->app->ReadCard($card->id);
+
+  1   D:\xampp\htdocs\nscriptwallet\app\Console\Commands\ishipment\Sync.php:123
+      Illuminate\Foundation\Bootstrap\HandleExceptions::handleError("Undefined variable: sdf", "D:\xampp\htdocs\nscriptwallet\app\Console\Commands\ishipment\Sync.php")
+
+  2   D:\xampp\htdocs\nscriptwallet\vendor\laravel\framework\src\Illuminate\Container\BoundMethod.php:36
+      App\Console\Commands\ishipment\Sync::handle()
