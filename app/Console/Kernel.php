@@ -26,6 +26,8 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('ishipment:sync')->everyMinute()
 											 ->appendOutputTo("logs/ishipment.txt");
+		$schedule->command('lshipment:sync')->everyMinute()
+											 ->appendOutputTo("logs/lshipment.txt");
 		$schedule->exec('del logs\* /q')->daily();	
     }
 
