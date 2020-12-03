@@ -24,10 +24,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-         $schedule->command('ishipment:sync')->everyMinute()
-											 ->appendOutputTo("logs/test.txt");
-		 ;
-		 $schedule->command('support:sync')->everyMinute();
+         $schedule->command('ishipment:sync')->everyTenMinutes()
+											 ->appendOutputTo("logs/ishipment.txt");
     }
 
     /**
