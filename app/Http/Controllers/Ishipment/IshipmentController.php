@@ -45,8 +45,8 @@ class IshipmentController extends Controller
 				}
 			}
 			$obj->hardware = $hardware;
-			dump($obj->hardware);
-			dump($ticket->url);
+			//dump($obj->hardware);
+			//dump($ticket->url);
 			// Owener ////
 			$parts = explode("-",$ticket->name);
 			$obj->owner = $parts[2];
