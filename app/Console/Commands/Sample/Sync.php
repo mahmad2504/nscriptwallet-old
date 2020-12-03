@@ -36,11 +36,11 @@ protected $signature = 'sample:sync {--rebuild=0} {--force=0} {--beat=0}';
 	{
 		$this->app = new Sample();
 		$this->rebuild = $this->option('rebuild');
+		$sync_requested = $this->app->Read('sync_requested');
 		$this->force = $this->option('force');
-		if(($this->rebuild == 1)||($this->force))
+		if(($this->rebuild == 1)||($this->force)||$sync_requested)
 			return true;
-	
-		return $this->app->Permission();
+		return $this->app->Permission();		
 	}
 	public function Preprocess()
 	{
@@ -49,7 +49,7 @@ protected $signature = 'sample:sync {--rebuild=0} {--force=0} {--beat=0}';
 	public function Postprocess()
 	{
 		$this->app->SaveUpdateTime();
-
+		$this->app->Save(['sync_requested'=>0]);
 	}
     public function handle()
     {

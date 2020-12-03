@@ -19,6 +19,12 @@ class LshipmentController extends Controller
     {
 	
     }
+	public function Sync(Request $request)
+	{
+		$app = new Lshipment();
+		$app->Save(['sync_requested'=>1]);
+		return ['status'=>'Sync Requested'];
+	}
 	public function Active(Request $request,$team,$code)
 	{
 		if(strlen($code) < 5)

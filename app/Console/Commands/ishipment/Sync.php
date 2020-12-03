@@ -34,9 +34,10 @@ protected $signature = 'ishipment:sync {--rebuild=0} {--force=0} {--beat=0}';
     public function Permission()
 	{
 		$this->app = new Ishipment();
+		$sync_requested = $this->app->Read('sync_requested');
 		$this->rebuild = $this->option('rebuild');
 		$this->force=$this->option('force');
-		if(($this->rebuild == 1)||($this->force))
+		if(($this->rebuild == 1)||($this->force)||$sync_requested)
 			return true;
 		return $this->app->Permission(10); //update every 2 min;
 	}
@@ -47,6 +48,7 @@ protected $signature = 'ishipment:sync {--rebuild=0} {--force=0} {--beat=0}';
 	public function Postprocess()
 	{
 		$this->app->SaveUpdateTime();
+		$this->app->Save(['sync_requested'=>0]);
 	}
 	public function UpdateCard($card,$listname)
 	{
@@ -56,9 +58,7 @@ protected $signature = 'ishipment:sync {--rebuild=0} {--force=0} {--beat=0}';
 			$card->archived=1;
 			return;
 		}
-		$card->archived=0;	
-		
-		
+		$card->archived=0;		
 		$data = $this->trello->Card($card->id,'name,badges,desc,labels,url,dueComplete,idChecklists,idList');
 		$attachements = $this->trello->Attachment($card->id);
 		$data->trackingno = '';

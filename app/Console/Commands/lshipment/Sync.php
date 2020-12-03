@@ -34,9 +34,10 @@ protected $signature = 'Lshipment:sync {--rebuild=0} {--force=0} {--beat=0}';
 	public function Permission()
 	{
 		$this->app = new Lshipment();
+		$sync_requested = $this->app->Read('sync_requested');
 		$this->rebuild = $this->option('rebuild');
 		$this->force = $this->option('force');
-		if(($this->rebuild == 1)||($this->force))
+		if(($this->rebuild == 1)||($this->force)||$sync_requested)
 			return true;
 		return $this->app->Permission(10); //update every 10 min;
 	}
@@ -48,7 +49,7 @@ protected $signature = 'Lshipment:sync {--rebuild=0} {--force=0} {--beat=0}';
 	public function Postprocess()
 	{
 		$this->app->SaveUpdateTime();
-
+		$this->app->Save(['sync_requested'=>0]);
 	}
 	public function UpdateCard($card,$listname)
 	{

@@ -21,8 +21,10 @@ Route::get('/support/updated','App\Http\Controllers\Support\SupportController@up
 
 //////////////////////////////////////////
 Route::get('/ishipment','App\Http\Controllers\Ishipment\IshipmentController@active')->name('ishipment.active');
+Route::get('/ishipment/sync','App\Http\Controllers\Ishipment\IshipmentController@sync')->name('ishipment.sync');
 
-
+//////////////////////////////////////////
+Route::get('/lshipment/sync','App\Http\Controllers\Lshipment\LshipmentController@sync')->name('lshipment.sync');
 Route::get('/lshipment/{team}/{code}','App\Http\Controllers\Lshipment\LshipmentController@active')->name('lshipment.active');
 
 

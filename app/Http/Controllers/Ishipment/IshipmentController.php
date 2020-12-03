@@ -19,6 +19,12 @@ class IshipmentController extends Controller
     {
 	
     }
+	public function Sync(Request $request)
+	{
+		$app = new Ishipment();
+		$app->Save(['sync_requested'=>1]);
+		return ['status'=>'Sync Requested'];
+	}
 	public function Active(Request $request)
 	{
 		$app = new Ishipment();
