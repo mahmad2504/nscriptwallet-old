@@ -19,11 +19,13 @@ class Jira
 {
 	public static $issueService;
 	public static $server;
+	public static $app = null;
+	public static $username ='';
 	public function __construct()
 	{
 		
 	}
-	public static function Init($server='EPS')
+	public static function Init($server='EPS',$app=null)
 	{
 		self::$server = $server;
 		self::$issueService = new IssueService(new ArrayConfiguration([
@@ -31,6 +33,8 @@ class Jira
               'jiraUser' => env('JIRA_'.$server.'_USERNAME'),
              'jiraPassword' => env('JIRA_'.$server.'_PASSWORD'),
 		]));
+		self::$username = env('JIRA_'.$server.'_USERNAME');
+		self::$app=$app;
 	}
 	public static function GetFieldService()
 	{
@@ -167,7 +171,7 @@ class Jira
 		{
 			$obj =  new \StdClass();
 			$started = new Carbon($worklog->started);
-			SetTimeZone($started);
+			self::$app->SetTimeZone($started);
 			$obj->id = $worklog->id;
 			$obj->started = $started->getTimeStamp();
 			$obj->seconds = $worklog->timeSpentSeconds;
@@ -316,7 +320,10 @@ class Jira
 			for($i=0;$i<count($wlgs);$i++)
 			{
 				$wlg = $wlgs[$i];
-				if($wlg->comment == "@auto")
+				if(isset($wlg->comment))
+					if($wlg->comment == "@auto")
+						break;
+				if($wlg->author == self::$username)
 					break;
 			}
 			if($i==count($wlgs))

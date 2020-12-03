@@ -27,6 +27,9 @@ Route::get('/ishipment/sync','App\Http\Controllers\Ishipment\IshipmentController
 Route::get('/lshipment/sync','App\Http\Controllers\Lshipment\LshipmentController@sync')->name('lshipment.sync');
 Route::get('/lshipment/{team}/{code}','App\Http\Controllers\Lshipment\LshipmentController@active')->name('lshipment.active');
 
+//////////////////////////////////////////
+Route::get('/epicupdate/sync','App\Http\Controllers\Epicupdate\EpicupdateController@sync')->name('epicupdate.sync');
+
 
 Route::get('/', function () {
     return view('default');

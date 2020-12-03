@@ -28,6 +28,8 @@ class Kernel extends ConsoleKernel
 											 ->appendOutputTo("logs/ishipment.txt");
 		$schedule->command('lshipment:sync')->everyMinute()
 											 ->appendOutputTo("logs/lshipment.txt");
+		$schedule->command('epicupdate:sync')->everyMinute()
+											 ->appendOutputTo("logs/epicupdate.txt");
 		$schedule->exec('del logs\* /q')->daily();	
     }
 
