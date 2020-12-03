@@ -34,8 +34,8 @@ protected $signature = 'ishipment:sync {--rebuild=0}} {--beat=0}';
     public function Permission()
 	{
 		$this->app = new Ishipment();
-		$rebuild = $this->option('rebuild');
-		if($rebuild == 1)
+		$this->rebuild = $this->option('rebuild');
+		if($this->rebuild == 1)
 			return true;
 		return $this->app->Permission(10); //update every 2 min;
 	}
@@ -145,7 +145,7 @@ protected $signature = 'ishipment:sync {--rebuild=0}} {--beat=0}';
 					$this->UpdateCard($card,$name);
 					$this->app->SaveCard($card);
 				}
-				else if($card->dateLastActivity != $scard->dateLastActivity)
+				else if(($card->dateLastActivity != $scard->dateLastActivity)||($this->rebuild))
 				{
 					echo "Processing ticket $inprocess/$total ".$card->id."\n";
 					$this->UpdateCard($card,$name);

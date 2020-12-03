@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Local Shipments Pakistan</title>
+        <title>International Shipments Pakistan</title>
 		<link rel="stylesheet" href="{{ asset('apps/ishipment/tabulator/css/tabulator.min.css') }}" />
 		<link rel="stylesheet" href="{{ asset('apps/ishipment/attention/attention.css') }}" />
 		<link rel="stylesheet" href="{{ asset('apps/ishipment/stepprogress/stepprogressbar.css') }}" />
@@ -47,7 +47,7 @@
 			background-color: #FF8C00;
 			width:100%;
 		}
-		label_orchid {
+		.label_orchid {
 			color:#ffffff;
 			background-color: #9932CC;
 			width:100%;
@@ -97,7 +97,7 @@
 	console.log(tabledata);
 	
 	var columns=[
-		{title:"Hardware", field:"hardware", sorter:"string", align:"left",width:"350",formatter:
+		{title:"Hardware", field:"hardware", sorter:"string", align:"left",width:"250",formatter:
 			function(cell, formatterParams, onRendered)
 			{
 				var row = cell.getRow().getData();
@@ -122,9 +122,13 @@
 		{title:"Tracking", field:"trackingno", sorter:"string", align:"center",formatter:
 			function(cell, formatterParams, onRendered)
 			{
-				var dhlurl = "https://www.packagetrackr.com/track/dhl_express/"+cell.getValue();
-				return "<a href='"+dhlurl+"'>"+'<img title="Tracking # '+cell.getValue()+'" width="50" style="margin-top:5px;" src="{{ asset('apps/ishipment/images/dhl.png') }}">'+'</a>';;
-	
+				var row = cell.getRow().getData();
+				if(row.status == 'Dispatched')
+				{
+					var dhlurl = "https://www.packagetrackr.com/track/dhl_express/"+cell.getValue();
+					return "<a href='"+dhlurl+"'>"+'<img title="Tracking # '+cell.getValue()+'" width="50" style="margin-top:5px;" src="{{ asset('apps/ishipment/images/dhl.png') }}">'+'</a>';;
+				}
+				return '';
 			}
 		},
 		{title:"Status", field:"status", sorter:"string", align:"left",formatter:

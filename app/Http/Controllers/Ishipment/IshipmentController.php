@@ -31,24 +31,25 @@ class IshipmentController extends Controller
 			$ticket = $ticket->jsonSerialize();
 			unset($ticket->_id);
 			/// Hardware Details //////
-			$parts = explode("Qty:",$ticket->desc);
-			$parts = explode("\n",$parts[0]);	
-			$del = '';
-			$hardware = '';
-			for($j=1;$j<count($parts);$j++)
-			{
-				if(strlen(trim($parts[$j]))>0)
-				{
-					$parts[$j] = str_replace("-",'',$parts[$j]);
-					$hardware .= $del.trim($parts[$j]);
-					$del=',';
-				}
-			}
-			$obj->hardware = $hardware;
+			//$parts = explode("Qty:",$ticket->desc);
+			//$parts = explode("\n",$parts[0]);	
+			//$del = '';
+			//$hardware = '';
+			//for($j=1;$j<count($parts);$j++)
+			//{
+			//	if(strlen(trim($parts[$j]))>0)
+			//	{
+			//		$parts[$j] = str_replace("-",'',$parts[$j]);
+			//		$hardware .= $del.trim($parts[$j]);
+			//		$del=',';
+			//	}
+			//}
+			//$obj->hardware = $hardware;
 			//dump($obj->hardware);
 			//dump($ticket->url);
 			// Owener ////
 			$parts = explode("-",$ticket->name);
+			$obj->hardware = $parts[0];
 			$obj->owner = $parts[2];
 			$obj->source = $parts[1];
 			$obj->team = '';
@@ -67,8 +68,11 @@ class IshipmentController extends Controller
 			$obj->trackingno = $ticket->trackingno;
 			if(($ticket->list == 'Upcoming')||($ticket->list == 'Shipment')) 
 			    $obj->status = 'Ready';
-			if($ticket->checkitems['Shipment Dispatched'] == 'complete')
-				$obj->status = 'Dispatched';
+			if(isset($ticket->checkitems['Shipment Dispatched']->state))
+			{
+				if($ticket->checkitems['Shipment Dispatched']->state == 'complete')
+					$obj->status = 'Dispatched';
+			}
 			if($ticket->list == 'Custom')
 				$obj->status = 'Customs';
 			if($ticket->list == 'Expense')
