@@ -25,9 +25,10 @@ class LshipmentController extends Controller
 		$app->Save(['sync_requested'=>1]);
 		return ['status'=>'Sync Requested'];
 	}
-	public function Active(Request $request,$team,$code)
+	public function Active(Request $request,$team=null,$code=null)
 	{
-		if(strlen($code) < 5)
+		
+		if((strlen($code) < 5)||($team==null)||($code==null))
 		{
 			return ['result'=>'Unautorized Aceess'];
 		}

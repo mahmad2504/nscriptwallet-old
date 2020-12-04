@@ -15,10 +15,4 @@ class SampleController extends Controller
 		$app->Save(['sync_requested'=>1]);
 		return ['status'=>'Sync Requested'];
 	}
- 	public function Sync(Request $request)
-    {
-		$app = new Sample();
-		dump(Artisan::queue('sample:sync', []));
-		dump("last updated on ".$app->ReadUpdateTime());
-	}
 }

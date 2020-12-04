@@ -30,6 +30,31 @@ Route::get('/lshipment/{team}/{code}','App\Http\Controllers\Lshipment\LshipmentC
 //////////////////////////////////////////
 Route::get('/epicupdate/sync','App\Http\Controllers\Epicupdate\EpicupdateController@sync')->name('epicupdate.sync');
 
+//////////////////////////////////////////
+Route::get('/sprintcalendar','App\Http\Controllers\Sprintcalendar\SprintcalendarController@show')->name('sprintcalendar.show');
+
+Route::get('/{param1}/{params2?}', function (Request $request,$param1,$param2=null) 
+{
+	$url = Request::root();
+	$parts = explode('shipments.pkl.mentorg.com',$url);
+	if(count($parts)>1)
+	{
+		if($param1 == 'international')
+		{
+			return \Redirect::route('ishipment.active',[]);
+		}
+		else
+			return \Redirect::route('lshipment.active', ['team'=>$param1,'code'=>$param2]);
+	
+	}
+	$parts = explode('rmo.pkl.mentorg.com',$url);
+	if(count($parts)>1)
+	{
+		return \Redirect::route('rmo.'.$param1, []);
+	}
+	
+    return view('welcome');
+});
 
 Route::get('/', function () {
     return view('default');
