@@ -294,7 +294,7 @@
 				table.setFilter("label", "=", this.value);
 				var md5=CryptoJS.MD5(this.value.toLowerCase()).toString();
 				var url  = baseUrl + "/" + this.value.toLowerCase()+ "/" + md5.substring(0,6);
-				
+				var url = '{{route("lshipment.active")}}/'+this.value.toLowerCase()+"/"+md5.substring(0,6);
 				$('#teamurl').html('<a href="'+url+'">Share Link</a>');
 			}
 		});

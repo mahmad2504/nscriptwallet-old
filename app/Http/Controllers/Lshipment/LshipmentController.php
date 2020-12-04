@@ -30,7 +30,7 @@ class LshipmentController extends Controller
 		
 		if((strlen($code) < 5)||($team==null)||($code==null))
 		{
-			return ['result'=>'Unautorized Aceess'];
+			return ['result'=>'Unauthorized Access'];
 		}
 		
 		if( count(explode($code,md5(strtolower($team))))==2)

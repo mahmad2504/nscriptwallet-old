@@ -25,7 +25,7 @@ Route::get('/ishipment/sync','App\Http\Controllers\Ishipment\IshipmentController
 
 //////////////////////////////////////////
 Route::get('/lshipment/sync','App\Http\Controllers\Lshipment\LshipmentController@sync')->name('lshipment.sync');
-Route::get('/lshipment/{team}/{code}','App\Http\Controllers\Lshipment\LshipmentController@active')->name('lshipment.active');
+Route::get('/lshipment/{team?}/{code?}','App\Http\Controllers\Lshipment\LshipmentController@active')->name('lshipment.active');
 
 //////////////////////////////////////////
 Route::get('/epicupdate/sync','App\Http\Controllers\Epicupdate\EpicupdateController@sync')->name('epicupdate.sync');
@@ -33,7 +33,7 @@ Route::get('/epicupdate/sync','App\Http\Controllers\Epicupdate\EpicupdateControl
 //////////////////////////////////////////
 Route::get('/sprintcalendar','App\Http\Controllers\Sprintcalendar\SprintcalendarController@show')->name('sprintcalendar.show');
 
-Route::get('/{param1}/{params2?}', function (Request $request,$param1,$param2=null) 
+Route::get('/{param1}/{param2}/{param3}', function (Request $request,$param1,$param2=null,$param3=null) 
 {
 	$url = Request::root();
 	$parts = explode('shipments.pkl.mentorg.com',$url);
@@ -43,8 +43,8 @@ Route::get('/{param1}/{params2?}', function (Request $request,$param1,$param2=nu
 		{
 			return \Redirect::route('ishipment.active',[]);
 		}
-		else
-			return \Redirect::route('lshipment.active', ['team'=>$param1,'code'=>$param2]);
+		else if($param1 == 'local')
+			return \Redirect::route('lshipment.active', ['team'=>$param2,'code'=>$param3]);
 	
 	}
 	$parts = explode('rmo.pkl.mentorg.com',$url);
@@ -53,7 +53,7 @@ Route::get('/{param1}/{params2?}', function (Request $request,$param1,$param2=nu
 		return \Redirect::route('rmo.'.$param1, []);
 	}
 	
-    return view('welcome');
+    return view('default');
 });
 
 Route::get('/', function () {
