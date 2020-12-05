@@ -24,13 +24,14 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+		$schedule->exec('del logs\* /q')->daily();
         $schedule->command('ishipment:sync')->everyMinute()
-											 ->appendOutputTo("logs/ishipment.txt");
+											 ->appendOutputTo("logs/ishipment.txt")->runInBackground();
+											 
 		$schedule->command('lshipment:sync')->everyMinute()
-											 ->appendOutputTo("logs/lshipment.txt");
+											 ->appendOutputTo("logs/lshipment.txt")->runInBackground();
 		$schedule->command('epicupdate:sync')->everyMinute()
-											 ->appendOutputTo("logs/epicupdate.txt");
-		$schedule->exec('del logs\* /q')->daily();	
+											 ->appendOutputTo("logs/epicupdate.txt")->runInBackground();	
     }
 
     /**

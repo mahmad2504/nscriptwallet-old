@@ -33,13 +33,13 @@ Route::get('/epicupdate/sync','App\Http\Controllers\Epicupdate\EpicupdateControl
 //////////////////////////////////////////
 Route::get('/sprintcalendar','App\Http\Controllers\Sprintcalendar\SprintcalendarController@show')->name('sprintcalendar.show');
 
-Route::get('/{param1}/{param2}/{param3}', function (Request $request,$param1,$param2=null,$param3=null) 
+Route::get('/{param1?}/{param2?}/{param3?}', function (Request $request,$param1=null,$param2=null,$param3=null) 
 {
 	$url = Request::root();
 	$parts = explode('shipments.pkl.mentorg.com',$url);
 	if(count($parts)>1)
 	{
-		if($param1 == 'international')
+		if(($param1 == 'international')||($param1 == null))
 		{
 			return \Redirect::route('ishipment.active',[]);
 		}
