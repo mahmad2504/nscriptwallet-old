@@ -25,15 +25,15 @@ class Jira
 	{
 		
 	}
-	public static function Init($server='EPS',$app=null)
+	public static function Init($app)
 	{
-		self::$server = $server;
+		self::$server = $app->jira_server;
 		self::$issueService = new IssueService(new ArrayConfiguration([
-			 'jiraHost' => env('JIRA_'.$server.'_URL'),
-              'jiraUser' => env('JIRA_'.$server.'_USERNAME'),
-             'jiraPassword' => env('JIRA_'.$server.'_PASSWORD'),
+			 'jiraHost' => env('JIRA_'.self::$server.'_URL'),
+              'jiraUser' => env('JIRA_'.self::$server.'_USERNAME'),
+             'jiraPassword' => env('JIRA_'.self::$server.'_PASSWORD'),
 		]));
-		self::$username = env('JIRA_'.$server.'_USERNAME');
+		self::$username = env('JIRA_'.self::$server.'_USERNAME');
 		self::$app=$app;
 	}
 	public static function GetFieldService()
@@ -368,8 +368,12 @@ class Jira
 			];
 		$ret = $issueService->update($key, $issueField,$editParams);	
 	}	
-	public static function FetchTickets($jql,Fields $Jirafields)
+	public static function FetchTickets($jql,Fields $Jirafields=null)
 	{
+		if($Jirafields == null)
+			$Jirafields=self::$app->fields;
+		
+		
 		if(isset($Jirafields->transitions))
 			$expand = ['changelog'];
 		else

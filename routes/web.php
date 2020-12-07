@@ -33,6 +33,9 @@ Route::get('/epicupdate/sync','App\Http\Controllers\Epicupdate\EpicupdateControl
 //////////////////////////////////////////
 Route::get('/sprintcalendar','App\Http\Controllers\Sprintcalendar\SprintcalendarController@show')->name('sprintcalendar.show');
 
+/////////////////////////////////////////
+Route::get('/milestone','App\Http\Controllers\Milestone\MilestoneController@show')->name('milestone.show');
+
 Route::get('/{param1?}/{param2?}/{param3?}', function (Request $request,$param1=null,$param2=null,$param3=null) 
 {
 	$url = Request::root();

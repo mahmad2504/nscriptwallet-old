@@ -1,11 +1,9 @@
 <?php
-
 namespace App\Console\Commands\Sample;
 
 use Illuminate\Console\Command;
 use App\Apps\Sample\Sample;
-use App\Libs\Jira\Fields;
-use App\Libs\Jira\Jira;
+
 class Sync extends Command
 {
     /**
@@ -13,14 +11,14 @@ class Sync extends Command
      *
      * @var string
      */
-protected $signature = 'sample:sync {--rebuild=0} {--force=0} {--beat=0}';
+    protected $signature = 'sample:sync {--rebuild=0} {--force=0} {--email=2}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Description';
 
     /**
      * Create a new command instance.
@@ -32,34 +30,10 @@ protected $signature = 'sample:sync {--rebuild=0} {--force=0} {--beat=0}';
     {
 		parent::__construct();
     }
-    public function Permission()
-	{
-		$this->app = new Sample();
-		$this->rebuild = $this->option('rebuild');
-		$sync_requested = $this->app->Read('sync_requested');
-		$this->force = $this->option('force');
-		if(($this->rebuild == 1)||($this->force)||$sync_requested)
-			return true;
-		return $this->app->Permission();		
-	}
-	public function Preprocess()
-	{
-		
-	}
-	public function Postprocess()
-	{
-		$this->app->SaveUpdateTime();
-		$this->app->Save(['sync_requested'=>0]);
-	}
-    public function handle()
+	
+    public function handle()//
     {
-		if(!$this->Permission())
-		{
-			echo "Not permitted at this time\n";
-			return;
-		}
-		$app = $this->app;
-		$this->Preprocess();
-		$this->Postprocess();
+		$app = new Sample($this->option());
+		$app->Run();
     }
 }

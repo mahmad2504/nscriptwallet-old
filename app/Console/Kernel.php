@@ -26,12 +26,17 @@ class Kernel extends ConsoleKernel
     {
 		$schedule->exec('del logs\* /q')->daily();
         $schedule->command('ishipment:sync')->everyMinute()
-											 ->appendOutputTo("logs/ishipment.txt")->runInBackground();
-											 
+											 ->appendOutputTo("logs/ishipment.txt")->runInBackground();				 
 		$schedule->command('lshipment:sync')->everyMinute()
 											 ->appendOutputTo("logs/lshipment.txt")->runInBackground();
 		$schedule->command('epicupdate:sync')->everyMinute()
-											 ->appendOutputTo("logs/epicupdate.txt")->runInBackground();	
+											 ->appendOutputTo("logs/epicupdate.txt")->runInBackground();
+		$schedule->command('milestone:sync')->everyMinute()
+                                             ->appendOutputTo("logs/milestone.txt")->runInBackground();
+		$schedule->command('pullrequest:sync')->everyMinute()
+                                             ->appendOutputTo("logs/pullrequest.txt")->runInBackground();
+		$schedule->command('sprintcalendar:sync')->everyMinute()
+                                             ->appendOutputTo("logs/sprintcalendar.txt")->runInBackground();										
     }
 
     /**

@@ -3,20 +3,94 @@ namespace App\Apps;
 use App\Email;
 use \MongoDB\Client;
 use \MongoDB\BSON\UTCDateTime;
-
+use App\Libs\Jira\Jira;
+use App\Libs\Jira\Fields;
+use Carbon\Carbon;
 class App
 {
 	public $key = 'Unknown';
-	public function __construct($namespace,$server)
+	public $app = null;
+	public $jira_fields = [];
+	public $jira_customfields = [];
+	public $timezone =  null;
+	public function InitOption()
 	{
-		$parts = explode("\\",$namespace);
-		$key = strtolower($parts[count($parts)-1]);
-		$mongoclient =new Client($server);
-		$this->db = $mongoclient->$key;
-		$this->key = $key;
+		if(!isset($this->options))
+			$this->options = [];
+		if(!isset($this->options['rebuild']))
+			$this->options['rebuild'] = 0;
+		if(!isset($this->options['force']))
+			$this->options['force'] = 0;
+		if(!isset($this->options['email']))
+			$this->options['email'] = 2;
 	}
-	public function Permission($update_every_xmin=1)
+	public function __construct($app)
 	{
+		$this->InitOption();
+		
+		
+		$this->app = $app;
+		if(!isset($this->namespace))
+			dd("App namespace not set");
+		$parts = explode("\\",$app->namespace);
+		$key = strtolower($parts[count($parts)-1]);
+		$this->key = $key;
+		
+		if(isset($this->timezone))
+			date_default_timezone_set($this->timezone);
+		
+		if(!isset($this->mongo_server))
+			dd("App mongo_server not set");
+		
+		$mongoclient =new Client($this->mongo_server);
+		$this->db = $mongoclient->$key;
+		if(isset($this->jira_server))
+		{
+			Jira::Init($app);
+			$this->fields = new Fields($this);
+			if(!$this->fields->Exists()||$this->options['rebuild'])
+			{
+				dump("Configuring Jira Fields");
+				$this->fields = new Fields($this,0);
+				$this->fields->Set($this->jira_fields);
+				if($this->isAssoc($this->jira_customfields))
+					$this->fields->Set($this->jira_customfields);
+				$this->fields->Dump();
+			}
+		}
+	}
+	private function isAssoc(array $arr)
+	{
+		if (array() === $arr) return false;
+		return array_keys($arr) !== range(0, count($arr) - 1);
+	}
+	function IssueParser($code,$issue,$fieldname)
+	{
+		dd("Implement IssueParser function");
+	}
+	public function JiraFields(&$fields,&$customfields)
+	{
+		dd("Implement JiraFields function");
+	}
+	public function Run()
+	{
+		if($this->app->TimeToRun())
+		{
+			$this->Script();
+			$this->SaveUpdateTime();
+			$this->Save(['sync_requested'=>0]);
+		}
+	}
+	public function Script()
+	{
+		dd("Implement Scriot function");
+	}
+	public function TimeToRun($update_every_xmin=1)
+	{
+		$sync_requested = $this->Read('sync_requested');
+		if($this->options['rebuild']||$this->options['force']||$sync_requested)
+			return true;
+		
 		$sec = $this->SecondsSinceLastUpdate();
 		if($sec == null)
 		{
@@ -58,11 +132,10 @@ class App
 	}
 	public function Notify($to)
 	{
-	  	$email = new Email('localhost',['support-bot@mentorg.com', 'Support Bot'],'Mumtaz_Ahmad@mentor.com');
+	  	$email = new Email();
 		$subject = strtoupper($this->key)." : Service Status Alert";
-		$email->AddTo('mumtaz_ahmad@mentor.com');
 		$msg = 'Service '.strtoupper($this->key).' has some issue and not updating  ';
-		$email->Send($subject,$msg);
+		$email->Send(2,$subject,$msg);
 	}
 	public function SecondsSinceLastUpdate()
 	{
@@ -80,12 +153,26 @@ class App
 		$now->setTimezone(new \DateTimeZone($this->timezone));
 		return $now->getTimestamp();
 	}
+	public function CurrentDateTimeObj()
+	{
+		$now =  new Carbon('now');
+		$now->setTimezone(new \DateTimeZone($this->timezone));
+		return $now;
+	}
+	public function TimestampToObj($timestamp)
+	{
+		$dt =  new Carbon('now');
+		$dt->setTimeStamp($timestamp);
+		$dt->setTimezone(new \DateTimeZone($this->timezone));
+		return $dt;
+	}
 	public function SetTimeZone($datetime)
 	{
 		$datetime->setTimezone(new \DateTimeZone($this->timezone));
 	}
 	function Save($obj)
 	{
+		
 		$options=['upsert'=>true];
 		if(is_array($obj))
 		{
@@ -172,5 +259,24 @@ class App
 		if($code == 200)
 			return json_decode($result);
 		return 0;
+	}
+	function FetchJiraTickets($jql=null)
+	{
+		if($jql==null)
+			return Jira::FetchTickets($this->query);
+		else
+			return Jira::FetchTickets($jql);
+	}
+	function GetBusinessMinutes($ini_stamp,$end_stamp,$start_hour,$end_hour)
+	{
+		$ini = new \DateTime();
+		$ini->setTimeStamp($ini_stamp);
+		$ini->setTimezone(new \DateTimeZone($this->timezone));
+		
+		$end = new \DateTime();
+		$end->setTimeStamp($end_stamp);
+		$end->setTimezone(new \DateTimeZone($this->timezone));
+		
+		return round(GetBusinessSeconds($ini,$end,$start_hour,$end_hour)/60);
 	}
 }

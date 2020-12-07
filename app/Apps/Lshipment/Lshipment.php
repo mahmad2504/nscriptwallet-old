@@ -1,21 +1,25 @@
 <?php
 namespace App\Apps\Lshipment;
 use App\Apps\App;
+use App\Libs\Trello\Trello;
 
 class Lshipment extends App{
 	public $timezone='Asia/Karachi';
 	public $board = '5e96d769cab6ce1d5e4fdb91';
 	public $lists = ["List 1"=>"5e96d7c8ebdb461cc84f83ba","List 2"=>"5e96d7a0dffcf41ccac595c6","Archive"=>"5fc5d45fe9fe3702e6e71433"];
 		
-	public function __construct()
+	public $options = 0;
+	public function __construct($options=null)
     {
-		$server = env("MONGO_DB_SERVER", "mongodb://127.0.0.1");
-		date_default_timezone_set($this->timezone);
-		parent::__construct(__NAMESPACE__, $server);
+		$this->namespace = __NAMESPACE__;
+		$this->mongo_server = env("MONGO_DB_SERVER", "mongodb://127.0.0.1");
+		$this->options = $options;
+		$this->trello = new Trello(env("TRELLO_KEY"),env("TRELLO_TOKEN"));
+		parent::__construct($this);
     }
-	public function Permission($update_every_xmin=0)
+	public function TimeToRun($update_every_xmin=10)
 	{
-		return parent::Permission($update_every_xmin);
+		return parent::TimeToRun($update_every_xmin);
 	}
 	function ReadCard($id)
 	{
@@ -41,5 +45,95 @@ class Lshipment extends App{
 
 		$records = $this->MongoRead('cards',$query,['due' => 1],[]);
 		return $records->toArray();
+	}
+	public function UpdateCard($card,$listname)
+	{
+		$card->list = $listname;
+		if($listname == 'Archive')
+		{
+			$card->archived=1;
+			return;
+		}
+		$card->archived=0;	
+		$data = $this->trello->Card($card->id,'name,badges,desc,labels,url,dueComplete,idChecklists,idList');
+		$data->checkitems = [];
+		
+		if(count($data->idChecklists)>0)
+		{
+			foreach($data->idChecklists as $id)
+			{
+				if(isset($this->checklists[$id]))
+					$checklist_data = $this->checklists[$id];
+				else
+					$checklist_data = $this->trello->Checklist($id);
+				foreach($checklist_data->checkItems as $checkItem)
+				{
+					$data->checkitems[$checkItem->name]=$checkItem->state;
+				}
+				break;
+			}
+		}
+		$card->name = $data->name;
+		$card->desc = $data->desc;
+		$card->dueComplete = $data->dueComplete;
+        $card->checkitems =   $data->checkitems;
+		if(($card->dueComplete)||(!isset($card->createdon)))
+		{
+			$actions = $this->trello->GetActions($card->id,'updateCard');
+			foreach($actions as $action)
+			{
+				if(isset($action->data->card->dueComplete))
+					if($action->data->card->dueComplete === true)
+						$card->deliveredon = explode("T",$action->date)[0];
+			}	
+			if(isset($action))
+				$card->createdon = explode("T",$action->date)[0];
+		}
+		if($card->dueComplete == false)
+			$card->deliveredon = '';
+		
+		$card->checkItems = $data->badges->checkItems;
+		$card->checkItemsChecked = $data->badges->checkItemsChecked;
+		$card->url = $data->url;
+		$card->due = explode("T",$data->badges->due)[0];
+		$card->progress = ($card->checkItemsChecked/$card->checkItems)*100;
+		$card->labels = $data->labels;
+		
+	}
+    public function Script()
+    {
+		//$lists = $board = $this->trello->Lists($this->app->board);
+		//dd($lists);
+		$board = $this->trello->Board($this->app->board);
+		echo "Updating ".$board->name."\n";
+		foreach($this->app->lists as $name=>$listid)
+		{
+			echo "Processing List ".$name."\n";
+			$cards = $this->trello->ListCards($listid);
+			if(!is_array($cards))
+				continue;
+			$total = count($cards);
+			$inprocess = 1;
+			foreach($cards as $card)
+			{
+				$card->dayLastActivity = explode("T",$card->dateLastActivity)[0];
+				$scard = $this->app->ReadCard($card->id);
+				if($scard == null)
+				{
+					echo "Processing ticket $inprocess/$total ".$card->id."\n";
+					$card->list = $name;
+					$this->UpdateCard($card,$name);
+					$this->app->SaveCard($card);
+				}
+				else if(($card->dateLastActivity != $scard->dateLastActivity)||($this->options['rebuild']))
+				{
+					echo "Processing ticket $inprocess/$total ".$card->id."\n";
+					$card->list = $name;
+					$this->UpdateCard($card,$name);
+					$this->app->SaveCard($card);
+				}
+				$inprocess++;
+			}
+		}
 	}
 }

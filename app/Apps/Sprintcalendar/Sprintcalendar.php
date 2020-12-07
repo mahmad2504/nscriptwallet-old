@@ -3,8 +3,10 @@ namespace App\Apps\Sprintcalendar;
 use App\Apps\App;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
-
-class Sprintcalendar extends App{
+use App\Email;
+class Sprintcalendar extends App
+{	
+	public $options = 0;
 	public $timezone='Asia/Karachi';
 	public $csprint_no=null;
 	public $to=[
@@ -24,22 +26,24 @@ class Sprintcalendar extends App{
 		'Muhammad_Shafique@mentor.com',
 		'MuhammadAwais_Anwar@mentor.com',
 	];
-	public function Permission($update_every_xmin=0)
+	
+	
+	function __construct($start=null,$end=null,$options=null)
 	{
-		return parent::Permission($update_every_xmin);
-	}
-	function IssueParser($code,$issue,$fieldname)
-	{
-		switch($fieldname)
+		$this->namespace = __NAMESPACE__;
+		$this->mongo_server = env("MONGO_DB_SERVER", "mongodb://127.0.0.1");
+		$this->options = $options;
+		
+		if($start == null)
 		{
-			case 'default':
-				dd("Implement IssueParser");
+			$start = Carbon::now();
+			$start->subDays(4);
 		}
-	}
-	function __construct($start,$end)
-	{
-		$server = env("MONGO_DB_SERVER", "mongodb://127.0.0.1");
-		date_default_timezone_set($this->timezone);
+		if($end == null)
+		{
+			$end = Carbon::now();
+			$end=  $end->addDays(50);
+		}
 		
 		$base='2019-12-30';	
 		$sprint_number = 1;
@@ -140,9 +144,61 @@ class Sprintcalendar extends App{
 		$this->months=$months;
 		$this->weeks=$weeks;
 		$this->days=$days;
-		
 		$this->sprints=$sprints;
-		parent::__construct(__NAMESPACE__, $server);
+		parent::__construct($this);
+	}
+	public function TimeToRun($update_every_xmin=120)
+	{
+		$now = Carbon::now($this->timezone);
+		$lastemailsenton = $this->app->Read('lastemailsenton');
+		if($now->format('Y-m-d') == $lastemailsenton)
+		{
+			dump("Email already sent today");
+			return false;
+		}
+		if($now->format('H')<9)
+			return false;
+		return parent::TimeToRun($update_every_xmin);
+	}
+	public function Email($sprint,$start)
+	{
+		$email = new Email();
+		if($start)
+			$subject = 'Notification Sprint '.$sprint.': Starts today';
+		else
+			$subject = 'Notification Sprint '.$sprint.' Close today';	
+		$msg = $subject.'<br>';
+		$msg .= '<br>';
+		$msg .= '<br>';
+		$msg .= "<small>This is an auto generated notification so please donot reply to this email<br>";
+		$msg .= "If you are not interested in these notifications, please send an email to mumtaz_ahmad@mentor.com".'<br>';
+		$msg .= '<br>';
+		$msg .= "For complete sprint calender please <a href='http://script.pkl.mentorg.com/sprintcalendar'>click here</a></small><br>";
+		$to = [];
+		$to[] = 'mumtazahmad2504@gmail.com';
+		$email->Send($this->options['email'],$subject,$msg,$to,[]);
+	}
+	public function Script()
+	{
+		dump("Running script");
+		$now = Carbon::now($this->timezone); 	
+		$sstart = Carbon::parse($this->GetCurrentSprintStart()->date);
+		$send =   Carbon::parse($this->GetCurrentSprintEnd()->date);
+		$send->subDays(2);///since sprint closes on friday and now sunday
+		$sprint = $this->GetCurrentSprint();
+		if($sstart->IsToday())
+		{
+			$this->Email($sprint,1);
+			$lastemailsenton = $this->app->Save(['lastemailsenton'=>$now->format('Y-m-d')]);
+			echo "Sent email eminder for start of sprint ".$sprint;
+		}
+		if($send->IsToday())
+		{
+			$this->Email($sprint,0);
+			$lastemailsenton = $this->app->Save(['lastemailsenton'=>$now->format('Y-m-d')]);
+			echo "Sent email eminder for closure of sprint ".$sprint;
+
+		}
 	}
 	public function GetGridData()
 	{

@@ -9,9 +9,10 @@ use App;
 class Fields 
 {
 	private $fields = [];
-	private $default = ['key','status','issuelinks','timetracking'];
+	private $default = ['key','status','resolutiondate','updated','duedate','summary'];
 	private $native = [];
-	private $custom = ['story_points'=>'Story Points','sprint'=>'Sprint'];
+	private $custom = [];
+	//['story_points'=>'Story Points','sprint'=>'Sprint'];
 	private $conf_filename = null;
 	private $app = null;
 	public function __construct($app,$auto_initialize=1)
@@ -40,11 +41,13 @@ class Fields
 		if (array() === $arr) return false;
 		return array_keys($arr) !== range(0, count($arr) - 1);
 	}
-
+	
 	public function Set($fields)
 	{
 		if($this->isAssoc($fields))
+		{
 			$this->custom = $fields;
+		}
 		else
 		{
 			$this->native = $fields;
@@ -82,7 +85,6 @@ class Fields
 		try 
 		{
 			$fieldService = Jira::GetFieldService();
-			
 			// return custom field only. 
 			$ret = $fieldService->getAllFields(Field::CUSTOM);
 			foreach($ret as $field)
@@ -121,8 +123,8 @@ class Fields
 			$obj = $this->app->Read('jirafields');
 			if($obj != null)
 			    $this->fields = $obj->fields;
-				
 			$this->init();
+			
 		} 
 		catch (JiraRestApi\JiraException $e) 
 		{

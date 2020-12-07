@@ -14,7 +14,7 @@ class Sync extends Command
      *
      * @var string
      */
-    protected $signature = 'support:sync {--rebuild=0} {--beat=0}';
+    protected $signature = 'support:sync {--rebuild=0} {--debug=0}';
 	protected $app = null;
 	 /**
      * The console command description.

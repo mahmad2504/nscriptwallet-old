@@ -49,9 +49,9 @@ function isBusinessDay(\DateTime $date)
 	}
 
 	//December company holidays
-	if (new \DateTime(date('Y') . '-12-15') <= $date && $date <= new \DateTime((date('Y') + 1) . '-01-08')) {
-		return false;
-	}
+	//if (new \DateTime(date('Y') . '-12-15') <= $date && $date <= new \DateTime((date('Y') + 1) . '-01-08')) {
+	//	return false;
+	//}
 
 	// Other checks can go here
 

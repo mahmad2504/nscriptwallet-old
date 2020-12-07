@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Console\Commands\ishipment;
+namespace App\Console\Commands\Milestone;
 
 use Illuminate\Console\Command;
-use App\Apps\ishipment\ishipment;
+use App\Apps\Milestone\Milestone;
+use App\Libs\Jira\Fields;
+use App\Libs\Jira\Jira;
 class Sync extends Command
 {
     /**
@@ -11,14 +13,14 @@ class Sync extends Command
      *
      * @var string
      */
-protected $signature = 'ishipment:sync {--rebuild=0} {--force=0} {--beat=0}';
+    protected $signature = 'milestone:sync {--rebuild=0} {--force=0} {--email=2}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'International shipment sync';
+    protected $description = 'Send Milestone Notifications based on due dates';
 
     /**
      * Create a new command instance.
@@ -30,9 +32,10 @@ protected $signature = 'ishipment:sync {--rebuild=0} {--force=0} {--beat=0}';
     {
 		parent::__construct();
     }
+	
     public function handle()
     {
-		$app = new Ishipment($this->option());
-		$app->Run();
+		$this->app = new Milestone($this->option());
+		$this->app->Run();
     }
 }
