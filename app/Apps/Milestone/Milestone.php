@@ -136,6 +136,7 @@ class Milestone extends App{
 				$record = new \StdClass();
 				$record->updated = 0;
 				$record->delay=null;
+				$record->duedate=null;
 			}
 			$duedate = $this->TimestampToObj($ticket->duedate);
 			$duedate->hour = 18;
@@ -159,9 +160,12 @@ class Milestone extends App{
 				$days=$days*$mul;
 				if($record->updated != $ticket->updated)
 				{
-					dump("Sending email update for ".$ticket->key.". Due in ".$days);
-					$this->Email($ticket,$days);
-					$ticket->days = $days;
+					if($record->duedate != $ticket->duedate)
+					{
+						dump("Sending email update for ".$ticket->key.". Due in ".$days);
+						$this->Email($ticket,$days);
+						$ticket->days = $days;
+					}
 				}
 				else if(($days < 8)&&($days%2!=0))
 				{
