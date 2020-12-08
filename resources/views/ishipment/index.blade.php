@@ -123,7 +123,7 @@
 			function(cell, formatterParams, onRendered)
 			{
 				var row = cell.getRow().getData();
-				if(row.status == 'Dispatched')
+				if(row.status != 'Received')
 				{
 					var dhlurl = "https://www.packagetrackr.com/track/dhl_express/"+cell.getValue();
 					return "<a href='"+dhlurl+"'>"+'<img title="Tracking # '+cell.getValue()+'" width="50" style="margin-top:5px;" src="{{ asset('apps/ishipment/images/dhl.png') }}">'+'</a>';;
