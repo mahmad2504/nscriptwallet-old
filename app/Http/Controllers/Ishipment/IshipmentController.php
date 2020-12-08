@@ -68,8 +68,8 @@ class IshipmentController extends Controller
 					break;
 				}
 			}
-			if($exportticket)
-				break;
+			if($exportticket==1)
+				continue;
 			foreach($ticket->labels as $label)
 			{
 				$obj->team = trim($label->name);
