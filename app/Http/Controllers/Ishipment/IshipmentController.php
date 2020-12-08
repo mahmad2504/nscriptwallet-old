@@ -59,6 +59,17 @@ class IshipmentController extends Controller
 			$obj->owner = $parts[2];
 			$obj->source = $parts[1];
 			$obj->team = '';
+			$exportticket = 0;
+			foreach($ticket->labels as $label)
+			{
+				if(strtolower($label->name)=='export')
+				{
+					break;
+					$exportticket = 1;
+				}
+			}
+			if($exportticket)
+				break;
 			foreach($ticket->labels as $label)
 			{
 				$obj->team = trim($label->name);
