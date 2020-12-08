@@ -137,6 +137,8 @@ class Milestone extends App{
 				$record->updated = 0;
 				$record->delay=null;
 				$record->duedate=null;
+				record->assignee = [];
+				$record->assignee['emailAddress'] = '';
 			}
 			$duedate = $this->TimestampToObj($ticket->duedate);
 			$duedate->hour = 18;
@@ -160,7 +162,7 @@ class Milestone extends App{
 				$days=$days*$mul;
 				if($record->updated != $ticket->updated)
 				{
-					if($record->duedate != $ticket->duedate)
+					if(($record->duedate != $ticket->duedate)||($ticket->assignee['emailAddress']!=$record->assignee['emailAddress']))
 					{
 						dump("Sending email update for ".$ticket->key.". Due in ".$days);
 						$this->Email($ticket,$days);
