@@ -90,7 +90,7 @@ class IshipmentController extends Controller
 					$obj->received_date = $ticket->checkitems['Shipment Received']->date;
 				}
 			}
-			
+
 			$obj->trackingno = $ticket->trackingno;
 			if(($ticket->idList == $app->lists['Upcoming'])||($ticket->idList == $app->lists['Shipment'])) 
 			    $obj->status = 'Ready';
