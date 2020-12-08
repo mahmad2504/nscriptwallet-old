@@ -42,6 +42,8 @@ class Pullrequest extends App{
 		}
 		if($now->format('H')<10)
 			return false;
+		if($dt->isWednesday()||$dt->isMonday())
+			return true;
 		return parent::TimeToRun($update_every_xmin);
 	}
 	function IssueParser($code,$issue,$fieldname)
