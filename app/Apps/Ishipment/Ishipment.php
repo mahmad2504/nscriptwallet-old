@@ -6,7 +6,16 @@ use App\Libs\Trello\Trello;
 class Ishipment extends App{
 	public $timezone='Asia/Karachi';
 	public $board = '5a78b043543acc40d8ba06f9';
-	public $lists = ["Upcoming"=>"5aa212ebaac901de308b610c","Shipment"=>"5a78b08798546b40f68be6ee","Custom"=>"5a7c3ccdb5181394a42a0b06","Expense"=>"5a78b08c6f85c304e464aa07","Archive"=>"5fc5d63ded63c36a03facf6"];
+	public $lists = [
+	"Upcoming"=>"5aa212ebaac901de308b610c",
+	"Shipment"=>"5a78b08798546b40f68be6ee",
+	"Custom"=>"5a7c3ccdb5181394a42a0b06",
+	"Expense"=>"5a78b08c6f85c304e464aa07",
+	"Exports"=>"5a8feced2d5113d8cd58948a",
+	"Archive"=>"5fc5d63ded63c36a03facf6",
+	"Resources"=>"5b97bd3738c1cb1a7ca651ad",
+	"Closed"=>"5a851a762654fc6a36e11f48"
+	];
 	//public $query='';
 	//public $jira_fields = []; 
     //public $jira_customfields = [];  	
@@ -42,20 +51,30 @@ class Ishipment extends App{
 	}
 	public function ReadActive()
 	{
-		$active =  $this->MongoRead('cards',['list'=> ['$nin' =>['Expense']],'archived'=>['$ne'=>1]],['dateLastActivity' => -1],[]);
-		$date = new \DateTime('-6 days');
-		$closed = $this->MongoRead('cards',['list'=>'Expense','dayLastActivity'=>['$gt' => $date->format('Y-m-d')]  ],['dateLastActivity' => -1],[]);
-	    return array_merge($active->toArray(),$closed->toArray());
+		$active =  $this->MongoRead('cards',['archived'=>['$ne'=>1]],['dateLastActivity' => -1],[]);
+		return $active->toArray();
+		//$date = new \DateTime('-6 days');
+		//$closed = $this->MongoRead('cards',['list'=>'Expense','dayLastActivity'=>['$gt' => $date->format('Y-m-d')]  ],['dateLastActivity' => -1],[]);
+	    //return array_merge($active->toArray(),$closed->toArray());
 	}
-	public function UpdateCard($card,$listname)
+	public function UpdateCard($card)
 	{
-		$card->list = $listname;
-		if($listname == 'Archive')
+		if(
+			($card->idList == $this->lists["Upcoming"])||
+			($card->idList == $this->lists["Shipment"])||
+			($card->idList == $this->lists["Custom"])||
+			($card->idList == $this->lists["Expense"])
+			
+		)
+		{
+			$card->archived=0;
+		}
+		else
 		{
 			$card->archived=1;
 			return;
 		}
-		$card->archived=0;		
+			
 		$data = $this->trello->Card($card->id,'name,badges,desc,labels,url,dueComplete,idChecklists,idList');
 		$attachements = $this->trello->Attachment($card->id);
 		$data->trackingno = '';
@@ -113,36 +132,32 @@ class Ishipment extends App{
     {
 		//$lists = $this->trello->Lists($this->app->board);
 		//dd($lists);
+		if($this->options['rebuild'])
+			$this->db->cards->drop();
+		
 		$board = $this->trello->Board($this->app->board);
+		$cards = $this->trello->ListCardsOnBoard($board->id);
+		
 		echo "Updating ".$board->name."\n";
-		foreach($this->app->lists as $name=>$listid)
+		$total = count($cards);
+		$inprocess = 1;
+		foreach($cards as $card)
 		{
-			echo "Processing List ".$name."\n";
-			
-			$cards = $this->trello->ListCards($listid);
-			if(!is_array($cards))
-				continue;
-				
-			$total = count($cards);
-			$inprocess = 1;
-			foreach($cards as $card)
+			$card->dayLastActivity = explode("T",$card->dateLastActivity)[0];
+			$scard = $this->app->ReadCard($card->id);
+			if($scard == null)
 			{
-				$card->dayLastActivity = explode("T",$card->dateLastActivity)[0];
-				$scard = $this->app->ReadCard($card->id);
-				if($scard == null)
-				{
-					echo "Processing ticket $inprocess/$total ".$card->id."\n";
-					$this->UpdateCard($card,$name);
-					$this->app->SaveCard($card);
-				}
-				else if(($card->dateLastActivity != $scard->dateLastActivity)||($this->options['rebuild']))
-				{
-					echo "Processing ticket $inprocess/$total ".$card->id."\n";
-					$this->UpdateCard($card,$name);
-					$this->app->SaveCard($card);
-				}
-				$inprocess++;
+				echo "Processing ticket $inprocess/$total ".$card->id."\n";
+				$this->UpdateCard($card);
+				$this->app->SaveCard($card);
 			}
+			else if(($card->dateLastActivity != $scard->dateLastActivity)||($this->options['rebuild']))
+			{
+				echo "Processing ticket $inprocess/$total ".$card->id."\n";
+				$this->UpdateCard($card);
+				$this->app->SaveCard($card);
+			}
+			$inprocess++;
 		}
     }
 }

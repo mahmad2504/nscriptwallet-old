@@ -71,17 +71,26 @@ class IshipmentController extends Controller
 					$obj->shipment_date = $ticket->checkitems['Shipment Dispatched']->date;
 				}
 			}
+			if(isset($ticket->checkitems['Shipment Received']->state))
+			{
+				//dump($ticket->checkitems['Shipment Received']->state);
+				if($ticket->checkitems['Shipment Received']->state == 'complete')
+				{
+					$obj->received_date = $ticket->checkitems['Shipment Received']->date;
+				}
+			}
+			
 			$obj->trackingno = $ticket->trackingno;
-			if(($ticket->list == 'Upcoming')||($ticket->list == 'Shipment')) 
+			if(($ticket->idList == $app->lists['Upcoming'])||($ticket->idList == $app->lists['Shipment'])) 
 			    $obj->status = 'Ready';
 			if(isset($ticket->checkitems['Shipment Dispatched']->state))
 			{
 				if($ticket->checkitems['Shipment Dispatched']->state == 'complete')
 					$obj->status = 'Dispatched';
 			}
-			if($ticket->list == 'Custom')
+			if($ticket->idList == $app->lists['Custom'])
 				$obj->status = 'Customs';
-			if($ticket->list == 'Expense')
+			if($ticket->idList == $app->lists['Expense'])
 				$obj->status = 'Received';
 			$obj->url = $ticket->url;
 			$filtered[]=$obj;

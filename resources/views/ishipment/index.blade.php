@@ -153,6 +153,16 @@
 					break
 				}		
 			}
+		},
+		{title:"Received on", field:"received_date", sorter:"string", align:"left",formatter:
+			function(cell, formatterParams, onRendered)
+			{
+				var dt  = new Date(cell.getValue());
+				var rval = dt.toString().substring(0, 15);
+				if(rval == 'Invalid Date')
+					return '';
+				return dt.toString().substring(0, 15);
+			}
 		}
 	];
 	$(document).ready(function()
