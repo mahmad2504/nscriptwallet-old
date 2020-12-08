@@ -106,8 +106,8 @@
 			}
 		},
 		{title:"Owner", field:"owner", sorter:"string", align:"left"},
-		{title:"Source", field:"source", sorter:"string", align:"left"},
 		{title:"Team", field:"team", sorter:"string", align:"left"},
+		{title:"Source", field:"source", sorter:"string", align:"left"},
 		{title:"Dispatched on", field:"shipment_date", sorter:"string", align:"center",formatter:
 			function(cell, formatterParams, onRendered)
 			{
