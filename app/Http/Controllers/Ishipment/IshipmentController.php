@@ -64,8 +64,8 @@ class IshipmentController extends Controller
 			{
 				if(strtolower($label->name)=='export')
 				{
-					break;
 					$exportticket = 1;
+					break;
 				}
 			}
 			if($exportticket)
