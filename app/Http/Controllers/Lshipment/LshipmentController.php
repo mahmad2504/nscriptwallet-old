@@ -25,6 +25,13 @@ class LshipmentController extends Controller
 		$app->Save(['sync_requested'=>1]);
 		return ['status'=>'Sync Requested'];
 	}
+	public function IsSynced(Request $request)
+	{
+		$app = new Lshipment();
+		$val = $app->Read('sync_requested');
+		$val  = $val == 1? 0:1;
+		return ['status'=>$val];
+	}
 	public function Active(Request $request,$team=null,$code=null)
 	{
 		

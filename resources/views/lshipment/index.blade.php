@@ -8,6 +8,8 @@
 		<link rel="stylesheet" href="{{ asset('apps/lshipment/tabulator/css/tabulator.min.css') }}" />
 		<link rel="stylesheet" href="{{ asset('apps/lshipment/attention/attention.css') }}" />
 		<link rel="stylesheet" href="{{ asset('apps/lshipment/stepprogress/stepprogressbar.css') }}" />
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css"/>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css"/>
 		<style>
 		.tabulator [tabulator-field="summary"]{
 				max-width:200px;
@@ -44,7 +46,7 @@
 			 <div style="margin-right:150px;">{{ $team }} - Local Shipments Dashboard - Pakistan</div>
 			</div>
 			<div class="flex-item"> 
-			<small class="flex-item" style="font-size:12px;">This Dashboard lists down Open,In progress and recently delivered shipment tickets<a id="update" href="#"></a></small>
+			<small class="flex-item" style="font-size:12px;">This Dashboard lists down Open,In progress and recently delivered shipment tickets</small>
 			</div>
 			<hr>
 			<div style="display:none" id="selectdiv">
@@ -59,8 +61,8 @@
 			
 			<div class="flex-item">
 				
-				<small style="font-size:10px;">Dashboard created by mumtaz.ahmad@siemens.com for engineering operations Pakistan<a id="update" href="#"></a></small><br>
-				<small style="font-size:10px;">Last updated on {{$lastupdated}} PKT</small>
+				<small style="font-size:10px;">Dashboard created by mumtaz.ahmad@siemens.com for engineering operations Pakistan</small><br>
+				<small style="font-size:10px;">Last updated on {{$lastupdated}} PKT <span style="text-decoration: underline;cursor: pointer;" title="Request for dashboard update" id="update" href="#">Update now</span></small>
 			</div>
 		</div>
 	</div>
@@ -69,13 +71,14 @@
 	<script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/core.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/md5.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
 	<script src="{{ asset('apps/lshipment/tabulator/js/tabulator.min.js') }}" ></script>
 	<script src="{{ asset('apps/lshipment/attention/attention.js') }}" ></script>
 	<script>
 	//define data
 	var labels = {};
 	var admin = {{$admin}};
-	
+	var sync_requested = 0;
 	var tabledata = @json($tickets);
 	
 	for(i=0;i<tabledata.length;i++)
@@ -90,7 +93,7 @@
 		labels[row.label]=row.label;
 		
 	}
-	console.log(tabledata);
+	
 	labels['Others']='Others';
 	$('#select').append('<option value="'+'Select'+'" selected="selected">'+'Select'+'</option>');
 	for(var i in labels)
@@ -272,11 +275,66 @@
 	{title:"Due", field:"dueComplete", sorter:"string", align:"left",visible:false}
 
 	];
+	
+	function OnTimeOut()
+	{
+		if(sync_requested)
+		{
+			Get("{{ route('lshipment.issynced')}}",
+			function (response){
+				console.log(response);
+				if(response.status == 1)
+				{
+					alertify.success('Updated');
+					location.reload();
+				}
+				else
+				{
+					setTimeout(OnTimeOut, 20000);
+				}
+			},
+			function (error) {});
+		}
+				
+	}
+	function Get(url,success,failure)
+	{
+		$.ajax(
+		{
+			type:"GET",
+			url:url,
+			data:null,
+			success: success,
+			error: failure
+		});
+	}
 	$(document).ready(function()
 	{
 		var getUrl = window.location;
 		var baseUrl = getUrl .protocol + "//" + getUrl.host;
-		console.log(baseUrl);
+		
+		$( "#update" ).click(function() {
+				console.log("clicked");
+				if(sync_requested)
+					return;
+				Get("{{ route('lshipment.sync')}}",
+				function(response)
+				{
+					console.log(response);
+					alertify.success('Update Requested');
+					$('#update').html("Update requested");
+					sync_requested = 1;
+					setTimeout(OnTimeOut, 20000);
+				},
+				function (error) 
+				{
+					console.log(error); 
+					alertify.error('Network Error');
+					sync_requested = 0;					
+				}
+			);
+		});
+		
 		var table = new Tabulator("#table", {
 			data:tabledata,
 			columns:columns,

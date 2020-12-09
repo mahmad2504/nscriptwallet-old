@@ -82,7 +82,7 @@
 			<div class="flex-item">
 				
 				<small style="font-size:10px;">Automted by mumtaz.ahmad@siemens.com for engineering operations Pakistan </small><br>
-				<small style="font-size:10px;">Last updated on {{$lastupdated}} PKT  <a title="Request for dashboard update" id="update" href="#">Update now</a></small>
+				<small style="font-size:10px;">Last updated on {{$lastupdated}} PKT  <span style="text-decoration: underline;cursor: pointer;" title="Request for dashboard update" id="update" href="#">Update now</span></small>
 			</div>
 		</div>
 	</div>
@@ -98,8 +98,6 @@
 	//define data
 	var tabledata = @json($tickets);
 	var sync_requested = 0;
-	console.log(tabledata);
-	
 	var columns=[
 		{title:"Hardware", field:"hardware", sorter:"string", align:"left",width:"250",formatter:
 			function(cell, formatterParams, onRendered)
@@ -206,6 +204,7 @@
 	$(document).ready(function()
 	{
 		$( "#update" ).click(function() {
+			    console.log("clicked");
 				if(sync_requested)
 					return;
 				Get("{{ route('ishipment.sync')}}",

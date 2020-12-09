@@ -26,6 +26,7 @@ Route::get('/ishipment/issynced','App\Http\Controllers\Ishipment\IshipmentContro
 
 //////////////////////////////////////////
 Route::get('/lshipment/sync','App\Http\Controllers\Lshipment\LshipmentController@sync')->name('lshipment.sync');
+Route::get('/lshipment/issynced','App\Http\Controllers\Lshipment\LshipmentController@issynced')->name('lshipment.issynced');
 Route::get('/lshipment/{team?}/{code?}','App\Http\Controllers\Lshipment\LshipmentController@active')->name('lshipment.active');
 
 //////////////////////////////////////////
