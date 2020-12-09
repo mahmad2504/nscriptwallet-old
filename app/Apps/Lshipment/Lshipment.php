@@ -46,14 +46,21 @@ class Lshipment extends App{
 		$records = $this->MongoRead('cards',$query,['due' => 1],[]);
 		return $records->toArray();
 	}
-	public function UpdateCard($card,$listname)
+	public function UpdateCard($card)
 	{
-		$card->list = $listname;
-		if($listname == 'Archive')
+		if(
+			($card->idList == $this->lists["List 1"])||
+			($card->idList == $this->lists["List 2"])
+		)
+		{
+			$card->archived=0;
+		}
+		else
 		{
 			$card->archived=1;
 			return;
 		}
+		
 		$card->archived=0;	
 		$data = $this->trello->Card($card->id,'name,badges,desc,labels,url,dueComplete,idChecklists,idList');
 		$data->checkitems = [];
@@ -100,40 +107,37 @@ class Lshipment extends App{
 		$card->labels = $data->labels;
 		
 	}
+	public function Rebuild()
+	{
+		dump("Dropping cards database");
+		$this->db->cards->drop();
+	}
     public function Script()
     {
 		//$lists = $board = $this->trello->Lists($this->app->board);
 		//dd($lists);
 		$board = $this->trello->Board($this->app->board);
+		$cards = $this->trello->ListCardsOnBoard($board->id);
 		echo "Updating ".$board->name."\n";
-		foreach($this->app->lists as $name=>$listid)
+		$total = count($cards);
+		$inprocess = 1;
+		foreach($cards as $card)
 		{
-			echo "Processing List ".$name."\n";
-			$cards = $this->trello->ListCards($listid);
-			if(!is_array($cards))
-				continue;
-			$total = count($cards);
-			$inprocess = 1;
-			foreach($cards as $card)
+			$card->dayLastActivity = explode("T",$card->dateLastActivity)[0];
+			$scard = $this->app->ReadCard($card->id);
+			if($scard == null)
 			{
-				$card->dayLastActivity = explode("T",$card->dateLastActivity)[0];
-				$scard = $this->app->ReadCard($card->id);
-				if($scard == null)
-				{
-					echo "Processing ticket $inprocess/$total ".$card->id."\n";
-					$card->list = $name;
-					$this->UpdateCard($card,$name);
-					$this->app->SaveCard($card);
-				}
-				else if(($card->dateLastActivity != $scard->dateLastActivity)||($this->options['rebuild']))
-				{
-					echo "Processing ticket $inprocess/$total ".$card->id."\n";
-					$card->list = $name;
-					$this->UpdateCard($card,$name);
-					$this->app->SaveCard($card);
-				}
-				$inprocess++;
+				echo "Processing ticket $inprocess/$total ".$card->id."\n";
+				$this->UpdateCard($card);
+				$this->app->SaveCard($card);
 			}
+			else if(($card->dateLastActivity != $scard->dateLastActivity)||($this->options['rebuild']))
+			{
+				echo "Processing ticket $inprocess/$total ".$card->id."\n";
+				$this->UpdateCard($card);
+				$this->app->SaveCard($card);
+			}
+			$inprocess++;
 		}
 	}
 }

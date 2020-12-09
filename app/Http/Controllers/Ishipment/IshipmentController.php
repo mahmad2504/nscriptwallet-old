@@ -82,12 +82,12 @@ class IshipmentController extends Controller
 					$obj->shipment_date = $ticket->checkitems['Shipment Dispatched']->date;
 				}
 			}
-			if(isset($ticket->checkitems['Shipment Received']->state))
+			if(isset($ticket->checkitems['Delivered']->state))
 			{
-				//dump($ticket->checkitems['Shipment Received']->state);
-				if($ticket->checkitems['Shipment Received']->state == 'complete')
+				//dump($ticket->checkitems['Delivered']->state);
+				if($ticket->checkitems['Delivered']->state == 'complete')
 				{
-					$obj->received_date = $ticket->checkitems['Shipment Received']->date;
+					$obj->received_date = $ticket->checkitems['Delivered']->date;
 				}
 			}
 

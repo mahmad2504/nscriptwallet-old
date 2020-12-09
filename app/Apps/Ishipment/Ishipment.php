@@ -89,7 +89,7 @@ class Ishipment extends App{
 		{
 			foreach($data->idChecklists as $id)
 			{
-				if($id = '5db286ad4973fc041fe623ba')
+				if(1)//$id = '5db286ad4973fc041fe623ba')
 				{
 					if(isset($this->checklists[$id]))
 						$checklist_data = $this->checklists[$id];
@@ -120,6 +120,7 @@ class Ishipment extends App{
 				}
 			}	
 		}
+		
 		$card->trackingno = $data->trackingno;
 		$card->name = $data->name;
 		$card->desc = $data->desc;
@@ -128,12 +129,15 @@ class Ishipment extends App{
 		$card->url = $data->url;
 		$card->labels = $data->labels;
 	}
+	public function Rebuild()
+	{
+		dump("Dropping cards database");
+		$this->db->cards->drop();
+	}
     public function Script()
     {
 		//$lists = $this->trello->Lists($this->app->board);
 		//dd($lists);
-		if($this->options['rebuild'])
-			$this->db->cards->drop();
 		
 		$board = $this->trello->Board($this->app->board);
 		$cards = $this->trello->ListCardsOnBoard($board->id);

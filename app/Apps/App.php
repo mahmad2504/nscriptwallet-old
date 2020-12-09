@@ -72,10 +72,16 @@ class App
 	{
 		dd("Implement JiraFields function");
 	}
+	public function Rebuild()
+	{
+		dump('Rebuild callback function not implemented');
+	}
 	public function Run()
 	{
 		if($this->app->TimeToRun())
 		{
+			if($this->options['rebuild'])
+				$this->Rebuild();
 			$this->Script();
 			$this->SaveUpdateTime();
 			$this->Save(['sync_requested'=>0]);

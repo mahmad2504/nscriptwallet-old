@@ -33,6 +33,11 @@ class Sample extends App{
 				dd('"'.$fieldname.'" not handled in IssueParser');
 		}
 	}
+	public function Rebuild()
+	{
+		//$this->db->cards->drop();
+		$this->options['email']=0;// no emails when rebuild
+	}
 	public function Script()
 	{
 		dump("Running script");
