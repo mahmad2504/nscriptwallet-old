@@ -23,12 +23,13 @@ class App
 			$this->options['force'] = 0;
 		if(!isset($this->options['email']))
 			$this->options['email'] = 2;
+		if(!isset($this->options['email_resend']))
+			$this->options['email_resend'] = 0;
+		
 	}
 	public function __construct($app)
 	{
 		$this->InitOption();
-		
-		
 		$this->app = $app;
 		if(!isset($this->namespace))
 			dd("App namespace not set");

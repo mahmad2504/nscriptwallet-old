@@ -4,6 +4,7 @@ use App\Apps\App;
 use App\Libs\Jira\Fields;
 use App\Libs\Jira\Jira;
 use Carbon\Carbon;
+use App\Email;
 
 class Sample extends App{
 	public $timezone='Asia/Karachi';
@@ -41,6 +42,8 @@ class Sample extends App{
 	public function Script()
 	{
 		dump("Running script");
+		$email =  new Email();
+		$email->Send(2,'dd','ff');
 		//$tickets =  $this->FetchJiraTickets();
 	}
 }

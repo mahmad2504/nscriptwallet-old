@@ -35,14 +35,14 @@ class Pullrequest extends App{
 	{
 		$now = Carbon::now($this->timezone);
 		$lastemailsenton = $this->app->Read('lastemailsenton');
-		if($now->format('Y-m-d') == $lastemailsenton)
+		if(($now->format('Y-m-d') == $lastemailsenton)&&($this->options['email_resend']==0))
 		{
 			dump("Email already sent today");
 			return false;
 		}
 		if($now->format('H')<10)
 			return false;
-		if($dt->isWednesday()||$dt->isMonday())
+		if($now->isWednesday()||$now->isMonday())
 			return true;
 		return parent::TimeToRun($update_every_xmin);
 	}
