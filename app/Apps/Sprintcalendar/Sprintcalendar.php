@@ -151,7 +151,7 @@ class Sprintcalendar extends App
 	{
 		$now = Carbon::now($this->timezone);
 		$lastemailsenton = $this->app->Read('lastemailsenton');
-		if($now->format('Y-m-d') == $lastemailsenton)
+		if(($now->format('Y-m-d') == $lastemailsenton)&&($this->options['email_resend']==0))
 		{
 			dump("Email already sent today");
 			return false;

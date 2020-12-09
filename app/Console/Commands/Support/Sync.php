@@ -14,7 +14,7 @@ class Sync extends Command
      *
      * @var string
      */
-    protected $signature = 'support:sync {--rebuild=0} {--debug=0}';
+    protected $signature = 'support:sync {--rebuild=0} {--force=0} {--email=2} {--email_resend=0}';
 	protected $app = null;
 	 /**
      * The console command description.
@@ -22,7 +22,7 @@ class Sync extends Command
      * @var string
      */
 		
-    protected $description = 'Command description';
+    protected $description = 'Sync support Jira tickets';
 
     /**
      * Create a new command instance.

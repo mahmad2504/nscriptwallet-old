@@ -8,6 +8,8 @@
 		<link rel="stylesheet" href="{{ asset('apps/ishipment/tabulator/css/tabulator.min.css') }}" />
 		<link rel="stylesheet" href="{{ asset('apps/ishipment/attention/attention.css') }}" />
 		<link rel="stylesheet" href="{{ asset('apps/ishipment/stepprogress/stepprogressbar.css') }}" />
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css"/>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/bootstrap.min.css"/>
 		<style>
 		.tabulator [tabulator-field="summary"]{
 				max-width:200px;
@@ -66,7 +68,7 @@
 			 <div style="margin-right:150px;"> International Shipments Dashboard </div>
 			</div>
 			<div class="flex-item"> 
-			<small class="flex-item" style="font-size:12px;">This Dashboard lists down Open,In progress and recently delivered shipment tickets<a id="update" href="#"></a></small>
+			<small class="flex-item" style="font-size:12px;">This Dashboard lists down Open, In progress and recently delivered shipments<a id="" href="#"></a></small>
 			</div>
 			<hr>
 			
@@ -79,8 +81,8 @@
 			
 			<div class="flex-item">
 				
-				<small style="font-size:10px;">Automted by mumtaz.ahmad@siemens.com for engineering operations Pakistan<a id="update" href="#"></a></small><br>
-				<small style="font-size:10px;">Last updated on {{$lastupdated}} PKT</small>
+				<small style="font-size:10px;">Automted by mumtaz.ahmad@siemens.com for engineering operations Pakistan </small><br>
+				<small style="font-size:10px;">Last updated on {{$lastupdated}} PKT  <a title="Request for dashboard update" id="update" href="#">Update now</a></small>
 			</div>
 		</div>
 	</div>
@@ -89,11 +91,13 @@
 	<script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/core.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/md5.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
 	<script src="{{ asset('apps/ishipment/tabulator/js/tabulator.min.js') }}" ></script>
 	<script src="{{ asset('apps/ishipment/attention/attention.js') }}" ></script>
 	<script>
 	//define data
 	var tabledata = @json($tickets);
+	var sync_requested = 0;
 	console.log(tabledata);
 	
 	var columns=[
@@ -114,7 +118,7 @@
 				var dt  = new Date(cell.getValue());
 				var rval = dt.toString().substring(0, 15);
 				if(rval == 'Invalid Date')
-					return '';
+					return 'N/A';
 				return dt.toString().substring(0, 15);
 			}
 		
@@ -123,10 +127,10 @@
 			function(cell, formatterParams, onRendered)
 			{
 				var row = cell.getRow().getData();
-				if(row.status != 'Received')
+				if(1)//row.status != 'Received')
 				{
 					if(cell.getValue() == '')
-						return "Not Dispatched";
+						return "N/A";
 					var dhlurl = "https://www.packagetrackr.com/track/dhl_express/"+cell.getValue();
 					return "<a href='"+dhlurl+"'>"+'<img title="Tracking # '+cell.getValue()+'" width="50" style="margin-top:5px;" src="{{ asset('apps/ishipment/images/dhl.png') }}">'+'</a>';;
 				}
@@ -162,13 +166,65 @@
 				var dt  = new Date(cell.getValue());
 				var rval = dt.toString().substring(0, 15);
 				if(rval == 'Invalid Date')
-					return '';
+					return 'N/A';
 				return dt.toString().substring(0, 15);
 			}
 		}
 	];
+	function Get(url,success,failure)
+	{
+		$.ajax(
+		{
+			type:"GET",
+			url:url,
+			data:null,
+			success: success,
+			error: failure
+		});
+	}
+	function OnTimeOut()
+	{
+		if(sync_requested)
+		{
+			Get("{{ route('ishipment.issynced')}}",
+			function (response){
+				console.log(response);
+				if(response.status == 1)
+				{
+					alertify.success('Updated');
+					location.reload();
+				}
+				else
+				{
+					setTimeout(OnTimeOut, 20000);
+				}
+			},
+			function (error) {});
+		}
+				
+	}
 	$(document).ready(function()
 	{
+		$( "#update" ).click(function() {
+				if(sync_requested)
+					return;
+				Get("{{ route('ishipment.sync')}}",
+				function(response)
+				{
+					console.log(response);
+					alertify.success('Update Requested');
+					$('#update').html("Update requested");
+					sync_requested = 1;
+					setTimeout(OnTimeOut, 20000);
+				},
+				function (error) 
+				{
+					console.log(error); 
+					alertify.error('Network Error');
+					sync_requested = 0;					
+				}
+			);
+		});
 		var table = new Tabulator("#table", {
 			data:tabledata,
 			columns:columns,

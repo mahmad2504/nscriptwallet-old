@@ -13,7 +13,7 @@ class Sync extends Command
      *
      * @var string
      */
-    protected $signature = 'sprintcalendar:sync {--rebuild=0} {--force=0} {--email=2}';
+    protected $signature = 'sprintcalendar:sync {--rebuild=0} {--force=0} {--email=2} {--email_resend=0}';
 
     /**
      * The console command description.

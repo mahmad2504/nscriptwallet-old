@@ -11,7 +11,7 @@ class Sync extends Command
      *
      * @var string
      */
-protected $signature = 'ishipment:sync {--rebuild=0} {--force=0} {--beat=0}';
+protected $signature = 'ishipment:sync {--rebuild=0} {--force=0} {--email_resend=0}';
 
     /**
      * The console command description.

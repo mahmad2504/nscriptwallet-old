@@ -4,6 +4,24 @@ use App\Apps\App;
 use App\Email;
 class Support extends App{
 	public $timezone='America/Chicago';
+	public $query='labels in (risk,milestone) and duedate >=';
+	public $jira_fields = ['issuelinks','resolution','issuetype','assignee','priority','key','summary','status','statuscategory','resolutiondate','created','updated','transitions']);
+	public $jira_customfields =['premium_support'=>'Premium Support',
+				'first_contact_date'=>'First Contact Date',
+				'violation_time_to_resolution'=>'Violation Time to Resolution',
+				'gross_time_to_resolution'=>'Gross Time to Resolution',   
+				'gross_minutes_to_resolution'=>'gross_minutes_to_resolution',  
+				'net_time_to_resolution'=>'Net Time to Resolution',
+				//'waiting_time'=>'Time in Status(WFC)',
+				'violation_firstcontact'=>'Violation First Contact',
+				'solution_provided_date'=>'Solution Provided Date',
+				'test_case_provided_date'=>'Test / Use Case Provided',
+				'product_name'=>'Product Name',
+				'component'=>'Component',
+				'account'=>'Account'];
+				
+	public $jira_server = 'EPS';
+	
 	public $start_hour=8;   // Hour on which business day start
 	public $end_hour=20;    // Hour on which business day end
 	public $hours_day=12;   // Total hours in 1 business day
@@ -16,6 +34,9 @@ class Support extends App{
 				 ''=>[40,20]];
 	public $query='project=Siebel_JIRA AND "Product Name" !~ Vista AND "Product Name" !~ A2B AND "Product Name" !~ XSe and updated >= "2020-01-01" order by key';			 
 	private $sla_firstcontact = [2,1];
+	
+	
+	
 	public function __construct()
     {
 		$server = env("MONGO_DB_SERVER", "mongodb://127.0.0.1");
