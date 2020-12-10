@@ -43,7 +43,7 @@ class Support extends App{
 		
 		parent::__construct($this);
     }
-	public function TimeToRun($update_every_xmin=10)
+	public function TimeToRun($update_every_xmin=30)
 	{
 		return parent::TimeToRun($update_every_xmin);
 	}

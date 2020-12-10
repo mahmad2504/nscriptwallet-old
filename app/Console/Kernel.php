@@ -37,7 +37,10 @@ class Kernel extends ConsoleKernel
                                              ->appendOutputTo("logs/pullrequest.txt")->runInBackground();
 		$schedule->command('sprintcalendar:sync')->everyMinute()
                                              ->appendOutputTo("logs/sprintcalendar.txt")->runInBackground();										
-    }
+		$schedule->command('support:sync')->everyMinute()
+                                             ->appendOutputTo("logs/support.txt")->runInBackground();										
+  
+	}
 
     /**
      * Register the commands for the application.
