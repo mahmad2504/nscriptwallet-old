@@ -42,7 +42,7 @@ Route::get('/{param1?}/{param2?}/{param3?}', function (Request $request,$param1=
 {
 	$url = Request::root();
 	$parts = explode('shipments.pkl.mentorg.com',$url);
-	if(count($parts)>1)
+	if(count($parts)>1&&('http://' == strtolower($parts[0])))
 	{
 		if(($param1 == 'international')||($param1 == null))
 		{
@@ -50,22 +50,21 @@ Route::get('/{param1?}/{param2?}/{param3?}', function (Request $request,$param1=
 		}
 		else if($param1 == 'local')
 			return \Redirect::route('lshipment.active', ['team'=>$param2,'code'=>$param3]);
-	
 	}
 	$parts = explode('localshipments.pkl.mentorg.com',$url);
-	if(count($parts)>1)
+	if(count($parts)>1&&('http://' == strtolower($parts[0])))
 	{
+		if($param1==null)
+			return view('default');
 		return \Redirect::route('lshipment.active', ['team'=>$param1,'code'=>$param2]);
 	}
 	$parts = explode('rmo.pkl.mentorg.com',$url);
-	if(count($parts)>1)
+	if(count($parts)>1&&('http://' == strtolower($parts[0])))
 	{
 		return \Redirect::route('rmo.'.$param1, []);
 	}
-	
     return view('default');
 });
-
 Route::get('/', function () {
     return view('default');
 });
