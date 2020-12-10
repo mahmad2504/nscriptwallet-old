@@ -3,7 +3,7 @@ namespace App\Console\Commands\Sample;
 
 use Illuminate\Console\Command;
 use App\Apps\Sample\Sample;
-
+use App\Email;
 class Sync extends Command
 {
     /**
@@ -33,6 +33,7 @@ class Sync extends Command
 	
     public function handle()//
     {
+		
 		$app = new Sample($this->option());
 		$app->Run();
     }

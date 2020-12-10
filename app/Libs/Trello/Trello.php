@@ -6,10 +6,10 @@ class Trello
 {
 	private $key=null;
 	private $token=null;
-	public function __construct($key,$token)
+	public function __construct($key=null,$token=null)
 	{
-		$this->key = $key;
-		$this->token = $token;
+		$this->key = $key==null? env("TRELLO_KEY"):$key;
+		$this->token = $token==null? env("TRELLO_TOKEN"):$token;
 	}
 	public function GetResource($resource,$fields)
 	{

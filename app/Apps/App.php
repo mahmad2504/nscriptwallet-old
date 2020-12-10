@@ -148,7 +148,6 @@ class App
 	{
 		if($this->ReadUpdateTime()==null)
 			return null;
-	
 		$ldt = new \DateTime($this->ReadUpdateTime());
 		$ldt = $ldt->getTimestamp();
 		$cdt = $this->CurrentDateTime();

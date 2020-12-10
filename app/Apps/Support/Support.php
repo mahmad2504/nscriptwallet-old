@@ -1,11 +1,14 @@
 <?php
 namespace App\Apps\Support;
 use App\Apps\App;
+use App\Libs\Jira\Fields;
+use App\Libs\Jira\Jira;
 use App\Email;
 class Support extends App{
 	public $timezone='America/Chicago';
-	public $query='labels in (risk,milestone) and duedate >=';
-	public $jira_fields = ['issuelinks','resolution','issuetype','assignee','priority','key','summary','status','statuscategory','resolutiondate','created','updated','transitions']);
+	public $to='dan_schiro@mentor.com';
+	public $query='project=Siebel_JIRA AND "Product Name" !~ Vista AND "Product Name" !~ A2B AND "Product Name" !~ XSe and updated >= "2020-01-01" order by key';			 
+	public $jira_fields = ['issuelinks','resolution','issuetype','assignee','priority','key','summary','status','statuscategory','resolutiondate','created','updated','transitions'];
 	public $jira_customfields =['premium_support'=>'Premium Support',
 				'first_contact_date'=>'First Contact Date',
 				'violation_time_to_resolution'=>'Violation Time to Resolution',
@@ -18,48 +21,39 @@ class Support extends App{
 				'test_case_provided_date'=>'Test / Use Case Provided',
 				'product_name'=>'Product Name',
 				'component'=>'Component',
-				'account'=>'Account'];
-				
+				'account'=>'Account'];		
 	public $jira_server = 'EPS';
-	
 	public $start_hour=8;   // Hour on which business day start
 	public $end_hour=20;    // Hour on which business day end
 	public $hours_day=12;   // Total hours in 1 business day
-	public $email=1;
-	public $from='Waqar_Humayun@mentor.com';
 	private $sla= ['critical'=>[2,1],
 				 'high'=>[10,5],
 				 'medium'=>[20,10],
 				 'low'=>[40,20],
 				 ''=>[40,20]];
-	public $query='project=Siebel_JIRA AND "Product Name" !~ Vista AND "Product Name" !~ A2B AND "Product Name" !~ XSe and updated >= "2020-01-01" order by key';			 
 	private $sla_firstcontact = [2,1];
-	
-	
-	
-	public function __construct()
+	public function __construct($options)
     {
-		$server = env("MONGO_DB_SERVER", "mongodb://127.0.0.1");
-		date_default_timezone_set($this->timezone);
-		parent::__construct(__NAMESPACE__, $server);
+		$this->namespace = __NAMESPACE__;
+		$this->mongo_server = env("MONGO_DB_SERVER", "mongodb://127.0.0.1");
+		$this->options = $options;
+		$this->email = new Email();
+		$this->email->AddBCC('mumtaz_ahmad@mentor.com');
+		$this->email->AddTo($this->to);
+		
+		parent::__construct($this);
     }
-	public function Permission()
+	public function TimeToRun($update_every_xmin=10)
 	{
-		return true;
+		return parent::TimeToRun($update_every_xmin);
+	}
+	public function Rebuild()
+	{
+		$this->db->tickets->drop();
+		$this->options['email']=0;// no emails when rebuild
 	}
 	
-	function GetBusinessMinutes($ini_stamp,$end_stamp)
-	{
-		$ini = new \DateTime();
-		$ini->setTimeStamp($ini_stamp);
-		$ini->setTimezone(new \DateTimeZone($this->timezone));
-		
-		$end = new \DateTime();
-		$end->setTimeStamp($end_stamp);
-		$end->setTimezone(new \DateTimeZone($this->timezone));
-		
-		return round(GetBusinessSeconds($ini,$end,$this->start_hour,$this->end_hour)/60);
-	}
+	
 	function ClosedTickets()
 	{
 		$date = new \DateTime("-6 months");
@@ -100,9 +94,8 @@ class Support extends App{
 	}
 	public function SendFirstContactEmail($ticket)
 	{
-		$email = new Email('localhost',['support-bot@mentorg.com', 'Support Bot'],$this->from);
 		$subject = 'Support SLT Violation!!';
-		$email->AddTo('mumtaz_ahmad@mentor.com');//$ticket->assignee);
+		$this->email->to[] = $ticket->assignee->emailAddress;
 		$rem = 100-$ticket->percent_first_contact_time_consumed;
 		if($rem <= 0)
 		{
@@ -118,14 +111,12 @@ class Support extends App{
 			$msg .= '<p>';// style="font-style: italic;">';
 			$msg .= 'This is an automated message.Contact Dan Schiro for any questions.</p>';
 		}
-		$email->Send($subject,$msg);
+		$this->email->Send($this->options['email'],$subject,$msg,$this->to);
 	}
 	public function SendFirstContactNotification($ticket)
 	{
-		$email=$this->email;
 		if(!isset($ticket->first_contact_alert))
 		{
-			$email=0;
 			$ticket->first_contact_alert=0;
 		}
 			
@@ -142,7 +133,7 @@ class Support extends App{
 		{
 			if($ticket->first_contact_alert<5)
 			{
-				if($email) $this->SendFirstContactEmail($ticket);
+				$this->SendFirstContactEmail($ticket);
 				$ticket->first_contact_alert=5;
 			}
 		}
@@ -158,7 +149,7 @@ class Support extends App{
 		{
 			if($ticket->first_contact_alert<3)
 			{
-				if($email) $this->SendFirstContactEmail($ticket);
+				$this->SendFirstContactEmail($ticket);
 				$ticket->first_contact_alert=3;
 			}
 		}
@@ -166,7 +157,7 @@ class Support extends App{
 		{
 			if($ticket->first_contact_alert<2)
 			{
-				if($email) $this->SendFirstContactEmail($ticket);
+				$this->SendFirstContactEmail($ticket);
 				$ticket->first_contact_alert=2;
 			}
 		}
@@ -174,46 +165,44 @@ class Support extends App{
 		{
 			if($ticket->first_contact_alert<1)
 			{
-				if($email)  $this->SendFirstContactEmail($ticket);
+				$this->SendFirstContactEmail($ticket);
 				$ticket->first_contact_alert=1;
 			}
 		}
 	}
 	public function SendResolutionTimeEmail($ticket)
 	{
-		$email = new Email('localhost',['support-bot@mentorg.com', 'Support Bot'],$this->from);
 		$subject = 'Support SLT Violation!!';
-		$quota = SecondsToString($ticket->minutes_quota*60);
-		$email->AddTo('mumtaz_ahmad@mentor.com');//$ticket->assignee);
+		$this->email->to[] = $ticket->assignee->emailAddress;
+		$quota = SecondsToString($ticket->minutes_quota*60,$this->hours_day);
+		
 		$rem = 100-$ticket->percent_time_consumed;
 		if($rem <= 0)
 		{
 			$msg = '<span style="font-weight:bold">'.$ticket->key.'</span><br><br>';
-			$msg .= 'This ticket has crossed the SLT Threshold of '.$quote.' for "Time to Resolution"<br>';
+			$msg .= 'This ticket has crossed the SLT Threshold of '.$quota.' for "Time to Resolution"<br>';
 			$msg .= 'Please contact Dan Schiro for any questions.';
 		}
 		else
 		{
 			$msg = '<span style="font-weight:bold">'.$ticket->key.'</span> is approaching a SLT milestone<br>';
-			$msg .= '<p>'.$rem.' % of '.$quote.' remains on milestone "Time to Resolution"<br>';
+			$msg .= '<p>'.$rem.' % of '.$quota.' remains on milestone "Time to Resolution"<br>';
 			$msg .= '<p>';// style="font-style: italic;">';
 			$msg .= 'This is an automated message.Contact Dan Schiro for any questions.</p>';
 		}
-		$email->Send($subject,$msg);
+		$this->email->Send($this->options['email'],$subject,$msg);
 	}
 	public function SendTimeToResolutionNotification($ticket)
 	{
-		$email=$this->email;
 		if(!isset($ticket->time_to_resolution_alert))
 		{
-			$email=0;
 			$ticket->time_to_resolution_alert = 0;
 		}
 		if($ticket->percent_time_consumed >= 100)
 		{
 			if($ticket->time_to_resolution_alert<5)
 			{
-				if($email) $this->SendResolutionTimeEmail($ticket);
+				$this->SendResolutionTimeEmail($ticket);
 				$ticket->time_to_resolution_alert=5;
 			}
 		}
@@ -221,7 +210,7 @@ class Support extends App{
 		{
 			if($ticket->time_to_resolution_alert<4)
 			{
-				if($email) $this->SendResolutionTimeEmail($ticket);
+				$this->SendResolutionTimeEmail($ticket);
 				$ticket->time_to_resolution_alert=4;
 			}
 		}
@@ -229,7 +218,7 @@ class Support extends App{
 		{
 			if($ticket->time_to_resolution_alert<3)
 			{
-				if($email) $this->SendResolutionTimeEmail($ticket);
+				$this->SendResolutionTimeEmail($ticket);
 				$ticket->time_to_resolution_alert=3;
 			}
 		}
@@ -237,7 +226,7 @@ class Support extends App{
 		{
 			if($ticket->time_to_resolution_alert<2)
 			{
-				if($email) $this->SendResolutionTimeEmail($ticket);
+				$this->SendResolutionTimeEmail($ticket);
 				$ticket->time_to_resolution_alert=2;
 			}
 		}
@@ -245,7 +234,7 @@ class Support extends App{
 		{
 			if($ticket->time_to_resolution_alert<1)
 			{
-				if($email) $this->SendResolutionTimeEmail($ticket);
+				$this->SendResolutionTimeEmail($ticket);
 				$ticket->time_to_resolution_alert=1;
 			}
 		}
@@ -312,7 +301,7 @@ class Support extends App{
 					{
 						$interval->end = $ticket->solution_provided_date;					
 					}
-					$interval->waiting_minutes = $this->GetBusinessMinutes($interval->start,$interval->end);
+					$interval->waiting_minutes = $this->GetBusinessMinutes($interval->start,$interval->end,$this->start_hour,$this->end_hour);
 					continue;
 				}
 			}
@@ -322,7 +311,7 @@ class Support extends App{
 				{
 					$interval->end = $transition->created;
 					
-					$interval->waiting_minutes = $this->GetBusinessMinutes($interval->start,$interval->end);
+					$interval->waiting_minutes = $this->GetBusinessMinutes($interval->start,$interval->end,$this->start_hour,$this->end_hour);
 					$interval->type="customer wait";
 					$intervals[] = $interval;
 					$interval = null;
@@ -338,7 +327,7 @@ class Support extends App{
 			if(($transition->from=="Resolved")  && ($transition->to == "Reopened"))
 			{
 				$interval->end = $transition->created;
-				$interval->waiting_minutes = $this->GetBusinessMinutes($interval->start,$interval->end);
+				$interval->waiting_minutes = $this->GetBusinessMinutes($interval->start,$interval->end,$this->start_hour,$this->end_hour);
 				$interval->type="Reopen";
 				$intervals[] = $interval;
 				$interval = null;
@@ -364,12 +353,12 @@ class Support extends App{
 	{
 		if($ticket->first_contact_date != '')
 		{
-			$ticket->net_minutes_to_firstcontact = $this->GetBusinessMinutes($ticket->created,$ticket->first_contact_date );
+			$ticket->net_minutes_to_firstcontact = $this->GetBusinessMinutes($ticket->created,$ticket->first_contact_date,$this->start_hour,$this->end_hour);
 		}
 		else
 		{
 			$now =  $this->CurrentDateTime();
-			$ticket->net_minutes_to_firstcontact = $this->GetBusinessMinutes($ticket->created,$now);
+			$ticket->net_minutes_to_firstcontact = $this->GetBusinessMinutes($ticket->created,$now,$this->start_hour,$this->end_hour);
 		}
 		$ticket->net_time_to_firstcontact = SecondsToString($ticket->net_minutes_to_firstcontact*60,$this->hours_day);		
 		if($ticket->firstcontact_minutes_quota<$ticket->net_minutes_to_firstcontact)
@@ -412,7 +401,7 @@ class Support extends App{
 			$test_case_provided_date = $ticket->test_case_provided_date;
 			//echo $test_case_provided_date."\n";
 			//echo $finish."\n";
-			$ticket->net_minutes_to_resolution = $this->GetBusinessMinutes($test_case_provided_date,$finish);
+			$ticket->net_minutes_to_resolution = $this->GetBusinessMinutes($test_case_provided_date,$finish,$this->start_hour,$this->end_hour);
 			
 			$ticket->net_minutes_to_resolution = $ticket->net_minutes_to_resolution - $ticket->waitminutes ;
 			$ticket->net_time_to_resolution  = SecondsToString($ticket->net_minutes_to_resolution*60,$this->hours_day);		
@@ -424,7 +413,7 @@ class Support extends App{
 		{
 			//dump($ticket->resolutiondate);
 			//dump($ticket->first_contact_date);
-			//$ticket->net_minutes_to_resolution = $this->GetBusinessMinutes($ticket->first_contact_date,$ticket->resolutiondate);
+			//$ticket->net_minutes_to_resolution = $this->GetBusinessMinutes($ticket->first_contact_date,$ticket->resolutiondate,$this->start_hour,$this->end_hour);
 			$difference = $ticket->resolutiondate - $ticket->first_contact_date;
 			//dump($difference/60);
 			//echo "1 -".$ticket->net_minutes_to_resolution."\n";
@@ -436,7 +425,7 @@ class Support extends App{
 			$now =  $this->CurrentDateTime();
 			//dump($ticket->created);
 			$difference =$now-$ticket->created;
-			//$ticket->net_minutes_to_resolution = $this->GetBusinessMinutes($ticket->created,$now);
+			//$ticket->net_minutes_to_resolution = $this->GetBusinessMinutes($ticket->created,$now,$this->start_hour,$this->end_hour);
 			//echo "2 -".$ticket->net_minutes_to_resolution."\n";
 		}
 		if(!isset($ticket->net_minutes_to_resolution))
@@ -567,6 +556,7 @@ class Support extends App{
 			$this->SendTimeToResolutionNotification($ticket);
 			$this->SendFirstContactNotification($ticket);
 			//$this->Debug($ticket);
+			dump("Processing ".$ticket->key);
 			$ticket->dirty=0;
 			$this->SaveTicket($ticket);
 			$count++;
@@ -676,5 +666,41 @@ class Support extends App{
 			default:
 				dd($fieldname.' is not handled in IssueParser');
 		}
-}
+    }
+	function Script()
+	{
+		
+		$fields = new Fields($this,0);
+		$fields->Set(['key','updated']);
+		//$this->query = 'key in (SIEJIR-5794)'; 
+		$tickets =  Jira::FetchTickets($this->query,$fields);
+		$del = '';
+		$nquery = '';
+		foreach($tickets as $ticket)
+		{
+			$dticket = $this->app->ReadTicket($ticket->key);
+			if($dticket == null)
+			{
+				$nquery .= $del.$ticket->key;
+				$del = ',';
+			}
+			else if($dticket->updated != $ticket->updated)
+			{
+				$nquery .= $del.$ticket->key;
+				$del = ',';
+			}
+		}
+		if($nquery != '')
+		{
+			$nquery = 'key in ('.$nquery.')';
+			$tickets =  $this->FetchJiraTickets($nquery);
+			dump(count($tickets)." tickets found");
+			foreach($tickets as $ticket)
+			{
+				$ticket->dirty = 1;
+				$this->SaveTicket($ticket);
+			}
+		}
+		$this->ProcessDirtyTickets();
+	}
 }

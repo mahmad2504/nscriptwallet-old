@@ -52,6 +52,11 @@ Route::get('/{param1?}/{param2?}/{param3?}', function (Request $request,$param1=
 			return \Redirect::route('lshipment.active', ['team'=>$param2,'code'=>$param3]);
 	
 	}
+	$parts = explode('localshipments.pkl.mentorg.com',$url);
+	if(count($parts)>1)
+	{
+		return \Redirect::route('lshipment.active', ['team'=>$param1,'code'=>$param2]);
+	}
 	$parts = explode('rmo.pkl.mentorg.com',$url);
 	if(count($parts)>1)
 	{

@@ -15,18 +15,23 @@ class Email
 		$this->mail = new PHPMailer(true);	
 		//$this->mail->SMTPDebug = 4; 
 		$this->mail->isSMTP();     
-		//$this->mail->Host = "email-na.mentorg.com";//$host;
-		$this->mail->Host = 'localhost';
-		//$this->mail->SMTPAuth = true;
-		$this->mail->SMTPAuth = false;
-		//$this->mail->SMTPAutoTLS = true; 
-		$this->mail->SMTPAutoTLS = false; 
-		//$this->mail->Port = 587;//25; 
-		$this->mail->Port = 25; 
-		//$this->mail->Username   = 'mgc\\mahmad';//$user[0]; 
-		//$this->mail->Password  ='E395120@gsmp6000';
-		//$this->mail->setFrom('Mumtaz_Ahmad@mentor.com', 'Mumtaz Ahmad');
-		$this->mail->setFrom('support-bot@mentorg.com', 'Support Bot');
+		$this->mail->Host = env("EMAIL_HOST");
+		if($this->mail->Host == 'localhost')
+		{
+			$this->mail->SMTPAuth = false;
+			$this->mail->SMTPAutoTLS = false; 
+			$this->mail->Port = 25;
+		}
+		else
+		{
+			$this->mail->SMTPAuth = true;
+			$this->mail->SMTPAutoTLS = true; 
+			$this->mail->Port = 587;//25; 
+		}
+		$this->mail->Username  = env("EMAIL_USER");
+		$this->mail->Password  = env("EMAIL_PASS");
+		$from = env("EMAIL_FROM");
+		$this->mail->setFrom(env("EMAIL_FROM"));
 		$this->mail->addReplyTo($replyto);
 		$this->mail->isHTML(true);  
 	}
@@ -93,9 +98,14 @@ class Email
 		if($option == 0)
 		{
 			dump("Email option is off");
+			
 			return;
 		}
-		if($option == 2)
+		else if($option == 1)
+		{
+			dump("Sending email");
+		}
+		else if($option == 2)
 		{
 			$subject = '[MODERATED] '.$subject;
 			$this->mail->ClearAllRecipients( );
@@ -105,6 +115,7 @@ class Email
 			foreach($this->recipients as $recipient)
 				$msg .= '<li><small>'.$recipient.'</small></li>'; 
 			$msg .= '';
+			dump("Sending email to moderator");
 		}
 
 		$this->mail->Subject = $subject;	

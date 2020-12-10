@@ -384,6 +384,7 @@ class Jira
 		{
 			$fields[ ]= $code;			
 		}
+		
 		$issues = [];
 		$start = 0;
 		$max = 100;
