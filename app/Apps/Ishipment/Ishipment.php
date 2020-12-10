@@ -64,7 +64,6 @@ class Ishipment extends App{
 			($card->idList == $this->lists["Shipment"])||
 			($card->idList == $this->lists["Custom"])||
 			($card->idList == $this->lists["Expense"])
-			
 		)
 		{
 			$card->archived=0;
@@ -142,6 +141,12 @@ class Ishipment extends App{
 		$board = $this->trello->Board($this->app->board);
 		$cards = $this->trello->ListCardsOnBoard($board->id);
 		
+		$closedcards = $this->trello->ListClosedCardsOnBoard($board->id);
+		foreach($closedcards as $card)
+		{
+			$card->idList = -1;
+		}
+		$cards = array_merge($cards,$closedcards);
 		echo "Updating ".$board->name."\n";
 		$total = count($cards);
 		$inprocess = 1;

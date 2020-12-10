@@ -3,10 +3,9 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-
         <title>Laravel</title>
-		<link rel="stylesheet" href="{{ asset('apps/support/tabulator/css/tabulator.min.css') }}" />
-		<link rel="stylesheet" href="{{ asset('apps/support/attention/attention.css') }}" />
+		<link rel="stylesheet" href="{{ asset('libs/tabulator/css/tabulator.min.css') }}" />
+		<link rel="stylesheet" href="{{ asset('libs/attention/attention.css') }}" />
     <style>
 		.tabulator [tabulator-field="summary"]{
 				max-width:200px;
@@ -61,10 +60,10 @@
 		</div>
 	</div>
     </body>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-	<script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
-	<script src="{{ asset('apps/support/tabulator/js/tabulator.min.js') }}" ></script>
-	<script src="{{ asset('apps/support/attention/attention.js') }}" ></script>
+	<script src="{{ asset('libs//jquery/jquery.min.js')}}" ></script>
+	<script src="{{ asset('libs/sheetjs/xlsx.full.min.js')}}" ></script>
+	<script src="{{ asset('libs/tabulator/js/tabulator.min.js') }}" ></script>
+	<script src="{{ asset('libs/attention/attention.js') }}" ></script>
 	<script>
 	//define data
 	var tabledata = @json($tickets);

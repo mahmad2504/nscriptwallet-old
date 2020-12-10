@@ -129,7 +129,6 @@ class Milestone extends App{
 		
 		foreach($tickets as $ticket)
 		{
-
 			$record = $this->ReadTicket($ticket->key);
 			if($record == null)
 			{
@@ -137,7 +136,7 @@ class Milestone extends App{
 				$record->updated = 0;
 				$record->delay=null;
 				$record->duedate=null;
-				record->assignee = [];
+				$record->assignee = [];
 				$record->assignee['emailAddress'] = '';
 			}
 			$duedate = $this->TimestampToObj($ticket->duedate);

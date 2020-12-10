@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <title>EPS Sprint Calendar</title>
-		<link rel="stylesheet" href="{{ asset('apps/rmo/rmo.css') }}" />
+		<link rel="stylesheet" href="{{ asset('libs/sprintcalendar/calendar.css') }}" />
     <style>
 		.flex-container {
 			height: 100%;
@@ -61,8 +61,8 @@
 		
 	
     </body>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-	<script src="{{ asset('apps/rmo/rmo.js') }}" ></script>
+	<script src="{{ asset('libs//jquery/jquery.min.js')}}" ></script>
+	<script src="{{ asset('libs/sprintcalendar/calendar.js') }}" ></script>
 	<script>
 	//define data
 	var tabledata = @json($tabledata);

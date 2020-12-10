@@ -38,6 +38,10 @@ Route::get('/sprintcalendar','App\Http\Controllers\Sprintcalendar\Sprintcalendar
 /////////////////////////////////////////
 Route::get('/milestone','App\Http\Controllers\Milestone\MilestoneController@show')->name('milestone.show');
 
+/////////////////////////////////////////
+Route::get('/bspestimate','App\Http\Controllers\Bspestimate\BspestimateController@show')->name('bspestimate.show');
+
+
 Route::get('/{param1?}/{param2?}/{param3?}', function (Request $request,$param1=null,$param2=null,$param3=null) 
 {
 	$url = Request::root();

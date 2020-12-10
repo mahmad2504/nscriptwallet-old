@@ -43,7 +43,11 @@ class Trello
 	{
 		return $this->GetResource("/boards/".$boardid."/lists",$fields);
 	}
-	public function ListCardsOnBoard($boardid,$fields="dateLastActivity,idList")
+	public function ListClosedCardsOnBoard($boardid,$fields="dateLastActivity,idList,closed&filter=closed")
+	{
+		return $this->GetResource("/board/".$boardid."/cards",$fields);
+	}
+	public function ListCardsOnBoard($boardid,$fields="dateLastActivity,idList,closed")
 	{
 		return $this->GetResource("/board/".$boardid."/cards",$fields);
 	}
