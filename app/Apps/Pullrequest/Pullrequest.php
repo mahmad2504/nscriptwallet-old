@@ -44,6 +44,8 @@ class Pullrequest extends App{
 			return false;
 		if($now->isWednesday()||$now->isMonday())
 			return true;
+		else
+			return false;
 		return parent::TimeToRun($update_every_xmin);
 	}
 	function IssueParser($code,$issue,$fieldname)
@@ -192,6 +194,7 @@ class Pullrequest extends App{
 					$del = ',';
 				}	
 				$openpr->author = $pr->author->user->displayName;
+				$openpr->author_email = $pr->author->user->emailAddress;
 				$repository = $pr->fromRef->repository->slug;
 				$openpr->reviewers = [];
 				foreach($pr->reviewers as $reviewer)
@@ -262,6 +265,7 @@ class Pullrequest extends App{
 				usort($pending_prs, [$this,'sortfunc']);
 				$html = $this->HtmlFormat($repository,$pending_prs);
 				$to['mumtaz_ahmad@mentor.com']='mumtaz_ahmad@mentor.com';
+				$to[$openpr->author_email]=$openpr->author_email;
 				$to = array_values($to);
 				$cc = array_values($cc);
 				$email = new Email();

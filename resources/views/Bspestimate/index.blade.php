@@ -5,70 +5,64 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Laravel</title>
 		<link rel="stylesheet" href="{{ asset('libs/smartwizard/css/smart_wizard_all.min.css') }}" />
+		<link rel="stylesheet" href="{{ asset('libs/form/form.min.css') }}" />
+		<link rel="stylesheet" href="{{ asset('libs/css/common.css') }}" />
 	<style>
-		.flex-container {
-			height: 100%;
-			padding: 0;
-			margin: 0;
-			display: -webkit-box;
-			display: -moz-box;
-			display: -ms-flexbox;
-			display: -webkit-flex;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-		}
-		.row {
-			width:50%;
-		}
-		.flex-item {
-			text-align: center;
-		}
     </style>
     </head>
     <body>
-	<div class="flex-container">
+	<br>
+	<div class="flex-container">	
 		<div class="row"> 
-			<div id="smartwizard" style="display:block">
-				<ul class="nav">
+		    <div style="font-weight:bold;font-size:20px;line-height: 70px;height:75px;background-color:#4682B4;color:white;" class="flex-item"> 
+			 <img style="float:left;" height="20px" src="{{ asset('apps/ishipment/images/mentor.png') }}"></img>
+			 <h3 style="margin-right:150px;"> BSP Estimation Wizard </h3>
+			</div>
+			<br>
+		    <div id="smartwizard" style="display:block">
+			 	<ul class="nav">
 					<li>
 						<a class="nav-link" href="#step-1">
-							Step 1
-							</a>
+							General Information
+						</a>
 					</li>
 					<li>
 						<a class="nav-link" href="#step-2">
-							Step 2
+							OSS Components
 						</a>
 					</li>
 					<li>
 						<a class="nav-link" href="#step-3">
-							Step 3
+							Architecture<br>Port
 						</a>
 					</li>
 					<li>
 						<a class="nav-link" href="#step-4">
-							Step 4
+							Peripheral Driver Support
 						</a>
 					</li>
+					<li>
+						<a class="nav-link" href="#step-5">
+							MCF Support<br>(For AMP SOCs)
+						</a>
+					</li>
+					
 				</ul>
 				<div class="tab-content">
 				   <div id="step-1" class="tab-pane" role="tabpanel">
-					  <form>
-  <label for="fname">First name:</label><br>
-  <input type="text" id="fname" name="fname"><br>
-  <label for="lname">Last name:</label><br>
-  <input type="text" id="lname" name="lname">
-</form>
+				     @include('bspestimate.general')
 				   </div>
 				   <div id="step-2" class="tab-pane" role="tabpanel">
-					  Step content 2
+					 @include('bspestimate.oss')
 				   </div>
 				   <div id="step-3" class="tab-pane" role="tabpanel">
-					  Step content 3
+					  @include('bspestimate.ap')
 				   </div>
 				   <div id="step-4" class="tab-pane" role="tabpanel">
-					  Step content 4
+					  @include('bspestimate.pds')
+				   </div>
+				   <div id="step-5" class="tab-pane" role="tabpanel">
+					  Step content 5
 				   </div>
 				</div>
 			</div>
@@ -81,7 +75,9 @@
 	$(document).ready(function()
 	{
 		$('#smartwizard').smartWizard({
-			theme: 'arrows'});
+			theme: 'arrows',
+			enablePagination: true
+			});
 		
 	});
 	</script>
