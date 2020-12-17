@@ -61,7 +61,7 @@
 	{title:"Identifiers", field:"identifiers", sorter:"string", align:"left",width:"200"},
 	
 	{//create column group
-		title:"Target Estimates(SP)",
+		title:"Estimates(Story Points)",
 		align:"right",
 		columns:[
 			{title:"Nuc 4.x", field:"estimates.765e3650c22dfd96fba3f4d1a10d238d", sorter:"number", align:"left",width:"100",editor:"input"},
