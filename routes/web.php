@@ -40,8 +40,11 @@ Route::get('/milestone','App\Http\Controllers\Milestone\MilestoneController@show
 
 /////////////////////////////////////////
 Route::get('/bspestimate','App\Http\Controllers\Bspestimate\BspestimateController@show')->name('bspestimate.show');
+Route::get('/bspestimate/driver/search/{identification}','App\Http\Controllers\Bspestimate\BspestimateController@searchdriver')->name('bspestimate.searchdriver');
+Route::get('/bspestimate/driver/estimate/{target}/{identification}','App\Http\Controllers\Bspestimate\BspestimateController@estimate')->name('bspestimate.estimate');
+Route::get('/bspestimate/plan','App\Http\Controllers\Bspestimate\BspestimateController@plan')->name('bspestimate.plan');
 
-
+/////////////////////////////////////////
 Route::get('/{param1?}/{param2?}/{param3?}', function (Request $request,$param1=null,$param2=null,$param3=null) 
 {
 	$url = Request::root();

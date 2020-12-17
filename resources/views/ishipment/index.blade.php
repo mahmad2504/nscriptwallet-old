@@ -58,7 +58,6 @@
     </head>
     <body>
 	<div class="flex-container">
-	
 		<div class="row"> 
 			<br>
 			<div style="font-weight:bold;font-size:20px;line-height: 50px;height:50px;background-color:#4682B4;color:white;" class="flex-item"> 

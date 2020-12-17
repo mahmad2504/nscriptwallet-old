@@ -74,6 +74,32 @@
 	<script>
 	$(document).ready(function()
 	{
+		
+		$(".driver_textbox").change(function(){
+			
+			var group = $(this).data('group');
+			var elements = $('.'+group);
+			
+			for(var i=0;i<elements.length;i++)
+			{
+				var element = $(elements[i]);
+				switch(element.prop("tagName"))
+				{
+					case 'INPUT':
+						console.log(element.val());
+						break;
+					break;
+					case 'SELECT':
+						console.log(element.val());
+					
+					break;
+					
+				}
+			}
+			
+		});
+
+		
 		$('#smartwizard').smartWizard({
 			theme: 'arrows',
 			enablePagination: true

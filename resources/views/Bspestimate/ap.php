@@ -61,32 +61,32 @@
 				 <span style="margin-left:10px">CPU Driver</span>
 			</td>
 			<td>
-				<input  type="text" class="form" style="width:90%" placeholder="Compatibility String">
+				<input  data-group="cpu" type="text" class="form driver_textbox cpu" style="width:90%" placeholder="Compatibility String">
 			</td>
 			<td>
-				<select class="form" style="width:90%">
+				<select id="driver_cpu_os" class="form cpu" style="width:90%">
 				<option>Nucleus 4.x</option>
 				</select>
 			</td>
 			<td>
-				<input type="text" class="form" style="width:90%" placeholder="Story Points ">
+				<input id="driver_cpu_sp" type="text" class="form cpu" style="width:90%" placeholder="Story Points ">
 			</td>
 		</tr>
 		
 		<tr>
 			<td>
-				<span style="margin-left:10px">Cache Controller</span>
+				<span  style="margin-left:10px">Cache Controller</span>
 			</td>
 			<td>
-				<input  type="text" class="form" style="width:90%" placeholder="Compatibility String">
+				<input  data-group="cache" type="text" class="form driver_textbox cache" style="width:90%" placeholder="Compatibility String">
 			</td>
 			<td>
-				<select class="form" style="width:90%">
+				<select class="form cache" style="width:90%">
 				<option>Nucleus 4.x</option>
 				</select>
 			</td>
 			<td>
-				<input type="text" class="form" style="width:90%" placeholder="Story Points ">
+				<input type="text" class="form cache" style="width:90%" placeholder="Story Points ">
 			</td>
 		</tr>
 		
@@ -95,15 +95,15 @@
 				<span style="margin-left:10px">Interrupt Controller</span> 
 			</td>
 			<td>
-				<input  type="text" class="form" style="width:90%" placeholder="Compatibility String">
+				<input  data-group="interrupt" type="text" class="form driver_textbox interrupt" style="width:90%" placeholder="Compatibility String">
 			</td>
 			<td>
-				<select class="form" style="width:90%" >
+				<select class="form interrupt" style="width:90%" >
 				<option>Nucleus 4.x</option>
 				</select>
 			</td>
 			<td>
-				<input type="text" class="form" style="width:90%" placeholder="Story Points ">
+				<input type="text" class="form interrupt" style="width:90%" placeholder="Story Points ">
 			</td>
 		</tr>
 		
@@ -112,15 +112,15 @@
 				<span style="margin-left:10px">OS Timer</span> 
 			</td>
 			<td>
-				<input  type="text" class="form" style="width:90%" placeholder="Compatibility String">
+				<input  data-group="timer" type="text" class="form driver_textbox timer" style="width:90%" placeholder="Compatibility String">
 			</td>
 			<td>
-				<select class="form" style="width:90%">
+				<select class="form timer" style="width:90%">
 				<option>Nucleus 4.x</option>
 				</select>
 			</td>
 			<td>
-				<input type="text" class="form" style="width:90%" placeholder="Story Points ">
+				<input type="text" class="form timer" style="width:90%" placeholder="Story Points ">
 			</td>
 		</tr>
 		<tr>
@@ -128,15 +128,15 @@
 				<span style="margin-left:10px">Pin Control</span>
 			</td>
 			<td>
-				<input  type="text" class="form"  style="width:90%" placeholder="Compatibility String">
+				<input  data-group="pincontrol" type="text" class="form driver_textbox pincontrol"  style="width:90%" placeholder="Compatibility String">
 			</td>
 			<td>
-				<select class="form" style="width:90%">
+				<select class="form pincontrol" style="width:90%">
 				<option>Nucleus 4.x</option>
 				</select>
 			</td>
 			<td>
-				<input type="text" class="form" style="width:90%" placeholder="Story Points ">
+				<input type="text" class="form pincontrol" style="width:90%" placeholder="Story Points ">
 			</td>
 		</tr>
 		<tr>
@@ -144,15 +144,15 @@
 				<span style="margin-left:10px">Clock</span>
 			</td>
 			<td>
-				<input  type="text" class="form" style="width:90%" placeholder="Compatibility String">
+				<input  data-group="clock" type="text" class="form driver_textbox clock" style="width:90%" placeholder="Compatibility String">
 			</td>
 			<td>
-				<select class="form" style="width:90%">
+				<select class="form clock" style="width:90%">
 				<option>Nucleus 4.x</option>
 				</select>
 			</td>
 			<td>
-				<input type="text" class="form" style="width:90%" placeholder="Story Points ">
+				<input type="text" class="form clock" style="width:90%" placeholder="Story Points ">
 			</td>
 		</tr>
 		</tbody>
