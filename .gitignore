@@ -3,7 +3,7 @@
 /public/storage
 /storage/*.key
 /vendor
-/data
+/dataold
 .env
 .pem
 .env.backup
