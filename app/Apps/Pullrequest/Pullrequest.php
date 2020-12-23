@@ -264,7 +264,7 @@ class Pullrequest extends App{
 				$cc[$this->cc] = $this->cc;
 				usort($pending_prs, [$this,'sortfunc']);
 				$html = $this->HtmlFormat($repository,$pending_prs);
-				$to['mumtaz_ahmad@mentor.com']='mumtaz_ahmad@mentor.com';
+				$cc['mumtaz_ahmad@mentor.com']='mumtaz_ahmad@mentor.com';
 				$to[$openpr->author_email]=$openpr->author_email;
 				$to = array_values($to);
 				$cc = array_values($cc);

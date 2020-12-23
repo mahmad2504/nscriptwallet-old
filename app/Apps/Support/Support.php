@@ -97,6 +97,8 @@ class Support extends App{
 		$subject = 'Support SLT Violation!!';
 		$this->email->to[] = $ticket->assignee->emailAddress;
 		$rem = 100-$ticket->percent_first_contact_time_consumed;
+		$quota = SecondsToString($ticket->firstcontact_minutes_quota*60,$this->hours_day);
+	
 		if($rem <= 0)
 		{
 			$msg = 'This is an automated alert for ';
@@ -107,7 +109,7 @@ class Support extends App{
 		else
 		{
 			$msg = '<span style="font-weight:bold">'.$ticket->key.'</span> is approaching a SLT milestone<br>';
-			$msg .= '<p>'.$rem.' % of '.$quote.' remains on milestone "First Contact"<br>';
+			$msg .= '<p>'.$rem.' % of '.$quota.' remains on milestone "First Contact"<br>';
 			$msg .= '<p>';// style="font-style: italic;">';
 			$msg .= 'This is an automated message.Contact Dan Schiro for any questions.</p>';
 		}

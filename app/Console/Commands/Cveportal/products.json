@@ -1,0 +1,187 @@
+{
+	"monitoring_lists" : [
+		{
+			"id" : "2581AE52",
+			"label" : "BASE_11_0_0"
+		},
+		{
+			"label" : "ASTONE_11_0_0",
+			"id" : "59517DB8"
+		},
+		{
+			"label" : "IMX8EVK_11_0_0",
+			"id" : "13E15F35"
+		},
+		{
+			"label" : "MX6ULL_11_0_0",
+			"id" : "0A52F7E0"
+		},
+		{
+			"id" : "4E4B1490",
+			"label" : "SABRESD_11_0_0"
+		},
+		{
+			"id" : "1ADA1882",
+			"label" : "SAMAD27_11_0_0"
+		},
+		{
+			"id" : "09CAFB5A",
+			"label" : "ULTRAZED_11_0_0"
+		},
+		{
+			"id" : "768725B7",
+			"label" : "ULTRAZED_11_1_0"
+		},
+		{
+			"id" : "4EDA07B2",
+			"label" : "UNO_11_0_0"
+		},
+		{
+			"id" : "7C720FFE",
+			"label" : "ZCU102_11_0_0"
+		},
+		{
+			"id" : "0EF2C92A",
+			"label" : "ZCU102_11_1_0"
+		},
+		{
+			"id" : "0EF2C92A",
+			"label" : "ZCU102_11_1_0"
+		},
+		{
+			"id" : "1B958546",
+			"label" : "READYSTART_ARM_4_1_0"
+		}
+	],
+	"groups" : [
+		{
+			"name" : "Mentor® Embedded Linux® Flex OS",
+			"label" : "MENTOR_FLEX_LINUX"
+		},
+		{
+			"name" : "Nucleus ReadyStart™ ® Arm",
+			"label" : "NUC_READYSTART_ARM"
+		}
+	],
+	"products" : [
+		{
+			"id" : "ASTONE_11_0_0",
+			"group" : "MENTOR_FLEX_LINUX",
+			"name" : "aStoneA9r2-V3-LIN",
+			"version" : "11.0.0",
+			"show" : "1",
+			"parents" : [ "BASE_11_0_0" ],
+			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ],
+			"jira" : "HMIP"
+		},
+		{
+			"id" : "IMX8EVK_11_0_0",
+			"group" : "MENTOR_FLEX_LINUX",
+			"name" : "NXP i.MX 6Quad SABRE",
+			"version" : "11.0.0",
+			"show" : "1",
+			"parents" : [ "BASE_11_0_0" ],
+			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ],
+			"jira" : "HMIP"
+		},
+		{
+			"id" : "MX6ULL_11_0_0",
+			"group" : "MENTOR_FLEX_LINUX",
+			"name" : "NXP i.MX 6ULL",
+			"version" : "11.0.0",
+			"show" : "1",
+			"parents" : [ "BASE_11_0_0" ],
+			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ],
+			"jira" : "HMIP"
+		},
+		{
+			"id" : "SABRESD_11_0_0",
+			"group" : "MENTOR_FLEX_LINUX",
+			"name" : "NXP i.MX 6Quad SABRE",
+			"version" : "11.0.0",
+			"show" : "1",
+			"parents" : [ "BASE_11_0_0" ],
+			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ],
+			"jira" : "HMIP"
+		},
+		{
+			"id" : "SAMAD27_11_0_0",
+			"group" : "MENTOR_FLEX_LINUX",
+			"name" : "Microchip SAMA5D27 Eval Kit",
+			"version" : "11.0.0",
+			"show" : "1",
+			"parents" : [ "BASE_11_0_0" ],
+			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ],
+			"jira" : "HMIP"
+		},
+		{
+			"id" : "ULTRAZED_11_0_0",
+			"group" : "MENTOR_FLEX_LINUX",
+			"name" : "Xilinx UltraZed-EG Starter Kit",
+			"version" : "11.0.0",
+			"show" : "1",
+			"parents" : [ "BASE_11_0_0" ],
+			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ],
+			"jira" : "HMIP"
+		},
+		{
+			"id" : "ULTRAZED_11_1_0",
+			"group" : "MENTOR_FLEX_LINUX",
+			"name" : "Xilinx UltraZed-EG Starter Kit",
+			"version" : "11.1.0",
+			"show" : "1",
+			"parents" : [ "BASE_11_0_0" ],
+			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ],
+			"jira" : "HMIP"
+		},
+		{
+			"id" : "UNO_11_0_0",
+			"group" : "MENTOR_FLEX_LINUX",
+			"name" : "Advantech UNO 2473G",
+			"version" : "11.0.0",
+			"show" : "1",
+			"parents" : [ "BASE_11_0_0" ],
+			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ],
+			"jira" : "HMIP"
+		},
+		{
+			"id" : "ZCU102_11_0_0",
+			"group" : "MENTOR_FLEX_LINUX",
+			"name" : "Xilinx MPSoC ZCU102-G",
+			"version" : "11.0.0",
+			"show" : "1",
+			"parents" : [ "BASE_11_0_0" ],
+			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ],
+			"jira" : "HMIP"
+		},
+		{
+			"id" : "ZCU102_11_1_0",
+			"group" : "MENTOR_FLEX_LINUX",
+			"name" : "Xilinx MPSoC ZCU102-G",
+			"version" : "11.1.0",
+			"show" : "1",
+			"parents" : [ "BASE_11_0_0" ],
+			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ],
+			"jira" : "HMIP"
+		},
+		{
+			"id" : "ZCU102_11_1_0",
+			"group" : "MENTOR_FLEX_LINUX",
+			"name" : "Xilinx MPSoC ZCU102-G",
+			"version" : "11.1.0",
+			"show" : "1",
+			"parents" : [ "BASE_11_0_0" ],
+			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ],
+			"jira" : "HMIP"
+		},
+		{
+			"id" : "READYSTART_ARM_4_1_0",
+			"group" : "NUC_READYSTART_ARM",
+			"name" : "Nucleus® ReadyStart™ ® Arm",
+			"version" : "4.1.0",
+			"show" : "1",
+			"admin" : [ "himp", "mahmad", "hmsadiq", "rbates", "waqarh" ],
+			"jira" : "HMIP"
+		}
+	]
+}

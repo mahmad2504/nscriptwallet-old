@@ -61,7 +61,6 @@ class Milestone extends App{
 		$cc = [];
 		$cc[]=$this->cc;
 		$cc[]=$ticket->reporter['emailAddress'];
-		$cc[]='mumtazahmad2504@gmail.com';
 		
 		$url = env('JIRA_EPS_URL');
 		$ticketurl = '<a href="'.$url.'/browse/'.$ticket->key.'">'.$ticket->key.'</a>';

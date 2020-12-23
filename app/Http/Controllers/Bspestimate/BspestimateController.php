@@ -16,7 +16,7 @@ class BspestimateController extends Controller
 	public function SearchDriver(Request $request,$identifier)
 	{
 		$app = new Bspestimate();
-		$drivers = $app->ReadDriver($identifier);
+		$drivers = $app->SearchDrivers($identifier);
 		foreach($drivers as &$driver)
 		{
 			$driver = $driver->jsonSerialize();

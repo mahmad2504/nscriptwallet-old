@@ -13,6 +13,7 @@ class App
 	public $jira_fields = [];
 	public $jira_customfields = [];
 	public $timezone =  null;
+	public $mongo = null;
 	public function InitOption()
 	{
 		if(!isset($this->options))
@@ -36,7 +37,7 @@ class App
 		$parts = explode("\\",$app->namespace);
 		$key = strtolower($parts[count($parts)-1]);
 		$this->key = $key;
-		
+		$this->dbname=$key;
 		if(isset($this->timezone))
 			date_default_timezone_set($this->timezone);
 		
@@ -44,6 +45,7 @@ class App
 			dd("App mongo_server not set");
 		
 		$mongoclient =new Client($this->mongo_server);
+		$this->mongo = $mongoclient;
 		$this->db = $mongoclient->$key;
 		if(isset($this->jira_server))
 		{
