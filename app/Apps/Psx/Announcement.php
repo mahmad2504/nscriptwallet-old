@@ -9,7 +9,8 @@ class Announcement{
 	{
 		$this->data = $data;
 		$this->message = "*".$data->title."*\n";
-		$this->message .= $data->company." (".$data->symbol.")\n";
+		if(isset($data->company))
+			$this->message .= $data->company." (".$data->symbol.")\n";
 		$this->message .= "_".$data->date." ".$data->time."_\n";
 		$this->message .= $data->notification."\n";
 		
