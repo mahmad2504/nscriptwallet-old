@@ -14,6 +14,11 @@ use App\Libs\Jira\Fields;
 use App\Libs\Jira\Ticket;
 use JiraRestApi\Field\Field;
 use JiraRestApi\Field\FieldService;
+use JiraRestApi\Issue\Version;
+use JiraRestApi\Project\ProjectService;
+use JiraRestApi\Version\VersionService;
+use JiraRestApi\JiraException;
+
 use Carbon\Carbon;
 class Jira
 {
@@ -44,6 +49,103 @@ class Jira
              'jiraPassword' => env('JIRA_'.self::$server.'_PASSWORD'),
 		]));
 		return $fieldService;
+	}
+	public function SetFields($project_key,$summary,$desc='',$priority='NA',$type='Task',$version=null)
+	{
+		$issueField = new IssueField();
+		$issueField->setProjectKey("HMIP")
+                ->setSummary("something's wrong")
+                ->setPriorityName($priority)
+                ->setIssueType($type)
+				 ->setDescription($desc);
+	
+		if($version != null)
+			$issueField->addVersion([$version]);
+		return $issueField;
+	}
+	public function SetCustomeFields($fields)
+	{
+		foreach($fields as $key=>$value)
+		{
+			
+		}
+	}
+	public static function AddLabels($key,$labels)
+	{
+		$ret = self::$issueService->update($key, $labels);
+	}
+	public static function UpdateTask($key,$summary=null,$desc=null,$priority=null,$type=null,$version=null,$customefields=null)
+	{
+		$issueField = new IssueField(true);
+		if($summary != null)
+			$issueField->setSummary($summary);
+		if($desc != null)
+			$issueField->setDescription($desc);
+		if($priority != null)
+			$issueField->setPriorityName($priority);
+		if($type != null)
+			$issueField->setIssueType($type);
+		if($version != null)
+			$issueField->addVersion([$version]);
+		
+		if($customefields != null)
+		{
+			foreach($customefields as $field=>$value)
+			{
+				$f = self::$app->fields->$field;
+				$issueField->addCustomField($f,$value);
+			}
+		}
+		//$editParams = [
+		//	'notifyUsers' => true,
+		//	];
+		$ret = self::$issueService->update($key, $issueField);//,$editParams);	
+	}
+	public static function CreateTask($project_key,$summary,$desc='',$priority='NA',$type='Task',$version=null,$customefields=null)
+	{
+		try{
+		$issueField = new IssueField();
+		$issueField->setProjectKey($project_key)
+                ->setSummary($summary)
+                ->setPriorityName($priority)
+                ->setIssueType($type)
+				 ->setDescription($desc);
+	
+		if($version != null)
+			$issueField->addVersion([$version]);
+		
+		if($customefields != null)
+		{
+			foreach($customefields as $field=>$value)
+			{
+				$f = self::$app->fields->$field;
+				$issueField->addCustomField($f,$value);
+			}
+		}
+		$ret = self::$issueService->create($issueField);
+		}
+		catch (JiraRestApi\JiraException $e) 
+		{
+			print("Error Occured! " . $e->getMessage());
+		}
+		return $ret;
+		
+	}
+	public static function GetVersions($project_key)
+	{
+		try {
+			$proj = new ProjectService(new ArrayConfiguration([
+			 'jiraHost' => env('JIRA_'.self::$server.'_URL'),
+              'jiraUser' => env('JIRA_'.self::$server.'_USERNAME'),
+             'jiraPassword' => env('JIRA_'.self::$server.'_PASSWORD'),
+		]));
+			$vers = $proj->getVersions($project_key);
+			return $vers;
+		} 
+		catch (JiraRestApi\JiraException $e) 
+		{
+			print("Error Occured! " . $e->getMessage());
+		}
 	}
 	public static function ValidateQuery($query)
 	{
@@ -372,8 +474,7 @@ class Jira
 	{
 		if($Jirafields == null)
 			$Jirafields=self::$app->fields;
-		
-		
+			
 		if(isset($Jirafields->transitions))
 			$expand = ['changelog'];
 		else

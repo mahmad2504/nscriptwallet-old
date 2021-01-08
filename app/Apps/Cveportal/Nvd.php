@@ -10,6 +10,7 @@ use \MongoDB\BSON\UTCDateTime;
 class Nvd extends App{
 	public $timezone='Asia/Karachi';
 	private $datafolder = "data/cveportal/nvd";
+	public $scriptname = "nvd";
 	public $urls = [
 			"https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-2020.json.zip",	
 		    "https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-2019.json.zip",
@@ -46,6 +47,7 @@ class Nvd extends App{
     }
 	public function TimeToRun($update_every_xmin=10)
 	{
+		return true;
 		return parent::TimeToRun($update_every_xmin);
 	}
 	function IssueParser($code,$issue,$fieldname)
@@ -157,7 +159,6 @@ class Nvd extends App{
 	}
 	public function Script()
 	{
-		dump("Running script");
 		$updatecvedb = true;
 		$collections = $this->db->listCollections();
 		$collectionNames = [];
@@ -198,10 +199,9 @@ class Nvd extends App{
 			$this->db->nvd->createIndex(["configurations.nodes.cpe_match.cpe23Uri"=>'text',"configurations.nodes.children.cpe_match.cpe23Uri"=>'text']);
 			//Create Index
 			$this->db->nvd->createIndex(["cve.CVE_data_meta.ID"=>1]);
-			dump('Imported NVD Data successfully');
 		}
-		else
-		   dump('NVD Data already updated');
+		//else
+		//   dump('NVD Data already updated');
 	}
 	function GetCve($cve_number)
 	{

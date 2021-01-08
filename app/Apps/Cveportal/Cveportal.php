@@ -1,18 +1,18 @@
 <?php
-namespace App\Apps\Sample;
+namespace App\Apps\Cveportal;
 use App\Apps\App;
 use App\Libs\Jira\Fields;
 use App\Libs\Jira\Jira;
 use Carbon\Carbon;
 use App\Email;
-
-class Sample extends App{
+use App\Apps\Cveportal\Nvd;
+use App\Apps\Cveportal\Svm;
+use App\Apps\Cveportal\Cve;
+use App\Apps\Cveportal\Product;
+use Artisan;
+class Cveportal extends App{
 	public $timezone='Asia/Karachi';
-	public $query='labels in (risk,milestone) and duedate >=';
-	public $jira_fields = ['key','status','statuscategory','summary']; 
-    //public $jira_customfields = ['sprint'=>'Sprint'];  	
-	public $jira_server = 'EPS';
-	public $scriptname = 'sample';
+	public $scriptname = 'cveportal';
 	public $options = 0;
 	public function __construct($options=null)
     {
@@ -22,7 +22,7 @@ class Sample extends App{
 		parent::__construct($this);
 
     }
-	public function TimeToRun($update_every_xmin=10)
+	public function TimeToRun($update_every_xmin=60)
 	{
 		return parent::TimeToRun($update_every_xmin);
 	}
@@ -41,8 +41,10 @@ class Sample extends App{
 	}
 	public function Script()
 	{
-		$email =  new Email();
-		$email->Send(2,'dd','ff');
-		//$tickets =  $this->FetchJiraTickets();
+		$options = $this->Options();
+		Artisan::call('product:sync',$options );
+		Artisan::call('svm:sync', $options);
+		Artisan::call('nvd:sync', $options);
+		Artisan::call('cve:sync', $options);
 	}
 }

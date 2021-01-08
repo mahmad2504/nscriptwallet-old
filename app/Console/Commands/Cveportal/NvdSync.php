@@ -11,7 +11,7 @@ class NvdSync extends Command
      *
      * @var string
      */
-    protected $signature = 'nvd:sync {--rebuild=0} {--force=0} {--email=2}';
+    protected $signature = 'nvd:sync {--rebuild=0} {--force=0} {--email=2} {--email_resend=0}';
 
     /**
      * The console command description.

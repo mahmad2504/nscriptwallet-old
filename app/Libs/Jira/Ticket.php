@@ -52,7 +52,6 @@ class Ticket
 			case 'labels':
 				if(isset($issue->fields->labels))
 					return $issue->fields->labels;	
-				
 				return [];
 			case 'key':
 			    return $issue->key;
@@ -112,16 +111,27 @@ class Ticket
 				}
 				return $assignee;
 				break;
-			case 'fixVersions':
+			case 'affectVersions':
 				$cstr = [];
-				if(isset($issue->fields->fixVersions))
+				if(isset($issue->fields->affectVersions))
 				{
-					foreach($issue->fields->fixVersions as $fixVersion)
+					dd($issue->fields->affectVersions);
+					foreach($issue->fields->affectVersions as $affectVersion)
 					{
-						$cstr[] = $fixVersion->name;
+						$cstr[] = $affectVersion->name;
 					}
 				}
-				
+				return $cstr;
+				break;
+			case 'versions':
+				$cstr = [];
+				if(isset($issue->fields->versions))
+				{
+					foreach($issue->fields->versions as $version)
+					{
+						$cstr[] = $version->name;
+					}
+				}
 				return $cstr;
 				break;
 			case 'components':

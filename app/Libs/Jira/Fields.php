@@ -21,7 +21,7 @@ class Fields
 		if($auto_initialize)
 		{
 			$obj = $app->Read('jirafields');
-			if($obj != null)
+				if($obj != null)
 				$this->fields = $obj->fields;
 		}
 		$this->init();
@@ -91,6 +91,13 @@ class Fields
 			{
 				foreach($this->custom as $variablename=>$fieldname)
 				{
+					
+					if(substr( $fieldname, 0, 12 ) === "customfield_")
+					{
+						$this->fields[$variablename] = new \StdClass();
+						$this->fields[$variablename]->id = $fieldname;
+						$this->fields[$variablename]->variablename = $variablename;
+					}
 					if(is_object($fieldname))
 					{
 						//echo $variablename."\n";
@@ -100,6 +107,7 @@ class Fields
 					{
 						$this->fields[$variablename] = $field; 
 						$this->fields[$variablename]->variablename = $variablename;
+						
 					}
 				}
             	//dd($field);

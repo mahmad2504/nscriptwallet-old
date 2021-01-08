@@ -43,7 +43,11 @@ Route::get('/bspestimate','App\Http\Controllers\Bspestimate\BspestimateControlle
 Route::get('/bspestimate/driver/search/{identification}','App\Http\Controllers\Bspestimate\BspestimateController@searchdriver')->name('bspestimate.searchdriver');
 Route::get('/bspestimate/driver/estimate/{target}/{identification}','App\Http\Controllers\Bspestimate\BspestimateController@estimate')->name('bspestimate.estimate');
 Route::get('/bspestimate/plan','App\Http\Controllers\Bspestimate\BspestimateController@plan')->name('bspestimate.plan');
+/////////////////////////////////////////
 
+Route::get('/cveportal','App\Http\Controllers\Cveportal\CveportalController@index')->name('cveportal.index');
+Route::get('/cveportal/cve/{group}/{product}/{version}','App\Http\Controllers\Cveportal\CveportalController@getcves')->name('cveportal.getcves');
+	
 /////////////////////////////////////////
 Route::get('/{param1?}/{param2?}/{param3?}', function (Request $request,$param1=null,$param2=null,$param3=null) 
 {

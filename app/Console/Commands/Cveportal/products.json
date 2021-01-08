@@ -51,6 +51,10 @@
 		{
 			"id" : "1B958546",
 			"label" : "READYSTART_ARM_4_1_0"
+		},
+		{
+			"id" : "63E85777",
+			"label" : "TEST_1_1"
 		}
 	],
 	"groups" : [
@@ -59,7 +63,7 @@
 			"label" : "MENTOR_FLEX_LINUX"
 		},
 		{
-			"name" : "Nucleus ReadyStart™ ® Arm",
+			"name" : "Nucleus ® ReadyStart ® Arm",
 			"label" : "NUC_READYSTART_ARM"
 		}
 	],
@@ -70,9 +74,14 @@
 			"name" : "aStoneA9r2-V3-LIN",
 			"version" : "11.0.0",
 			"show" : "1",
+			"active" : "0",
 			"parents" : [ "BASE_11_0_0" ],
 			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ],
-			"jira" : "HMIP"
+			"jira" : {
+				"project" : "HMIP",
+				"affectsversion" : "Demo1.0"
+			},
+			"notify" : "mumtaz_ahmad@mentor.com"
 		},
 		{
 			"id" : "IMX8EVK_11_0_0",
@@ -80,9 +89,9 @@
 			"name" : "NXP i.MX 6Quad SABRE",
 			"version" : "11.0.0",
 			"show" : "1",
+			"active" : "0",
 			"parents" : [ "BASE_11_0_0" ],
-			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ],
-			"jira" : "HMIP"
+			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ]
 		},
 		{
 			"id" : "MX6ULL_11_0_0",
@@ -90,9 +99,9 @@
 			"name" : "NXP i.MX 6ULL",
 			"version" : "11.0.0",
 			"show" : "1",
+			"active" : "0",
 			"parents" : [ "BASE_11_0_0" ],
-			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ],
-			"jira" : "HMIP"
+			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ]
 		},
 		{
 			"id" : "SABRESD_11_0_0",
@@ -100,9 +109,9 @@
 			"name" : "NXP i.MX 6Quad SABRE",
 			"version" : "11.0.0",
 			"show" : "1",
+			"active" : "0",
 			"parents" : [ "BASE_11_0_0" ],
-			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ],
-			"jira" : "HMIP"
+			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ]
 		},
 		{
 			"id" : "SAMAD27_11_0_0",
@@ -110,9 +119,9 @@
 			"name" : "Microchip SAMA5D27 Eval Kit",
 			"version" : "11.0.0",
 			"show" : "1",
+			"active" : "0",
 			"parents" : [ "BASE_11_0_0" ],
-			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ],
-			"jira" : "HMIP"
+			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ]
 		},
 		{
 			"id" : "ULTRAZED_11_0_0",
@@ -120,9 +129,9 @@
 			"name" : "Xilinx UltraZed-EG Starter Kit",
 			"version" : "11.0.0",
 			"show" : "1",
+			"active" : "0",
 			"parents" : [ "BASE_11_0_0" ],
-			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ],
-			"jira" : "HMIP"
+			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ]
 		},
 		{
 			"id" : "ULTRAZED_11_1_0",
@@ -130,9 +139,9 @@
 			"name" : "Xilinx UltraZed-EG Starter Kit",
 			"version" : "11.1.0",
 			"show" : "1",
+			"active" : "0",
 			"parents" : [ "BASE_11_0_0" ],
-			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ],
-			"jira" : "HMIP"
+			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ]
 		},
 		{
 			"id" : "UNO_11_0_0",
@@ -140,9 +149,9 @@
 			"name" : "Advantech UNO 2473G",
 			"version" : "11.0.0",
 			"show" : "1",
+			"active" : "0",
 			"parents" : [ "BASE_11_0_0" ],
-			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ],
-			"jira" : "HMIP"
+			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ]
 		},
 		{
 			"id" : "ZCU102_11_0_0",
@@ -150,9 +159,9 @@
 			"name" : "Xilinx MPSoC ZCU102-G",
 			"version" : "11.0.0",
 			"show" : "1",
+			"active" : "0",
 			"parents" : [ "BASE_11_0_0" ],
-			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ],
-			"jira" : "HMIP"
+			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ]
 		},
 		{
 			"id" : "ZCU102_11_1_0",
@@ -160,9 +169,9 @@
 			"name" : "Xilinx MPSoC ZCU102-G",
 			"version" : "11.1.0",
 			"show" : "1",
+			"active" : "0",
 			"parents" : [ "BASE_11_0_0" ],
-			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ],
-			"jira" : "HMIP"
+			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ]
 		},
 		{
 			"id" : "ZCU102_11_1_0",
@@ -170,9 +179,9 @@
 			"name" : "Xilinx MPSoC ZCU102-G",
 			"version" : "11.1.0",
 			"show" : "1",
+			"active" : "0",
 			"parents" : [ "BASE_11_0_0" ],
-			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ],
-			"jira" : "HMIP"
+			"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ]
 		},
 		{
 			"id" : "READYSTART_ARM_4_1_0",
@@ -180,8 +189,26 @@
 			"name" : "Nucleus® ReadyStart™ ® Arm",
 			"version" : "4.1.0",
 			"show" : "1",
+			"active" : "0",
 			"admin" : [ "himp", "mahmad", "hmsadiq", "rbates", "waqarh" ],
-			"jira" : "HMIP"
+			"jira" : {
+				"project" : "HMIP",
+				"fixversion" : "QT-5.5.0"
+			}
+		},
+		{
+			"id" : "TEST_1_1",
+			"group" : "NUC_READYSTART_ARM",
+			"name" : "Test",
+			"version" : "1.1",
+			"show" : "1",
+			"active" : "1",
+			"admin" : [ "himp", "mahmad", "hmsadiq", "rbates", "waqarh" ],
+			"jira" : {
+				"project" : "HMIP",
+				"affectsversion" : "QT-5.5.0"
+			},
+			"notify" : "mumtaz_ahmad@mentor.com"
 		}
 	]
 }

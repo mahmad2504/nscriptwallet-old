@@ -11,7 +11,7 @@ class ProductSync extends Command
      *
      * @var string
      */
-    protected $signature = 'product:sync {--rebuild=0} {--force=0} {--email=2}';
+    protected $signature = 'product:sync {--rebuild=0} {--force=0} {--email=2} {--email_resend=0}';
 
     /**
      * The console command description.
@@ -39,7 +39,5 @@ class ProductSync extends Command
 		$data = json_decode(utf8_encode($data));
 		$app = new Product($this->option(),$data);
 		$app->Run();
-		
-		dump("Product data imported successfully");
     }
 }

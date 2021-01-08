@@ -8,6 +8,8 @@ use App\Email;
 
 class Product extends App{
 	public $timezone='Asia/Karachi';
+	public $scriptname = 'product';
+	private $admin=null;
 	public function __construct($options=null,$data=null)
     {
 		if($data == null)
@@ -24,6 +26,7 @@ class Product extends App{
     }
 	public function TimeToRun($update_every_xmin=10)
 	{
+		return true;
 		return parent::TimeToRun($update_every_xmin);
 	}
 	function IssueParser($code,$issue,$fieldname)
@@ -41,7 +44,6 @@ class Product extends App{
 	}
 	public function Script()
 	{
-		dump("Running script");
 		$data = $this->data;
 		$monitoring_lists = [];
 		$groups = [];
@@ -160,5 +162,78 @@ class Product extends App{
 		$obj =  $obj->jsonSerialize();
 		unset($obj->_id);
 		return $obj->monitoring_lists->jsonSerialize();
+	}
+	function GetGroupNames()
+	{
+		$products = $this->GetProducts();
+		if($products == null)
+			return [];
+		$p = new Product();
+		$groups = [];
+		foreach($products as $product)
+		{
+			if(isset($product->active))
+				if($product->active == 0)
+					continue;
+				
+			$groups[$product->group]=$product->group;
+		}
+		return 	array_values($groups);
+	}
+	function GetProductNames($groupname)
+	{
+		$query=['group'=>$groupname];
+		$products = $this->db->products->find($query);
+		if($products == null)
+			return [];
+		$names = [];
+		foreach($products as $product)
+		{
+			$names[$product->name]=$product->name;
+		}
+		return array_values($names);
+	}
+	function GetVersionNames($group_name,$productname)
+	{
+		$query=['group'=>$group_name,'name'=>$productname];
+		$products = $this->db->products->find($query);
+		if($products == null)
+			return [];
+		$versions  = [];
+		foreach($products as $product)
+		{
+			$versions[$product->version]=$product->version;
+		}
+		return array_values($versions);
+	}
+	public function GetIds($groupname=null,$productname=null,$versionname=null)
+	{
+		$products = $this->GetCveProducts($groupname,$productname,$versionname);
+		$ids = [];
+		foreach($products as $product)
+		{
+			$ids[$product->id] = $product->id;	
+		}
+		return array_values($ids);
+	}
+	public function GetCveProducts($groupname=null,$productname=null,$versionname=null)
+	{
+		$query = [];
+		if($groupname!=null)
+			$query['group'] = new Regex(preg_quote($groupname), 'i');
+		if($productname!=null)
+			$query['name'] = new Regex(preg_quote($productname), 'i');
+		if($versionname!=null)
+			$query['version'] = $versionname;//new Regex(preg_quote("".$versionname), 'i');	
+		if($this->admin!=null)
+			$query['admin'] = new Regex(preg_quote("".$this->admin), 'i');
+		
+		$options = [
+			'projection'=>
+					["_id"=>0,
+					]
+		];
+		$list = $this->db->products->find($query,$options)->toArray();
+		return $list;
 	}
 }

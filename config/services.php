@@ -13,7 +13,10 @@ return [
     | a conventional file to locate the various service credentials.
     |
     */
-
+	'telegram-bot-api' => [
+		'token' => env('PSX_TELEGRAM_BOT_TOKEN')
+	],
+	
     'mailgun' => [
         'domain' => env('MAILGUN_DOMAIN'),
         'secret' => env('MAILGUN_SECRET'),

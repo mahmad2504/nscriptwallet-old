@@ -14,6 +14,8 @@ class App
 	public $jira_customfields = [];
 	public $timezone =  null;
 	public $mongo = null;
+	public $fields = null;
+	public $scriptname = 'unnamed';
 	public function InitOption()
 	{
 		if(!isset($this->options))
@@ -49,8 +51,8 @@ class App
 		$this->db = $mongoclient->$key;
 		if(isset($this->jira_server))
 		{
-			Jira::Init($app);
 			$this->fields = new Fields($this);
+			Jira::Init($app);
 			if(!$this->fields->Exists()||$this->options['rebuild'])
 			{
 				dump("Configuring Jira Fields");
@@ -79,15 +81,32 @@ class App
 	{
 		dump('Rebuild callback function not implemented');
 	}
+	public function Options()
+	{
+		$options = [];
+		foreach($this->options as $key=>$value)
+		{
+			if(($key == 'help')||
+			   ($key == 'version')||
+			   ($key == 'version')||
+			   ($key == 'quiet')
+			   )
+				continue;
+			$options["--".$key] = $value;
+		}
+		return $options	;	
+	}
 	public function Run()
 	{
 		if($this->app->TimeToRun())
 		{
 			if($this->options['rebuild'])
 				$this->Rebuild();
+			dump("#########  Running script ".$this->scriptname."  #########");
 			$this->Script();
 			$this->SaveUpdateTime();
 			$this->Save(['sync_requested'=>0]);
+			dump("Done");
 		}
 	}
 	public function Script()
@@ -104,7 +123,6 @@ class App
 		if($sec == null)
 		{
 			$this->SaveUpdateTime();
-			dump("First update");
 			return true;
 		}
 		if($sec >=  $update_every_xmin*3*60)

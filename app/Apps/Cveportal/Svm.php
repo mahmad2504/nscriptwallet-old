@@ -16,6 +16,7 @@ class Svm extends App{
 	public $svmurl='https://svm.cert.siemens.com/portal/api/v1';
 	public $svmproxyserver='http://cyp-fsrprx.net.plm.eds.com:2020';
 	public $options = 0;
+	public $scriptname = "svm";
 	public function __construct($options=null)
     {
 		$product = new Product();
@@ -43,6 +44,7 @@ class Svm extends App{
     }
 	public function TimeToRun($update_every_xmin=10)
 	{
+		return true;
 		return parent::TimeToRun($update_every_xmin);
 	}
 	function IssueParser($code,$issue,$fieldname)
@@ -60,45 +62,45 @@ class Svm extends App{
 	}
 	function getContentBycURL($strURL)
 	{
-			//echo $strURL."\n";
-			$strURL = $this->svmurl.$strURL;
-			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_HEADER, 0);
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); // Return data inplace of echoing on screen
-			curl_setopt($ch, CURLOPT_URL, $strURL);
-			curl_setopt($ch, CURLOPT_VERBOSE, '0');
-			curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, '2');
-			//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, '1');
-			curl_setopt($ch, CURLOPT_SSLCERT, getcwd() . "/Z003UJ3F_cert.pem");
-			curl_setopt($ch, CURLOPT_SSLKEY, getcwd() . "/Z003UJ3F_key.pem");
-			//New commands
-			//curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
-			curl_setopt($ch, CURLOPT_PROXY, $this->svmproxyserver );
-			curl_setopt($ch, CURLOPT_PROXYPORT, '2020');
-			curl_setopt($ch, CURLOPT_PROXYUSERPWD, env("SVM_USER").':'.env("SVM_PASS"));
-			curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
-			curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_NTLM);
-			//curl_setopt($ch, CURLOPT_KEEP_SENDING_ON_ERROR, TRUE);
+		//echo $strURL."\n";
+		$strURL = $this->svmurl.$strURL;
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_HEADER, 0);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); // Return data inplace of echoing on screen
+		curl_setopt($ch, CURLOPT_URL, $strURL);
+		curl_setopt($ch, CURLOPT_VERBOSE, '0');
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, '2');
+		//curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, '1');
+		curl_setopt($ch, CURLOPT_SSLCERT, getcwd() . "/Z003UJ3F_cert.pem");
+		curl_setopt($ch, CURLOPT_SSLKEY, getcwd() . "/Z003UJ3F_key.pem");
+		//New commands
+		//curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
+		curl_setopt($ch, CURLOPT_PROXY, $this->svmproxyserver );
+		curl_setopt($ch, CURLOPT_PROXYPORT, '2020');
+		curl_setopt($ch, CURLOPT_PROXYUSERPWD, env("SVM_USER").':'.env("SVM_PASS"));
+		curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
+		curl_setopt($ch, CURLOPT_PROXYAUTH, CURLAUTH_NTLM);
+		//curl_setopt($ch, CURLOPT_KEEP_SENDING_ON_ERROR, TRUE);
 
-			curl_setopt($ch, CURLOPT_CAINFO, getcwd() . "/siemens_root_ca_v3.0_2016.pem");
-			curl_setopt($ch, CURLOPT_CAPATH, getcwd() . "/siemens_root_ca_v3.0_2016.pem");
-			//curl_setopt($ch, CURLOPT_CAINFO, "/etc/ssl/certs/ca-certificates.crt");
-			$rsData = curl_exec($ch);
-			$error = curl_error($ch);
-			if($error != null)
-			{
-					echo $error;
-					return [];
-			}
-			$data = json_decode($rsData);
+		curl_setopt($ch, CURLOPT_CAINFO, getcwd() . "/siemens_root_ca_v3.0_2016.pem");
+		curl_setopt($ch, CURLOPT_CAPATH, getcwd() . "/siemens_root_ca_v3.0_2016.pem");
+		//curl_setopt($ch, CURLOPT_CAINFO, "/etc/ssl/certs/ca-certificates.crt");
+		$rsData = curl_exec($ch);
+		$error = curl_error($ch);
+		if($error != null)
+		{
+				echo $error;
+				return [];
+		}
+		$data = json_decode($rsData);
 
-			if(isset($data->errors))
-			{
-					json_encode($data->errors);
-					return [];
-			}
-			curl_close($ch);
-			return $data;
+		if(isset($data->errors))
+		{
+				json_encode($data->errors);
+				return [];
+		}
+		curl_close($ch);
+		return $data;
 	}
 	public function GetCpe($components/*array*/)
 	{
@@ -106,7 +108,6 @@ class Svm extends App{
 	}
 	public function Script()
 	{
-		dump("Running script");
 		$this->db->cpe2->drop();
 		$monitoring_lists = [];
 		if($this->monitoring_list_ids  == null)

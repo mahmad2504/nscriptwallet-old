@@ -1,3 +1,4 @@
 [2020-11-27T09:43:14.575698+00:00] JiraClient.ERROR: CURL Error: http response=0,  [] []
 [2020-12-06T12:23:22.805021+05:00] JiraClient.ERROR: CURL Error: http response=0, Failed to connect to jira.alm.mentorg.com port 443: Timed out [] []
 [2020-12-10T03:43:32.341563-06:00] JiraClient.ERROR: CURL Error: http response=0, Failed to connect to jira.alm.mentorg.com port 443: Timed out [] []
+[2020-12-27T16:59:05.271905+05:00] JiraClient.ERROR: CURL Error: http response=0, Could not resolve host: jira.alm.mentorg.com [] []
