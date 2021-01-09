@@ -200,7 +200,6 @@ class Announcement extends Psx{
 	public function Script()
 	{
 		$today = $this->CurrentDateTimeObj()->format('Y-m-d');
-		$today = '2020-01-08';
 		$ch = curl_init();
 		foreach($this->notice_types as $title=>$code)
 		{
