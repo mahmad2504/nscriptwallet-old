@@ -178,6 +178,7 @@ class Psxannouncement extends App{
 	}
 	public function Script()
 	{
+
 		$today = $this->CurrentDateTimeObj()->format('Y-m-d');
 		$ch = curl_init();
 		foreach($this->notice_types as $title=>$code)

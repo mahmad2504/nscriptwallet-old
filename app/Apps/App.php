@@ -154,7 +154,7 @@ class App
 			dump("Updating after [".round($sec/60)."] minutes");
 			return true;
 		}
-		dump("Its not time to update.[".$sec."] seconds gone since last update");
+		dump("Its not time to update.[".$sec."] seconds gone since last update.Update time out is ".($update_every_xmin*60)." seconds");
 		return false;
 	}
 	public function Notify($to)

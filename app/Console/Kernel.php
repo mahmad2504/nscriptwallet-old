@@ -22,7 +22,7 @@ class Kernel extends ConsoleKernel
      * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
      * @return void
      */
-    protected function schedule(Schedule $schedule)
+    protected function schedule_1(Schedule $schedule)
     {
 		$schedule->exec('del logs\* /q')->daily();
         $schedule->command('ishipment:sync')->everyMinute()
@@ -40,6 +40,15 @@ class Kernel extends ConsoleKernel
 		$schedule->command('support:sync --email=1')->everyMinute()
                                              ->appendOutputTo("logs/support.txt")->runInBackground();
 		$schedule->exec('curl -L "https://script.google.com/macros/s/AKfycbzsxNokdsDLDv6wcNOYDlPX8gGeAYzvHvNB4Ptdftz9hbPUZvkXclEv/exec?func=alive&device=scriptwallet"')->everyThirtyMinutes()->appendOutputTo("logs/google.txt");									 
+	}
+	
+	protected function schedule(Schedule $schedule)
+    {
+		$schedule->exec('del logs\* /q')->daily();
+		$schedule->command('psxannouncement:sync')->everyMinute()
+											 ->appendOutputTo("logs/psxannouncement.txt")->runInBackground();	
+        
+		$schedule->exec('curl -L "https://script.google.com/macros/s/AKfycbzsxNokdsDLDv6wcNOYDlPX8gGeAYzvHvNB4Ptdftz9hbPUZvkXclEv/exec?func=alive&device=psx"')->everyThirtyMinutes()->appendOutputTo("logs/google.txt");									 
 	}
 
     /**
