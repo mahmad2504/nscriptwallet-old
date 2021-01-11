@@ -6,9 +6,8 @@ use App\Libs\Jira\Jira;
 use Carbon\Carbon;
 use App\Email;
 
-class Product extends App{
-	public $timezone='Asia/Karachi';
-	public $scriptname = 'product';
+class Product extends Cveportal{
+	public $scriptname = 'cveportal:product';
 	private $admin=null;
 	public function __construct($options=null,$data=null)
     {

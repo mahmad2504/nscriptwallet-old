@@ -7,16 +7,11 @@ use Carbon\Carbon;
 use App\Email;
 use App\Apps\Cveportal\Product;
 
-class Svm extends App{
-	public $timezone='Asia/Karachi';
-	//public $query='labels in (risk,milestone) and duedate >=';
-	//public $jira_fields = ['key','status','statuscategory','summary']; 
-    //public $jira_customfields = ['sprint'=>'Sprint'];  	
-	//public $jira_server = 'EPS';
+class Svm extends Cveportal{
 	public $svmurl='https://svm.cert.siemens.com/portal/api/v1';
 	public $svmproxyserver='http://cyp-fsrprx.net.plm.eds.com:2020';
 	public $options = 0;
-	public $scriptname = "svm";
+	public $scriptname = "cveportal:svm";
 	public function __construct($options=null)
     {
 		$product = new Product();

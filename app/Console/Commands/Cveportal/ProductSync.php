@@ -11,7 +11,7 @@ class ProductSync extends Command
      *
      * @var string
      */
-    protected $signature = 'product:sync {--rebuild=0} {--force=0} {--email=2} {--email_resend=0}';
+    protected $signature = 'cveportal:product:sync {--rebuild=0} {--force=0} {--email=2} {--email_resend=0}';
 
     /**
      * The console command description.

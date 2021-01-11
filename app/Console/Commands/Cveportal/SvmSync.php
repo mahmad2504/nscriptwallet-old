@@ -11,14 +11,14 @@ class SvmSync extends Command
      *
      * @var string
      */
-    protected $signature = 'svm:sync {--rebuild=0} {--force=0} {--email=2} {--email_resend=0}';
+    protected $signature = 'cveportal:svm:sync {--rebuild=0} {--force=0} {--email=2} {--email_resend=0}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Description';
+    protected $description = 'Update SVM Data';
 
     /**
      * Create a new command instance.

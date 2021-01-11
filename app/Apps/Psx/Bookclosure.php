@@ -159,11 +159,13 @@ class Bookclosure extends Psx{
 		{
 			$status=null;
 			$bsfrom = new Carbon($object->bcfrom);
-			if($bsfrom->subDays(2)->isToday())
-				$status="Share is Ex today";
+			$bsfrom_minustwo = $bsfrom->subDays(2);
+			if($bsfrom_minustwo->isToday())
+				$status="Share is Ex today (".$bsfrom_minustwo->format('Y-m-d').")";
 			$bsfrom = new Carbon($object->bcfrom);
-			if($bsfrom->subDays(3)->isToday())
-				$status="Share well Ex tomorrow";
+			$bsfrom_minusthree = $bsfrom->subDays(3);
+			if($bsfrom_minusthree->isToday())
+				$status="Share will Ex on ".$bsfrom_minusthree->format('Y-m-d')."(tomorrow)";
 			
 			if($status != null)
 			{

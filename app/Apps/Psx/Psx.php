@@ -15,4 +15,14 @@ class Psx extends App{
     {
 		parent::__construct($this);
     }
+	public function TimeToRun($update_every_xmin=60)
+	{
+		$now = Carbon::now($this->timezone);
+		if(($now->format('H')<8)&&($now->format('H')<20))
+		{
+			dump('Its sleeping time please');
+			return false;
+		}
+		return parent::TimeToRun($update_every_xmin);
+	}
 }

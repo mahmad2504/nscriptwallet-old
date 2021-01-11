@@ -9,10 +9,9 @@ use App\Apps\Cveportal\Product;
 use App\Apps\Cveportal\Svm;
 use App\Apps\Cveportal\Nvd;
 
-class Cve extends App{
-	public $timezone='Asia/Karachi';
+class Cve extends Cveportal{
 	public $options = 0;
-	public $scriptname = "cve";
+	public $scriptname = "cveportal:cve";
 	public $count=0;
 	public $query='';
 	public $jira_fields = ['key','status','statuscategory','summary','versions','description']; 
@@ -432,6 +431,7 @@ class Cve extends App{
 					$email->Send(1,'CVE Portal - Sync error report',$msg,$to);
 					$p->date =  $date ;
 					$p->id = 'versionerror';
+					unset($p->_id);
 					$this->Save($p);
 				}
 				continue;
@@ -441,9 +441,8 @@ class Cve extends App{
 			'projection'=>
 			["cve"=>1]];
 			$cves = $this->db->cves->find($query)->toArray();
-			
-			$this->query='cf['.explode("_",$this->fields->product_id)[1].'] ~ '.$p->id." and summary !~ DEPRECATED and summary !~ DUPLICATES";
-			
+			$this->query='project = '.$p->jira->project.' and cf['.explode("_",$this->fields->product_id)[1].'] ~ '.$p->id." and summary !~ DEPRECATED and summary !~ DUPLICATES";
+
 			$tickets = $this->FetchJiraTickets();
 			foreach($tickets as $ticket)
 			{

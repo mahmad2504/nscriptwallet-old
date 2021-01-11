@@ -7,10 +7,9 @@ use Carbon\Carbon;
 use App\Email;
 use \MongoDB\BSON\UTCDateTime;
 
-class Nvd extends App{
-	public $timezone='Asia/Karachi';
-	private $datafolder = "data/cveportal/nvd";
-	public $scriptname = "nvd";
+class Nvd extends Cveportal{
+    private $datafolder = "data/cveportal/nvd";
+	public $scriptname = "cveportal:nvd";
 	public $urls = [
 			"https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-2020.json.zip",	
 		    "https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-2019.json.zip",

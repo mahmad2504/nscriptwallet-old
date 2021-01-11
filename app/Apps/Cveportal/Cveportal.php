@@ -11,18 +11,14 @@ use App\Apps\Cveportal\Cve;
 use App\Apps\Cveportal\Product;
 use Artisan;
 class Cveportal extends App{
-	public $timezone='Asia/Karachi';
 	public $scriptname = 'cveportal';
-	public $options = 0;
+	public $timezone='Asia/Karachi';
 	public function __construct($options=null)
     {
-		$this->namespace = __NAMESPACE__;
-		$this->mongo_server = env("MONGO_DB_SERVER", "mongodb://127.0.0.1");
-		$this->options = $options;
 		parent::__construct($this);
 
     }
-	public function TimeToRun($update_every_xmin=60)
+	public function TimeToRun($update_every_xmin=1)
 	{
 		return parent::TimeToRun($update_every_xmin);
 	}
