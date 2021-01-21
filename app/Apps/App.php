@@ -15,7 +15,7 @@ class App
 	public $timezone =  null;
 	public $mongo = null;
 	public $fields = null;
-	public $scriptname = 'unnamed';
+	public $scriptname = 'app';
 	public function InitOption()
 	{
 		if(!isset($this->options))
@@ -106,6 +106,15 @@ class App
 			$this->Script();
 			$this->SaveUpdateTime();
 			$this->Save(['sync_requested'=>0]);
+			
+			$sec = $this->SecondsSinceLastUpdate();
+			$error_sync = $this->Read('error_sync');
+			if($error_sync==1)
+			{
+				$subject = "Service Status Alert : ".strtoupper($this->scriptname)." : Up ";
+				$this->NotifyAdmin('Service '.$this->scriptname." is restored",$subject);
+				$this->Save(['error_sync'=>0]);
+			}
 			dump("Done");
 		}
 	}
@@ -120,6 +129,7 @@ class App
 			return true;
 		
 		$sec = $this->SecondsSinceLastUpdate();
+		
 		if($sec == null)
 		{
 			$this->SaveUpdateTime();
@@ -128,21 +138,30 @@ class App
 		if($sec >=  $update_every_xmin*3*60)
 		{
 			$timeout=$this->Read('timeout');
-		
+			$min_since_last_update = round($sec/60);
+			dump("Timeout #".$timeout."  [".$min_since_last_update."] minutes gone since last update. Update time out is ".($update_every_xmin*60)." seconds");
+			if($min_since_last_update > 1440)
+			{
+				$timeout=0;
+				$this->SaveUpdateTime();
+				$this->Save(['timeout'=>$timeout=0]);
+			}
 			if($timeout==null)
 				$timeout=0;
 			if($timeout==2)
 			{
-				$this->Notify('mumtaz_ahmad@mentor.com');
-				dump("Sending Service Error Notification [".round($sec/60)."] minutes gone since last update");
+				$subject = "Service Status Alert : ".strtoupper($this->scriptname)." : Down ";
+				$this->NotifyAdmin('Service '.$this->scriptname.' has some issue and not updating',$subject);
+				dump("Sending Service Error Notification [".round($sec/60)."] minutes gone since last update. Update time out is ".($update_every_xmin*60)." seconds");
 				$timeout++;
 				$this->Save(compact('timeout'));
+				$this->Save(['error_sync'=>1]);
 				return false;
 			}
 			else
 			{
 				$timeout++;
-				dump("timeout #".$timeout);
+				//dump("timeout #".$timeout);
 				$this->Save(compact('timeout'));
 				return true;
 			}
@@ -157,12 +176,13 @@ class App
 		dump("Its not time to update.[".$sec."] seconds gone since last update.Update time out is ".($update_every_xmin*60)." seconds");
 		return false;
 	}
-	public function Notify($to)
+	public function NotifyAdmin($msg,$subject,$to=null)
 	{
-	  	$email = new Email();
-		$subject = strtoupper($this->key)." : Service Status Alert";
-		$msg = 'Service '.strtoupper($this->key).' has some issue and not updating  ';
-		$email->Send(2,$subject,$msg);
+		$email = new Email();	
+		if($to == null)
+			$email->Send(2,$subject,$msg);
+		else
+			$email->Send(1,$subject,$msg,$to);
 	}
 	public function SecondsSinceLastUpdate()
 	{

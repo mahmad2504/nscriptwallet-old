@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Laravel</title>
+        <title>EPT Support Dashboard</title>
 		<link rel="stylesheet" href="{{ asset('libs/tabulator/css/tabulator.min.css') }}" />
 		<link rel="stylesheet" href="{{ asset('libs/attention/attention.css') }}" />
     <style>
@@ -50,6 +50,15 @@
 			<div class="flex-item"> 
 				<br>
 			</div>
+			<div class="" > 
+				<hr>
+				<label style="margin-left:0px;" for="start">Start:</label>	
+				<input type="date" id="filter_start" name="filter_start">
+				<label style="margin-left:10px;" for="start">End:</label>
+				<input type="date" id="filter_end" name="filter_end">
+				<button id="filter" name="search">Filter</button>
+				<hr>
+			</div>
 			<div class="flex-item">
 				<div style="box-shadow: 3px 3px #888888;" id="table"></div>
 			</div>
@@ -69,6 +78,9 @@
 	var tabledata = @json($tickets);
 	var jira_url = "{{$jira_url}}";
 	var thistoday="{{date("Y-m-d H:i:s")}}";
+	var filter_start="2020-01-01";
+	var filter_end="{{date("Y-m-d")}}";
+	var page = "{{$page}}";
 	var dummy = [
 		{id:1, name:"Oli Bob", location:"United Kingdom", gender:"male", rating:1, col:"red", dob:"14/04/1984"},
 		{id:2, name:"Mary May", location:"Germany", gender:"female", rating:2, col:"blue", dob:"14/05/1982"},
@@ -189,6 +201,12 @@
 				return cell.getValue().substring(0,10);
 			}
 		},
+		{title:"Solution On", field:"solution_provided_date", sorter:"string", align:"center",visible:false,
+			formatter:function(cell, formatterParams, onRendered)
+			{
+				return cell.getValue().substring(0,10);
+			}
+		},
 		
 		{title:"Time Consumed", field:"percent_time_consumed", sorter:"number", align:"left",visible:true,
 			formatter:function(cell, formatterParams, onRendered)
@@ -297,6 +315,7 @@
 		{title:"Updated", field:"updated", sorter:"string", align:"center",visible:false,
 			formatter:function(cell, formatterParams, onRendered)
 			{
+				return  cell.getValue();
 				ms = Math.floor(( Date.parse(thistoday) - Date.parse(cell.getValue()) ));
 				t = millisToDaysHoursMinutes(ms);
 				if(t.d > 0)
@@ -360,7 +379,10 @@
 			table.showColumn("issuetype");
 			table.showColumn("component");
 			table.showColumn("product_name");
-			
+			table.showColumn("resolutiondate");
+			table.showColumn("solution_provided_date");
+			table.showColumn("created");
+			table.showColumn("updated");
 			table.download("xlsx", "support.xlsx", {sheetName:"tickets"});
 			table.hideColumn("gross_minutes_to_resolution");
 			table.hideColumn("net_minutes_to_resolution");
@@ -369,7 +391,26 @@
 			table.hideColumn("issuetype");
 			table.hideColumn("component");
 			table.hideColumn("product_name");
+			table.hideColumn("solution_provided_date");
 			
+			if(page == 'active')
+			{
+				table.showColumn("created");
+				table.hideColumn("resolutiondate");
+				table.hideColumn("updated");
+			}
+			else if(page == 'closed')
+			{
+				table.hideColumn("created");
+				table.showColumn("resolutiondate");
+				table.hideColumn("updated");
+			}
+			else if(page == 'updated')
+			{
+				table.hideColumn("created");
+				table.hideColumn("resolutiondate");
+				table.showColumn("updated");
+			}
 		});
 		$('#update').on('click',function()
 		{
@@ -408,7 +449,63 @@
 				}
 			});	
 		});
-		
+		$('#filter').on('click',function()
+		{
+			if(page == 'active')
+			{
+				filter_start = $('#filter_start').val();
+				filter_end = $('#filter_end').val();
+				if((filter_start == '')&&(filter_end != ''))
+					table.setFilter([{field:"created", type:"<=", value:filter_end}]);
+				else if((filter_start != '')&&(filter_end == ''))
+					table.setFilter([{field:"created", type:">=", value:filter_start}]);
+				else 
+					table.setFilter(
+					[
+						{field:"created", type:">=", value:filter_start},
+						[
+							{field:"created", type:"<=", value:filter_end}
+						]
+					]
+					);
+			}
+			else if(page == 'closed')
+			{
+				filter_start = $('#filter_start').val();
+				filter_end = $('#filter_end').val();
+				if((filter_start == '')&&(filter_end != ''))
+					table.setFilter([{field:"resolutiondate", type:"<=", value:filter_end}]);
+				else if((filter_start != '')&&(filter_end == ''))
+					table.setFilter([{field:"resolutiondate", type:">=", value:filter_start}]);
+				else 
+					table.setFilter(
+					[
+						{field:"resolutiondate", type:">=", value:filter_start},
+						[
+							{field:"resolutiondate", type:"<=", value:filter_end}
+						]
+					]
+					);
+			}
+			else if(page == 'updated')
+			{
+				filter_start = $('#filter_start').val();
+				filter_end = $('#filter_end').val();
+				if((filter_start == '')&&(filter_end != ''))
+					table.setFilter([{field:"updated", type:"<=", value:filter_end}]);
+				else if((filter_start != '')&&(filter_end == ''))
+					table.setFilter([{field:"updated", type:">=", value:filter_start}]);
+				else 
+					table.setFilter(
+					[
+						{field:"updated", type:">=", value:filter_start},
+						[
+							{field:"updated", type:"<=", value:filter_end}
+						]
+					]
+					);
+			}
+		});
 		
 		var table = new Tabulator("#table", {
 			data:tabledata,
@@ -416,7 +513,21 @@
 			tooltips:true,
 			//autoColumns:true,
 		});
-		
+		if(page == 'active')
+		{
+			table.showColumn("created");
+			$('#filter').text('Filter on creation date');
+		}
+		else if(page == 'closed')
+		{
+			table.showColumn("resolutiondate");
+			$('#filter').text('Filter on resolution date');
+		}
+		else if(page == 'updated')
+		{
+			table.showColumn("updated");
+			$('#filter').text('Filter on last update date');
+		}
 	});
 	
 	</script>

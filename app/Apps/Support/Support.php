@@ -7,6 +7,7 @@ use App\Email;
 class Support extends App{
 	public $timezone='America/Chicago';
 	public $to='dan_schiro@mentor.com';
+	public $bcc='mumtaz_ahmad@mentor.com';
 	public $query='project=Siebel_JIRA AND "Product Name" !~ Vista AND "Product Name" !~ A2B AND "Product Name" !~ XSe and updated >= "2020-01-01" order by key';			 
 	public $jira_fields = ['issuelinks','resolution','issuetype','assignee','priority','key','summary','status','statuscategory','resolutiondate','created','updated','transitions'];
 	public $jira_customfields =['premium_support'=>'Premium Support',
@@ -32,13 +33,13 @@ class Support extends App{
 				 'low'=>[40,20],
 				 ''=>[40,20]];
 	private $sla_firstcontact = [2,1];
-	public function __construct($options)
+	public function __construct($options=null)
     {
 		$this->namespace = __NAMESPACE__;
 		$this->mongo_server = env("MONGO_DB_SERVER", "mongodb://127.0.0.1");
 		$this->options = $options;
 		$this->email = new Email();
-		$this->email->AddBCC('mumtaz_ahmad@mentor.com');
+		$this->email->AddBCC($this->bcc);
 		$this->email->AddTo($this->to);
 		
 		parent::__construct($this);
@@ -75,6 +76,19 @@ class Support extends App{
 		$tickets = $cursor->toArray();
 		return $tickets;
 	}
+	function UpdatedTickets()
+	{
+		$query = [];
+		$options = [
+					'projection' => ['_id' => 0],
+					'sort' => ['updated' => -1],
+				    'limit' => 100 ,
+					'projection' => ['_id' => 0]];
+
+		$cursor =$this->db->tickets->find($query,$options);
+		$tickets = $cursor->toArray();
+		return $tickets;
+	}
 	function SaveTicket($ticket)
 	{
 		$options=['upsert'=>true];
@@ -94,13 +108,13 @@ class Support extends App{
 	}
 	public function SendFirstContactEmail($ticket)
 	{
-		$subject = 'Support SLT Violation!!';
 		$this->email->to[] = $ticket->assignee->emailAddress;
 		$rem = 100-$ticket->percent_first_contact_time_consumed;
 		$quota = SecondsToString($ticket->firstcontact_minutes_quota*60,$this->hours_day);
 	
 		if($rem <= 0)
 		{
+			$subject = 'Support SLT Violation!!';
 			$msg = 'This is an automated alert for ';
 			$msg = '<span style="font-weight:bold">'.$ticket->key.'</span><br><br>';	
 			$msg .= 'This ticket has crossed the SLT Threshold for "First Contact"<br>';
@@ -108,6 +122,7 @@ class Support extends App{
 		}
 		else
 		{
+			$subject = 'Support SLT Notification!!';
 			$msg = '<span style="font-weight:bold">'.$ticket->key.'</span> is approaching a SLT milestone<br>';
 			$msg .= '<p>'.$rem.' % of '.$quota.' remains on milestone "First Contact"<br>';
 			$msg .= '<p>';// style="font-style: italic;">';
@@ -174,19 +189,20 @@ class Support extends App{
 	}
 	public function SendResolutionTimeEmail($ticket)
 	{
-		$subject = 'Support SLT Violation!!';
 		$this->email->to[] = $ticket->assignee->emailAddress;
 		$quota = SecondsToString($ticket->minutes_quota*60,$this->hours_day);
 		
 		$rem = 100-$ticket->percent_time_consumed;
 		if($rem <= 0)
 		{
+			$subject = 'Support SLT Violation!!';
 			$msg = '<span style="font-weight:bold">'.$ticket->key.'</span><br><br>';
 			$msg .= 'This ticket has crossed the SLT Threshold of '.$quota.' for "Time to Resolution"<br>';
 			$msg .= 'Please contact Dan Schiro for any questions.';
 		}
 		else
 		{
+			$subject = 'Support SLT Notification!!';
 			$msg = '<span style="font-weight:bold">'.$ticket->key.'</span> is approaching a SLT milestone<br>';
 			$msg .= '<p>'.$rem.' % of '.$quota.' remains on milestone "Time to Resolution"<br>';
 			$msg .= '<p>';// style="font-style: italic;">';

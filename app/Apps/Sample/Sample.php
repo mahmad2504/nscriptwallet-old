@@ -15,13 +15,13 @@ class Sample extends App{
 	public $scriptname = 'sample';
 	public $options = 0;
 	public function __construct($options=null)
-    {
+        {
 		$this->namespace = __NAMESPACE__;
 		$this->mongo_server = env("MONGO_DB_SERVER", "mongodb://127.0.0.1");
 		$this->options = $options;
 		parent::__construct($this);
 
-    }
+       }
 	public function TimeToRun($update_every_xmin=10)
 	{
 		return parent::TimeToRun($update_every_xmin);
@@ -41,6 +41,7 @@ class Sample extends App{
 	}
 	public function Script()
 	{
+		dump("Running script");
 		$email =  new Email();
 		$email->Send(2,'dd','ff');
 		//$tickets =  $this->FetchJiraTickets();

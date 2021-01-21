@@ -10,6 +10,11 @@
 <link type="text/css" rel="stylesheet" href="{{ asset('apps/cveportal/css/cveportal.css') }}" />
 
 <style>
+
+.editable{
+	font-weight:bold;
+}
+
 </style>
 </head>
 
@@ -64,7 +69,7 @@
 	</nav>
 	</header>
 	
-	<header id="header-secondary" class="bg-secondary-darker p-y" role="banner">
+	<header style="background-color:orange!important" id="header-warning" class="bg-warning-darker p-y" role="banner">
 		<div class="container">
 			<div class="row row-flex middle-lg">
 				<div class="col-md-9 col-xs-12">
@@ -103,7 +108,7 @@
 				</nav>
 			</div>
 		</div>
-		<div  id="copy" class="container">
+		<div  id="copy" style="width:85%; margin: auto;" class="container1">
 		<br>
 		<div class="row row-flex" style="width:110%;!important">
 			<div id="sidebar" class="col-md-2 col-xs-12 last-xs first-md content-sidebar">
@@ -155,7 +160,7 @@
 						<select  id="select_version" style="margin-left:10px;float:none;">
 						</select>
 					</div>
-					<div class="card-block">
+					<div style="width:100%" class="card-block">
 						<div class="row-container  ">
 							<div class="row row-fluid ">
 								<div id="vulnerability-table"></div>
@@ -209,7 +214,15 @@
 	var group_names = @json($group_names);
 	var product_names = @json($product_names);
 	var version_names = @json($version_names);
+	var admin='{{$admin}}';
 	var jira_url = '{{$jira_url}}';
+	function editCheck(cell)
+	{
+		var cve = cell.getRow().getData();
+		if(cve.jira != '')
+			return 0;
+		return 1;
+    }
 	function Get3Columns()
 	{
 		columns = [
@@ -224,23 +237,114 @@
 	{
 		columns = [
 			{title:"CVE", field:"cve", sorter:"string", width:130},
-			{title:"Description", field:"description", sorter:"string", width:500},
-			{title:"Package", field:"component", sorter:"string", width:90},
-			{title:"Status", field:"status.triage", sorter:"string", width:100},
-			{title:"Severity", field:"severity", sorter:"string", width:90},
-			{title:"Jira", field:"jira", sorter:"string", width:100,
+			{title:"Jira", field:"jira", sorter:"string", width:90,
 				formatter:function(cell, formatterParams, onRendered)
 				{	
 					if(cell.getValue() != '')
 						return '<a href="'+jira_url+'/browse/'+cell.getValue()+'">'+cell.getValue()+'</a>';
 					return '';
-				}
+			   }
 			
-			//'<a href='+url+'>Jira</a>';
-			
+			},
+			{title:"Description", field:"description", sorter:"string", width:500},
+			{title:"Package", field:"component", sorter:"string", width:90},
+			{title:"State", field:"status.triage", editor:"select", width:100,editorParams:
+				{
+					"Investigate":"Investigate",
+					"Vulnerable":"Vulnerable",
+					"Won't Fix":"Won't Fix",
+					"Fixed":"Fixed",
+				},
+				cellEdited:function(cell)
+				{
+					UpdateStatus(cell);
+				},
+				cssClass:'editable',
+				editable:editCheck
+			},
+			{title:"Severity", field:"severity", sorter:"string", width:90},
+			{title:"Publish", field:"status.publish", width:100,editor:"tick",
+				cellEdited:function(cell)
+				{
+					UpdateStatus(cell);
+				},
+				cssClass:'editable',
+				formatter:function(cell, formatterParams, onRendered)
+				{	
+					if(cell.getValue() == '1')
+						return 'Published';
+					else
+						return '';
+					return cell.getValue();
+				},
+				editable:editCheck
 			}
+			//{title:"Modified", field:"modified", sorter:"string", width:100}
 		];
 		return columns;
+	}
+	function UpdateStatus(cell)
+	{
+		selected_group = $('#select_group option:selected').val();
+		selected_product = $('#select_product option:selected').val();
+		selected_version = $('#select_version option:selected').val();
+
+		data = cell.getRow().getData();
+		d = {};
+		
+		if(data.status.publish)
+			data.status.publish = "1";
+		else
+			data.status.publish = "0";
+			
+		d.status = data.status;
+		d.group = selected_group;
+		d.product = selected_product;
+		d.version = selected_version;
+		
+		d._token = "{{ csrf_token() }}";
+		$.ajax({
+			type:"PUT",
+			url:'{{route("cveportal.status.update")}}',
+			cache: false,
+			data:d,
+			success: function(response){
+				cell.getRow().getElement().style.backgroundColor = "#8FBC8F";
+				//console.log(cell.getRow().getData());
+				d = cell.getRow().getData();
+				for(i=0;i<d.product.length;i++)
+				{
+					if(d.product[i].id == d.status.productid)
+					{
+						d.product[i].status.triage = d.status.triage;
+						d.product[i].status.publish = d.status.publish;
+						//console.log(d.product[i].status);
+					}
+				}
+				function colorrevert()
+				{
+					element = cell.getRow().getElement();
+					if($(element).hasClass('tabulator-row-even'))
+						element.style.backgroundColor = "#EFEFEF";
+					else
+						element.style.backgroundColor = "#ffffff";
+				};
+				setTimeout(colorrevert, 2000);
+			},
+			error: function(response){
+				cell.restoreOldValue();
+				cell.getRow().getElement().style.backgroundColor = "#FFD700";
+				function colorrevert()
+				{
+					element = cell.getRow().getElement();
+					if($(element).hasClass('tabulator-row-even'))
+						element.style.backgroundColor = "#EFEFEF";
+					else
+						element.style.backgroundColor = "#ffffff";
+				};
+				setTimeout(colorrevert, 2000);
+			}
+		});
 	}
 	function AddOption(id,optionText,optionValue,selected) 
 	{ 
@@ -283,7 +387,6 @@
 	$('#select_version').on('change', function()
 	{
 		LoadTableData();
-		
 	});
 	function LoadTableData()
 	{
@@ -291,7 +394,7 @@
 		selected_product = $('#select_product option:selected').val();
 		selected_version = $('#select_version option:selected').val();
 		
-		url = '/cveportal/cve/'+selected_group+'/'+selected_product+'/'+selected_version;
+		url = '/cveportal/cve/'+selected_group+'/'+selected_product+'/'+selected_version+'/'+admin;
 		if(selected_version == 'all')
 			columns = Get3Columns()
 		else
@@ -304,7 +407,7 @@
 		var table = new Tabulator("#vulnerability-table", {
 			columns:columns,
 			pagination:"local",
-			paginationSize:10,
+			paginationSize:50,
 			//autoColumns:true,
 			selectable:1,
 			ajaxURL:url,
@@ -346,17 +449,33 @@
 			{
 				//e - the click event object
 				//cell - cell component
-				//console.log(cell.getField() );
-				if(cell.getField() == 'jira')
+				//cve.jira
+				var cve = cell.getRow().getData();
+	
+				
+				if((cell.getField() == 'status.triage')||(cell.getField() == 'status.publish'))
 				{
 					// Do default click and list functions;
+					//console.log(cve.jira);
+					if(cve.jir == '')
+					{
+						PopulateModal(cell.getRow().getData());
+						$('#modal').show();
+					}
 				}
 				else
 				{
 					PopulateModal(cell.getRow().getData());
 					$('#modal').show();
 				}
-			}
+			},
+			rowClick:function(e, row)
+			{
+				//e - the click event object
+				//row - row component
+				//PopulateModal(row.getData());
+				//$('#modal').show();
+			},
 		});
 	}
 	function PopulateModal(data)
@@ -443,7 +562,7 @@
 		selected_product = $('#select_product option:selected').val();
 		selected_version = $('#select_version option:selected').val();
 		
-		url = '/cveportal/cve/'+selected_group+'/'+selected_product+'/'+selected_version;
+		url = '/cveportal/cve/'+selected_group+'/'+selected_product+'/'+selected_version+'/'+admin;
 		CreateTable(url,Get3Columns());
 	});
 	</script>

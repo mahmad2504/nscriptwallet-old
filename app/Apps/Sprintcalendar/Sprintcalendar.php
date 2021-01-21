@@ -8,6 +8,7 @@ class Sprintcalendar extends App
 {	
 	public $options = 0;
 	public $timezone='Asia/Karachi';
+	public $scriptname = "sprintcalendar";
 	public $csprint_no=null;
 	public $to=[
 		'mumtaz_ahmad@mentor.com',
@@ -75,6 +76,8 @@ class Sprintcalendar extends App
 			$week=$date->isoWeek();
 			$wyear=$date->isoWeekYear();
 			$today=$date->IsToday()?1:0;
+			//dump($date->format('Y-m-d'));
+			//dump($today);
 			$sprint_number=floor($i/21)+1;
 			
 			
@@ -131,6 +134,7 @@ class Sprintcalendar extends App
 			if($today == 1)
 				$this->csprint_no = $sprint_year."_".$sprint_number;
 			
+			//dump($sprint_number);
 				//$this->currentsprint=$sprints[$sprint_number];
 			
 			$days[$date->format('Y-m-d')]=$today;
@@ -145,6 +149,7 @@ class Sprintcalendar extends App
 		$this->weeks=$weeks;
 		$this->days=$days;
 		$this->sprints=$sprints;
+		
 		parent::__construct($this);
 	}
 	public function TimeToRun($update_every_xmin=120)
@@ -173,19 +178,43 @@ class Sprintcalendar extends App
 		$msg .= "<small>This is an auto generated notification so please donot reply to this email<br>";
 		$msg .= "If you are not interested in these notifications, please send an email to mumtaz_ahmad@mentor.com".'<br>';
 		$msg .= '<br>';
-		$msg .= "For complete sprint calender please <a href='http://script.pkl.mentorg.com/sprintcalendar'>click here</a></small><br>";
-		$to = [];
-		$to[] = 'mumtazahmad2504@gmail.com';
-		$email->Send($this->options['email'],$subject,$msg,$to,[]);
+		$msg .= "For complete sprint calender please <a href='http://scripts.pkl.mentorg.com/sprintcalendar'>click here</a></small><br>";
+		$email->Send($this->options['email'],$subject,$msg,$this->to,[]);
 	}
 	public function Script()
 	{
 		dump("Running script");
-		$now = Carbon::now($this->timezone); 	
-		$sstart = Carbon::parse($this->GetCurrentSprintStart()->date);
-		$send =   Carbon::parse($this->GetCurrentSprintEnd()->date);
+		$now = Carbon::now($this->timezone); 
+		
+		$start = Carbon::now();
+		$start->subDays(63);
+		$end = Carbon::now();
+		$end=  $end->addDays(300);
+		
+		
+		//ob_start('ob_gzhandler');
+
+		$calendar =  new SprintCalendar($start,$end);
+		$tabledata = $calendar->GetGridData();
+		$this->csprint_no = null;
+		foreach($tabledata->sprints as $sprint_name=>$data)
+		{
+			foreach($data as $d)
+			{
+				if($d->today)
+				{
+					$this->csprint_no = $sprint_name;
+					break;
+				}
+			}
+			if($this->csprint_no != null)
+				break;
+		}
+		$sstart = Carbon::parse($tabledata->sprints[$this->csprint_no][0]->date);
+		$send = Carbon::parse(end($tabledata->sprints[$this->csprint_no])->date);
 		$send->subDays(2);///since sprint closes on friday and now sunday
-		$sprint = $this->GetCurrentSprint();
+		$sprint = $this->csprint_no;
+			
 		if($sstart->IsToday())
 		{
 			$this->Email($sprint,1);

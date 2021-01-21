@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\lshipment;
+namespace App\Http\Controllers\Lshipment;
 use App\Apps\lshipment\Lshipment;
 use App\Http\Controllers\Controller;
 

@@ -42,14 +42,6 @@ class Svm extends Cveportal{
 		return true;
 		return parent::TimeToRun($update_every_xmin);
 	}
-	function IssueParser($code,$issue,$fieldname)
-	{
-		switch($fieldname)
-		{
-			default:
-				dd('"'.$fieldname.'" not handled in IssueParser');
-		}
-	}
 	public function Rebuild()
 	{
 		$this->db->monitoring_lists->drop();

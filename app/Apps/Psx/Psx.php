@@ -18,6 +18,7 @@ class Psx extends App{
 	public function TimeToRun($update_every_xmin=60)
 	{
 		$now = Carbon::now($this->timezone);
+		dump("Current hour is ".$now->format('H'));
 		if(($now->format('H')<8)&&($now->format('H')>20))
 		{
 			dump('Its sleeping time please');

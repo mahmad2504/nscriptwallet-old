@@ -46,8 +46,14 @@ Route::get('/bspestimate/plan','App\Http\Controllers\Bspestimate\BspestimateCont
 /////////////////////////////////////////
 
 Route::get('/cveportal','App\Http\Controllers\Cveportal\CveportalController@index')->name('cveportal.index');
-Route::get('/cveportal/cve/{group}/{product}/{version}','App\Http\Controllers\Cveportal\CveportalController@getcves')->name('cveportal.getcves');
-	
+Route::get('/cveportal/cve/{group}/{product}/{version}/{admin?}','App\Http\Controllers\Cveportal\CveportalController@getcves')->name('cveportal.getcves');
+Route::get('/cveportal/login','App\Http\Controllers\Cveportal\CveportalController@login')->name('cveportal.login');
+Route::get('/cveportal/logout', 'App\Http\Controllers\Cveportal\CveportalController@logout')->name('cveportal.logout'); 
+Route::post('/cveportal/authenticate','App\Http\Controllers\Cveportal\CveportalController@authenticate')->name('cveportal.authenticate');
+Route::get('/cveportal/triage','App\Http\Controllers\Cveportal\CveportalController@triage')->name('cveportal.triage');
+Route::put('/cveportal/status/update','App\Http\Controllers\Cveportal\CveportalController@statusupdate')->name('cveportal.status.update');
+
+
 /////////////////////////////////////////
 Route::get('/{param1?}/{param2?}/{param3?}', function (Request $request,$param1=null,$param2=null,$param3=null) 
 {
@@ -74,6 +80,14 @@ Route::get('/{param1?}/{param2?}/{param3?}', function (Request $request,$param1=
 	{
 		return \Redirect::route('rmo.'.$param1, []);
 	}
+	$parts = explode('support.pkl.mentorg.com',$url);
+	if(count($parts)>1&&('http://' == strtolower($parts[0])))
+	{
+		return \Redirect::route('support.active', []);
+	}
+	
+	
+	
     return view('default');
 });
 Route::get('/', function () {

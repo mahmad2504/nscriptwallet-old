@@ -13,6 +13,13 @@ use Artisan;
 class Cveportal extends App{
 	public $scriptname = 'cveportal';
 	public $timezone='Asia/Karachi';
+	public $jira_fields = ['key','status','statuscategory','summary','versions','description']; 
+    public $jira_customfields = ['cve_id'=>'customfield_17645','product_id'=>'monitoring_list','publish'=>'Publish','triage'=>'customfield_10444'];
+    public $admin = 'mumtaz_ahmad@mentor.com';	
+	public $jira_url = 'https://jira.alm.mentorg.com';
+	public $default_triage_status = 'Investigate';
+    //public $jira_customfields = ['cve_id'=>'customfield_10444','product_id'=>'External ID'];  
+	
 	public function __construct($options=null)
     {
 		parent::__construct($this);
@@ -26,10 +33,26 @@ class Cveportal extends App{
 	{
 		switch($fieldname)
 		{
+			case 'publish':
+				if(isset($issue->fields->customFields[$code]))
+					//return $issue->fields->customFields[$code][0]->value;
+					return 1;
+				else
+					return 0;
+				break;
+			case 'triage':
+			case 'product_id':
+			case 'cve_id':
+				
+				if(isset($issue->fields->customFields[$code]))
+					return $issue->fields->customFields[$code];
+				return null;
+				break;
 			default:
 				dd('"'.$fieldname.'" not handled in IssueParser');
 		}
 	}
+	
 	public function Rebuild()
 	{
 		//$this->db->cards->drop();

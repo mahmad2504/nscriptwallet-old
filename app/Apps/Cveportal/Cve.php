@@ -8,19 +8,19 @@ use App\Email;
 use App\Apps\Cveportal\Product;
 use App\Apps\Cveportal\Svm;
 use App\Apps\Cveportal\Nvd;
+use App\Apps\Cveportal\Cvestatus;
 
 class Cve extends Cveportal{
 	public $options = 0;
 	public $scriptname = "cveportal:cve";
 	public $count=0;
 	public $query='';
-	public $jira_fields = ['key','status','statuscategory','summary','versions','description']; 
-    public $jira_customfields = ['cve_id'=>'customfield_10444','product_id'=>'External ID'];  
-    public $cveportal_admin = 'mumtaz_ahmad@mentor.com';	
+    
 	//public $jira_customfields = ['customer'=>'Customer'];  	
 	private $cves = [];
 	public $jira_server = 'EPS';
 	public $jira_project = [];
+	
 	public function __construct($options=null)
     {
 		$this->namespace = __NAMESPACE__;
@@ -34,98 +34,13 @@ class Cve extends Cveportal{
 		return true;
 		//return parent::TimeToRun($update_every_xmin);
 	}
-	function IssueParser($code,$issue,$fieldname)
-	{
-		switch($fieldname)
-		{
-			case 'product_id':
-			case 'cve_id':
-				if(isset($issue->fields->customFields[$code]))
-					return $issue->fields->customFields[$code];
-				return null;
-				break;
-			default:
-				dd('"'.$fieldname.'" not handled in IssueParser');
-		}
-	}
+	
 	public function Rebuild()
 	{
 		//$this->db->monitoring_lists->drop();
 		$this->options['email']=0;// no emails when rebuild
 	}
-	private function ProcessCveRecord($record,$id=null)
-	{
-		$cve = new \StdClass();
-		$cve->cve = $record->cve;
-		if(!isset($record->nvd))
-			return null;
-		if($record->nvd==null)
-			return null;
-		
-		$cve->description = $record->nvd->description;
-		$cve->modified = $record->nvd->lastModifiedDate;
-		$cve->published = $record->nvd->publishedDate;
-		if($record->nvd->cvss == null)
-			return null;
-		
-		$cve->cvss = $record->nvd->cvss;
-		/*if(isset($record->nvd->cvssv3))
-			$cve->cvssv3 = $record->nvd->cvssv3;
-		
-		if(isset($record->nvd->cvssv2))
-			$cve->cvssv2 = $record->nvd->cvssv2;*/
-		
-		$cve->product = $record->product;
-		$remove = [];
-		$i=0;
-		$valid = 0;
-		$product_id = "-1";
-		$p = new Products();
-		if(count($id)==1)
-			$product_id = $id[0];
-		$cve->status = 'Not Applicable';
-		foreach($cve->product as $product)
-		{
-			$details = $p->GetProduct($product->id);
-			$product->group = $details->group;
-			$product->name = $details->name;
-			$product->version = $details->version;
-			$product->status = $this->GetCVETriageStatus($cve->cve,$product->id);
-			if($product_id == $product->id)
-			{
-				$cve->status = $product->status;
-			}
-		}
-		return $cve;
-	}
-	function Get($ids)
-	{		
-		$options = [
-			'sort' => ['nvd.lastModifiedDate' => -1],
-			'projection'=>
-					["_id"=>0,
-					"nvd.description"=>1,
-					"nvd.lastModifiedDate"=>1,
-					"nvd.publishedDate"=>1,
-					"nvd.cvss"=>1,
-					"product.id"=>1,
-					"product.component.name"=>1,
-					"product.component.version"=>1,
-					"cve"=>1]
-		];
-		$query  = ['product.id'=>['$in'=>$ids]];
-		
-		$cves = $this->db->cves->find($query,$options)->toArray();
-		
-		$cvedata = [];
-		foreach($cves as $record)
-		{
-			$r = $this->ProcessCveRecord($record,$ids);
-			if($r != null)
-				$cvedata[] = $r;
-		}
-		return $cvedata;
-	}
+	
 	function ComputeSeverity($cvss)
 	{
 		//echo $cvss["baseScore"]."\r\n";
@@ -165,10 +80,8 @@ class Cve extends Cveportal{
 	{
 		//$nvd = new NvdSearch();
 		//$nvd->Init();
-		
 		$svm =  new Svm();
 		$nvd =  new Nvd();
-		
 		$product_id = $product->id;
 		$projection = [
 			'projection'=>
@@ -194,14 +107,12 @@ class Cve extends Cveportal{
 			
 			foreach($cpe->cve as $cve)
 			{
-
 				if(!array_key_exists($cve,$this->cves))
 				{
 					$this->cves[$cve] = new \StdClass();
 					$this->cves[$cve]->cve = $cve;
 					$this->cves[$cve]->product = [];
 					$this->cves[$cve]->severity = 'NA';
-					
 					$cve_nvd_data = $nvd->GetCve($cve);
 					if($cve_nvd_data != null)
 					{
@@ -263,7 +174,6 @@ class Cve extends Cveportal{
 				}
 			}
 		}
-	
 	}
 	public function IsUpdated($cve,$product,$version,$ticket)
 	{
@@ -325,7 +235,7 @@ class Cve extends Cveportal{
 		if($option == 1)
 			$title = $title." - DEPRECATED";
 		if($option == 2)
-			$title = $title." - DUPLICATES - ".$cve->jira ;
+			$title = $title." - DUPLICATES - ".$cve->jira->key ;
 		$description = 'Description not found';
 		$priority = 'NA';
 		if(isset($cve->nvd->description))
@@ -336,6 +246,8 @@ class Cve extends Cveportal{
 		$customefields = [];
 		$customefields['product_id']=$product->id;
 		$customefields['cve_id']=$cve->cve;
+		$customefields['triage']=$this->default_triage_status;
+		
 		if($jirakey!=null)
 		{
 			dump("Updating Jira Ticket for ".$cve->cve." ".$product->id." ".$version." ".$priority);
@@ -344,7 +256,169 @@ class Cve extends Cveportal{
 		else
 		{
 			dump("Creating Jira Ticket for ".$cve->cve." ".$product->id." ".$version." ".$priority);
-			return Jira::CreateTask($jira_project,$title,$description,$priority,'Task',$version,$customefields);
+			$ticket =  Jira::CreateTask($jira_project,$title,$description,$priority,'Task',$version,$customefields);
+			$ticket->product_id = $product->id;
+			$ticket->triage = $this->default_triage_status;
+			return $ticket;
+		}
+	}
+	public function GetCVETriageStatus($cve,$productid)
+	{
+		$cvestatus = new CVEStatus();
+		$status = $cvestatus->GetStatus($cve,$productid);
+		$status = $status->Jsonserialize();
+		return $status;
+	}
+	private function ProcessCveRecord($record,$id=null)
+	{
+		$cve = new \StdClass();
+		$cve->cve = $record->cve;
+		if(!isset($record->nvd))
+			return null;
+		if($record->nvd==null)
+			return null;
+		
+		$cve->description = $record->nvd->description;
+		$cve->modified = $record->nvd->lastModifiedDate;
+		$cve->published = $record->nvd->publishedDate;
+		$cve->severity = $record->severity;
+		if($record->nvd->cvss == null)
+			return null;
+		
+		$cve->cvss = $record->nvd->cvss;
+		
+		/*if(isset($record->nvd->cvssv3))
+			$cve->cvssv3 = $record->nvd->cvssv3;
+		
+		if(isset($record->nvd->cvssv2))
+			$cve->cvssv2 = $record->nvd->cvssv2;*/
+		
+		$cve->product = $record->product;
+		$remove = [];
+		$i=0;
+		$valid = 0;
+		$product_id = "-1";
+		$p = new Product();
+		if(count($id)==1)
+			$product_id = $id[0];
+		$cve->status = 'Not Applicable';
+		foreach($cve->product as $product)
+		{
+			$details = $p->GetProduct($product->id);
+			$product->group = $details->group;
+			$product->name = $details->name;
+			$product->version = $details->version;
+			$product->status = $this->GetCVETriageStatus($cve->cve,$product->id);
+			if($product_id == $product->id)
+			{
+				$cve->status = $product->status;
+			}
+		}
+		return $cve;
+	}
+	function Get($ids)
+	{		
+		$options = [
+			'sort' => ['nvd.lastModifiedDate' => -1],
+			'projection'=>
+					["_id"=>0,
+					"nvd.description"=>1,
+					"nvd.lastModifiedDate"=>1,
+					"nvd.publishedDate"=>1,
+					"nvd.cvss"=>1,
+					"product.id"=>1,
+					"product.component.name"=>1,
+					"product.component.version"=>1,
+					"severity"=>1,
+					"cve"=>1]
+		];
+		$query  = ['product.id'=>['$in'=>$ids]];
+		
+		$cves = $this->db->cves->find($query,$options)->toArray();
+		
+		$cvedata = [];
+		foreach($cves as $record)
+		{
+			$r = $this->ProcessCveRecord($record,$ids);
+			if($r != null)
+				$cvedata[] = $r;
+		}
+		return $cvedata;
+	}
+	function GetPublished($ids)
+	{
+		$cves = $this->Get($ids);
+		$cve_delete_indexes = [];
+		$cve_index = 0;
+		/*foreach($cves as $cve)
+		{
+			$index = 0;
+			$delete_indexes = [];
+			$valid=0;
+			foreach($cve->product as $product)
+			{
+				if($product->status->publish == 0)
+					$delete_indexes[]=$index;
+				else
+				{
+					if( in_array($product->id,$ids))
+						$valid=1;
+				}
+				$index++;
+			}
+			foreach($delete_indexes  as $index)
+			{
+				unset($cve->product[$index]);
+			}
+			if(($valid==0)||(count($cve->product)==0))
+				$cve_delete_indexes[] = $cve_index; 
+			$cve_index++;
+		}
+		foreach($cve_delete_indexes as $cve_index)
+			unset($cves[$cve_index]);
+		*/
+		return array_values($cves);
+	}
+	public function SendErrorNotification($p)
+	{
+		dump("Version not found in Jira");
+		dump("Group = ".$p->group);
+		dump("Name = ".$p->name);
+		dump("Version = ".$p->version);
+		dump("Jira = ".$p->jira->project);
+		dump("Affects version = ".$p->jira->affectsversion);
+				
+		$email =  new Email();
+		$to[] = $this->cveportal_admin;
+		if(isset($p->notify))
+			$to[] = $p->notify;
+				
+		$msg = "<h3>CVE sync error</h3>";
+		$msg .= "<span style='color:red;'>".$p->jira->affectsversion." version not found in jira project ".$p->jira->project."</span><br>";
+		$msg .= "<br>"; 
+		$msg .= "<h4>Product Details</h4>";
+		$msg .= "Product Group = ".$p->group."<br>";
+		$msg .= "Product Name = ".$p->name."<br>";
+		$msg .= "Version label = ".$p->version."<br>";
+				
+		$date =  new \DateTime();
+		$date = $date->format('Y-m-d');
+				
+		$d = $this->Read('versionerror');
+		if($d ==  null)
+		{
+			$email->Send(1,'CVE Portal - Sync error report',$msg,$to);
+			$p->date =  $date ;
+			$p->id = 'versionerror';
+			$this->Save($p);
+		}
+		else if($d->date !=  $date)
+		{
+			$email->Send(1,'CVE Portal - Sync error report',$msg,$to);
+			$p->date =  $date ;
+			$p->id = 'versionerror';
+			unset($p->_id);
+			$this->Save($p);
 		}
 	}
 	public function Script()
@@ -352,97 +426,62 @@ class Cve extends Cveportal{
 		
 		$product = new Product();
 		$products = $product->GetProducts();
-		
-		foreach($products as $p)
-		{
-			$components = $product->GetComponents($p->id);
-			
-			
-			$this->BuildCVEs($p,$components);
-			
-			foreach($this->cves as $cve)
-			{
-				foreach($cve->product as $prod)
-					$prod->component = array_values($prod->component);
-				$cve->product = array_values($cve->product);
-				//$this->GenerateTickets($cve);
-				
-			}
-		}
-		$this->db->cves->drop();
-		$this->db->cves->insertMany(array_values($this->cves));
-		// Create Jira Tickets
-		$created = [];
-		$deprecated = [];
-		$updated = [];
-		$duplicate = [];
+		$sproducts = [];
 		foreach($products as $p)
 		{
 			if($p->active == 0)
 				continue;
 			
-			if(!isset($p->jira))
-				continue;
-			$versions = Jira::GetVersions($p->jira->project);
-			$version = null;
-			foreach($versions as $v)
+			if(isset($p->jira))
 			{
-				if(strtolower($v->name)==strtolower($p->jira->affectsversion))
+				$versions = Jira::GetVersions($p->jira->project);
+				$version = null;
+				foreach($versions as $v)
 				{
-					$version = $v->name;
-					break;
+					if(strtolower($v->name)==strtolower($p->jira->affectsversion))
+					{
+						$version = $v->name;
+						break;
+					}
 				}
+				if($version == null)
+				{
+					$this->SendErrorNotification($p);
+					continue;
+				}
+				$p->jira->versions = $versions;
 			}
-			if($version == null)
+			$components = $product->GetComponents($p->id);
+			$this->BuildCVEs($p,$components);
+			foreach($this->cves as $cve)
 			{
-				dump("Version not found in Jira");
-				dump("Group = ".$p->group);
-				dump("Name = ".$p->name);
-				dump("Version = ".$p->version);
-				dump("Jira = ".$p->jira->project);
-				dump("Affects version = ".$p->jira->affectsversion);
-				
-				$email =  new Email();
-				$to[] = $this->cveportal_admin;
-				if(isset($p->notify))
-					$to[] = $p->notify;
-				
-				$msg = "<h3>CVE sync error</h3>";
-				$msg .= "<span style='color:red;'>".$p->jira->affectsversion." version not found in jira project ".$p->jira->project."</span><br>";
-				$msg .= "<br>"; 
-				$msg .= "<h4>Product Details</h4>";
-				$msg .= "Product Group = ".$p->group."<br>";
-				$msg .= "Product Name = ".$p->name."<br>";
-				$msg .= "Version label = ".$p->version."<br>";
-				
-				$date =  new \DateTime();
-		        $date = $date->format('Y-m-d');
-				
-				$d = $this->Read('versionerror');
-				if($d ==  null)
-				{
-					$email->Send(1,'CVE Portal - Sync error report',$msg,$to);
-					$p->date =  $date ;
-					$p->id = 'versionerror';
-					$this->Save($p);
-				}
-				else if($d->date !=  $date)
-				{
-					$email->Send(1,'CVE Portal - Sync error report',$msg,$to);
-					$p->date =  $date ;
-					$p->id = 'versionerror';
-					unset($p->_id);
-					$this->Save($p);
-				}
-				continue;
+					
+				foreach($cve->product as $prod)
+					$prod->component = array_values($prod->component);
+				$cve->product = array_values($cve->product);
+				//$this->GenerateTickets($cve);
 			}
+			$sproducts[]=$p; 
+		}
+	
+		//dd($sproducts);
+		
+		$this->db->cves->drop();
+		$this->db->cves->insertMany(array_values($this->cves));
+		return;
+		// Create Jira Tickets
+		$created = [];
+		$deprecated = [];
+		$updated = [];
+		$duplicate = [];
+		foreach($sproducts as $p)
+		{
 			$query  = ['product.id'=>$p->id];
 			$projection = [
 			'projection'=>
 			["cve"=>1]];
 			$cves = $this->db->cves->find($query)->toArray();
 			$this->query='project = '.$p->jira->project.' and cf['.explode("_",$this->fields->product_id)[1].'] ~ '.$p->id." and summary !~ DEPRECATED and summary !~ DUPLICATES";
-
 			$tickets = $this->FetchJiraTickets();
 			foreach($tickets as $ticket)
 			{
@@ -452,13 +491,12 @@ class Cve extends Cveportal{
 					{
 						if(isset($cve->jira))
 						{
-							dump($ticket->key." duplicates ".$cve->jira);
+							dump($ticket->key." duplicates ".$cve->jira->key);
 							$ticket->cve = $cve;
 							$this->GenerateTickets($cve,$p,$version,$ticket->key,2);
 							$duplicate[] = $ticket;
 							continue;
 						}
-						
 						if($this->IsUpdated($cve,$p,$version,$ticket))
 						{
 							dump("Updating ".$ticket->key);
@@ -483,11 +521,15 @@ class Cve extends Cveportal{
 			{
 				if(!isset($cve->jira))// Jira key is not assigned 
 				{
-					$t = $this->GenerateTickets($cve,$p,$version);
-					$t->cve = $cve;
-					$created [] = $t;
+					$ticket = $this->GenerateTickets($cve,$p,$version);
+					$created [] = $ticket;
 				}
 			}
+			
+			//$this->db->cves->drop();
+			//$this->db->cves->insertMany(array_values($this->cves));
+		
+			
 			$msg = '';
 			if( count($created) > 0)
 			{
@@ -541,6 +583,7 @@ class Cve extends Cveportal{
 				$nmsg .= $msg;
 				$email->Send(1,'CVE Portal - Sync report',$nmsg,$to);
 			} 
+			
 		}
 	}
 }

@@ -155,6 +155,7 @@ class Bookclosure extends Psx{
 		$json = explode("}]};",$json)[0];
 		$json = $json."}]}";
 		$data = json_decode($json);
+		dd($data);
 		foreach($data->cur as $object)
 		{
 			$status=null;
