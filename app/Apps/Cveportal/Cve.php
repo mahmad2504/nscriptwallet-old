@@ -9,6 +9,7 @@ use App\Apps\Cveportal\Product;
 use App\Apps\Cveportal\Svm;
 use App\Apps\Cveportal\Nvd;
 use App\Apps\Cveportal\Cvestatus;
+use App\Apps\Cveportal\Cache;
 
 class Cve extends Cveportal{
 	public $options = 0;
@@ -468,122 +469,10 @@ class Cve extends Cveportal{
 		
 		$this->db->cves->drop();
 		$this->db->cves->insertMany(array_values($this->cves));
+		
+		$cache = new Cache();
+		$cache->Clean();
+		
 		return;
-		// Create Jira Tickets
-		$created = [];
-		$deprecated = [];
-		$updated = [];
-		$duplicate = [];
-		foreach($sproducts as $p)
-		{
-			$query  = ['product.id'=>$p->id];
-			$projection = [
-			'projection'=>
-			["cve"=>1]];
-			$cves = $this->db->cves->find($query)->toArray();
-			$this->query='project = '.$p->jira->project.' and cf['.explode("_",$this->fields->product_id)[1].'] ~ '.$p->id." and summary !~ DEPRECATED and summary !~ DUPLICATES";
-			$tickets = $this->FetchJiraTickets();
-			foreach($tickets as $ticket)
-			{
-				foreach($cves as $cve)
-				{
-					if($cve->cve == $ticket->cve_id)
-					{
-						if(isset($cve->jira))
-						{
-							dump($ticket->key." duplicates ".$cve->jira->key);
-							$ticket->cve = $cve;
-							$this->GenerateTickets($cve,$p,$version,$ticket->key,2);
-							$duplicate[] = $ticket;
-							continue;
-						}
-						if($this->IsUpdated($cve,$p,$version,$ticket))
-						{
-							dump("Updating ".$ticket->key);
-							$updated[] = $ticket;
-							$this->GenerateTickets($cve,$p,$version,$ticket->key);
-						}	
-						$cve->jira = $ticket->key;
-						$ticket->cve = $cve;
-					}
-				}
-				if(!isset($ticket->cve))
-				{
-					dump($ticket->key." no more belongs to any product cve");
-					$this->GenerateTickets($cve,$p,$version,$ticket->key,1);
-					$ticket->cve = $cve;
-					$deprecated[] = $ticket;
-				}
-			}
-			
-			/// Ticket Generation 
-			foreach($cves as $cve)
-			{
-				if(!isset($cve->jira))// Jira key is not assigned 
-				{
-					$ticket = $this->GenerateTickets($cve,$p,$version);
-					$created [] = $ticket;
-				}
-			}
-			
-			//$this->db->cves->drop();
-			//$this->db->cves->insertMany(array_values($this->cves));
-		
-			
-			$msg = '';
-			if( count($created) > 0)
-			{
-				$msg .= "<h3>Following Jira Tickets are created </h3>";
-				
-				foreach($created as $t)
-				{
-					$msg .= $t->key." for ".$t->cve->cve."<br>";	
-				}
-			}
-			if( count($deprecated) > 0)
-			{
-				$msg .= "<h3>Following Jira Tickets are deprecated and should be removed </h3>";
-				
-				foreach($deprecated as $t)
-				{
-					$msg .= $t->key." for ".$t->cve->cve."<br>";	
-				}
-			}
-			if( count($updated) > 0)
-			{
-				$msg .= "<h3>Following Jira Tickets are updated  </h3>";
-				
-				foreach($updated as $t)
-				{
-					$msg .= $t->key." for ".$t->cve->cve."<br>";	
-				}
-			}
-			if( count($duplicate) > 0)
-			{
-				$msg .= "<h3>Following Jira Tickets are duplicate  </h3>";
-				
-				foreach($duplicate as $t)
-				{
-					$msg .= $t->key." for ".$t->cve->cve."<br>";	
-				}
-			}
-		
-			if($msg != '')
-			{
-				$email =  new Email();
-				$to[] = $this->cveportal_admin;
-				if(isset($p->notify))
-					$to[] = $p->notify;
-				$nmsg = "<h3>CVE sync report</h3>";
-				$nmsg .= "<h4>Product Details</h4>";
-				$nmsg .= "Product Group = ".$p->group."<br>";
-				$nmsg .= "Product Name = ".$p->name."<br>";
-				$nmsg .= "Version label = ".$p->version."<br>";
-				$nmsg .= "<br>";
-				$nmsg .= $msg;
-				$email->Send(1,'CVE Portal - Sync report',$nmsg,$to);
-			} 
-			
-		}
 	}
 }

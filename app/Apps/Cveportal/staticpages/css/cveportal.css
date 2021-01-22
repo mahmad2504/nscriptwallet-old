@@ -1,0 +1,203 @@
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+/* The Close Button */
+.close {
+  color: #aaaaaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: #000;
+  text-decoration: none;
+  cursor: pointer;
+}
+table {width:50%;text-align:center } /* Make table wider */  
+td, th { border: 1px solid #CCC; text-align:left} /* Add borders to cells */  
+tr { font-size:12px } /* Add borders to cells */
+
+
+#section > span {
+    color: #fff;
+    font-family: "Avenir Next","Helvetica Neue","Segoe UI","Oxygen","Ubuntu","Cantarell","Open Sans",sans-serif;
+    font-size: 1.4rem;
+}
+
+#loadingDiv {
+    position: absolute;
+    display: -ms-flexbox;
+    display: flex;
+    /* -ms-flex-align: center; */
+    /* align-items: center; */
+    align-items: flex-start;
+    -ms-flex-align: start;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    height: 100%;
+    width: 100%;
+    background: rgba(0,0,0,.4);
+    text-align: center;
+}
+
+#loadingDiv .loadingMsg {
+    display: inline-block;
+    margin: 0 auto;
+    margin-top: 210px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    background: #fff;
+    font-weight: 700;
+    font-size: 16px;
+    border: 4px solid #333;
+    color: #000;
+}
+
+.customDropdown {
+    flex-basis: 30%;
+    max-width: 30%;
+}
+
+.customDropdown .form-select::before {
+    z-index: 0;
+}
+
+.col9_5percent {
+    flex-basis: 9.5%;
+    max-width: 9.5%;
+}
+
+.fontSize1_4rem {
+    font-size: 1.4rem;
+}
+
+.marginTop5px {
+    margin-top: 5px;
+}
+
+/* Tabulator */
+
+.tabulator {
+    border: none;
+}
+
+.tabulator .tabulator-header {
+    border-bottom: 1px solid #dbdbdb;
+}
+
+.tabulator-row.tabulator-row-even {
+    background: #f9f9f9;
+}
+
+.tabulator-row .tabulator-cell {
+    border-right: none;
+    padding: 0.50rem !important;
+    height: unset !important;
+    border-top: 1px solid #e1e1e1;
+}
+
+.tabulator .tabulator-header .tabulator-col {
+    border-right: none;
+    padding: 0.40rem 0.40rem 0.40rem 0.0rem !important;
+    height: unset !important;
+    background: white;
+    border-top: 1px solid #e1e1e1;
+}
+
+.tabulator .tabulator-footer {
+    padding-top: 0.70rem !important;
+    padding-bottom: 0px !important;
+    border-top: 2px solid #dbdbdb;
+    background: white;
+}
+
+/* The Modal (background) */
+.modal {
+    display: none;
+    /* Hidden by default */
+    position: fixed;
+    /* Stay in place */
+    z-index: 1;
+    /* Sit on top */
+    padding-top: 100px;
+    /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%;
+    /* Full width */
+    height: 100%;
+    /* Full height */
+    overflow: auto;
+    /* Enable scroll if needed */
+    background-color: rgb(0, 0, 0);
+    /* Fallback color */
+    background-color: rgba(0, 0, 0, 0.4);
+    /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+}
+
+/* The Close Button */
+.close {
+    color: #aaaaaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+table {
+    /* width: 50%; */
+    text-align: center
+}
+
+/* Make table wider */
+td,
+th {
+    border: 1px solid #CCC;
+    text-align: left
+}
+
+/* Add borders to cells */
+tr {
+    font-size: 12px
+}
+
+/* Add borders to cells */

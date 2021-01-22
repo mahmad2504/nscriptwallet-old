@@ -52,6 +52,7 @@ Route::get('/cveportal/logout', 'App\Http\Controllers\Cveportal\CveportalControl
 Route::post('/cveportal/authenticate','App\Http\Controllers\Cveportal\CveportalController@authenticate')->name('cveportal.authenticate');
 Route::get('/cveportal/triage','App\Http\Controllers\Cveportal\CveportalController@triage')->name('cveportal.triage');
 Route::put('/cveportal/status/update','App\Http\Controllers\Cveportal\CveportalController@statusupdate')->name('cveportal.status.update');
+Route::get('/cveportal/jira/sync/request','App\Http\Controllers\Cveportal\CveportalController@jirasyncrequest')->name('cveportal.jirasyncrequest');
 
 
 /////////////////////////////////////////

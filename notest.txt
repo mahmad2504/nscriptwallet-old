@@ -1,2 +1,5 @@
 composer dump-autoload
 php artisan schedule:work
+
+D:\xampp\htdocs\nscriptwallet\data\cveportal\static>aws s3 rm s3://eps.mentorcloudservices.com/cveportal --recursive
+D:\xampp\htdocs\nscriptwallet\data\cveportal\static>aws s3 sync . s3://eps.mentorcloudservices.com/cveportal --acl public-read-write

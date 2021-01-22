@@ -10,7 +10,8 @@ use Carbon\Carbon;
 use App\Apps\Cveportal\Cve;
 use App\Libs\Ldap\Ldap;
 use App\Apps\Cveportal\Cvestatus;
-
+use App\Apps\Cveportal\Cache;
+use App\Apps\Cveportal\Jiraa;
 
 class CveportalController extends Controller
 {
@@ -55,10 +56,6 @@ class CveportalController extends Controller
 			}
 			$product_names[] = $productnames;
 		}
-		if($request->refresh==null)
-			$refresh=0;
-		else
-			$refresh=1;
 		$displayname=$data->user_displayname;
 		$admin = $data->user_name;
 		$jira_url = $p->jira_url;
@@ -94,6 +91,7 @@ class CveportalController extends Controller
 	}
 	public function GetCves(Request $request,$group='all',$product='all',$version='all',$admin='all')
 	{
+		$cache = new Cache();
 		$static_file_name = $group."_".$product."_".$version;
 		ob_start('ob_gzhandler');
 		$p = new Product();
@@ -104,21 +102,17 @@ class CveportalController extends Controller
 		$ids = $p->GetIds($group,$product,$version,$admin);
 		sort($ids);
 		$key = md5(implode(",",$ids));
-		$key = $key.'published';
-		$data = null;
-		//if(($request->refresh==null)||($request->refresh==0))
-		//	$data = Cache::Load($key);
-		
-		//if($data==null)
-		//{
+	
+		$data = $cache->Get($key);
+		if($data==null)
+		{
 			$c =  new CVE();
 			$data = $c->GetPublished($ids);
-			//Cache::Save($key,json_encode($data));
-			//Cache::SaveStaticPage($static_file_name,json_encode($data));
-		//}
-		//dd($data);
+			$cache->Put($key,json_encode($data));
+		}
 		return $data;
 	}
+
 	public function StatusUpdate(Request $request)
 	{
 		$data = $request->session()->get('data');
@@ -127,7 +121,7 @@ class CveportalController extends Controller
 		if(!isset($data->user_name))
 			return Response::json(['error' => 'Un Authorized access'], 404); 
 		
-		//$p = new Product();
+		$p = new Product();
 		//$group = $request->group=='all'?null:$request->group;
 		//$product = $request->product=='all'?null:$request->product;
 		//$version = $request->version=='all'?null:$request->version;
@@ -139,6 +133,14 @@ class CveportalController extends Controller
 		$cvestatus->UpdateStatus($request->status);
 		$status = $cvestatus->GetStatus($request->status['cve'],$request->status['productid']);
 		//dump($status);
+		$cache = new Cache();
+		$cache->Clean();
 		return ["status"=>"success"];
+	}
+	public function JiraSyncRequest(Request $request)
+	{
+		$jira=new Jiraa();
+		$jira->RequestSync();
+		return "Requested. Wait for a minute";
 	}
 }

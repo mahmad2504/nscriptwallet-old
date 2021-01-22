@@ -9,6 +9,7 @@ use App\Apps\Cveportal\Product;
 use App\Apps\Cveportal\Svm;
 use App\Apps\Cveportal\Nvd;
 use App\Apps\Cveportal\Cvestatus;
+use App\Apps\Cveportal\Cache;
 
 class Jiraa extends Cveportal{
 	public $options = 0;
@@ -23,7 +24,17 @@ class Jiraa extends Cveportal{
     }
 	public function TimeToRun($update_every_xmin=10)
 	{
+		$sync_requested = $this->Read('sync_requested_'.$this->scriptname);
+		if($sync_requested)
+		{
+			$this->Save(['sync_requested_'.$this->scriptname=>0]);
+			return true;
+		}			
 		return parent::TimeToRun($update_every_xmin);
+	}
+	public function RequestSync()
+	{
+		$this->Save(['sync_requested_'.$this->scriptname=>1]);
 	}
 	public function Rebuild()
 	{
@@ -100,7 +111,7 @@ class Jiraa extends Cveportal{
 		$customefields = [];
 		$customefields['product_id']=$product->id;
 		$customefields['cve_id']=$cve->cve;
-		$customefields['triage']=$this->default_triage_status;
+		//$customefields['triage']=$this->default_triage_status;
 		
 		if($jirakey!=null)
 		{
@@ -112,7 +123,8 @@ class Jiraa extends Cveportal{
 			dump("Creating Jira Ticket for ".$cve->cve." ".$product->id." ".$version." ".$priority);
 			$ticket =  Jira::CreateTask($jira_project,$title,$description,$priority,'Task',$version,$customefields);
 			$ticket->product_id = $product->id;
-			$ticket->triage = $this->default_triage_status;
+			$ticket->triage = '';
+			$ticket->status = 'Open';
 			$ticket->publish = 0;
 			return $ticket;
 		}
@@ -226,7 +238,12 @@ class Jiraa extends Cveportal{
 							$this->GenerateTickets($cve,$p,$version,$ticket->key);
 						}	
 						$cve->jira = $ticket->key;
-						$cve->triage = $ticket->triage;
+						
+						if($ticket->triage != '')
+							$cve->triage = $ticket->triage;
+						else
+							$cve->triage = $ticket->status;
+						;
 						$cve->publish = $ticket->publish;
 						$ticket->cve = $cve;
 					}
@@ -246,14 +263,18 @@ class Jiraa extends Cveportal{
 				if(!isset($cve->jira))// Jira key is not assigned 
 				{
 					$ticket = $this->GenerateTickets($cve,$p,$version);
-					
 					$cve->jira = $ticket->key;
-					$cve->triage = $ticket->triage;
+					if($ticket->triage != '')
+						$cve->triage = $ticket->triage;
+					else
+						$cve->triage = $ticket->status;
+					
 					$cve->publish = $ticket->publish;
 					$ticket->cve = $cve;
 					$created [] = $ticket;
 				}
 				$status = $cvestatus->GetStatus($cve->cve,$p->id);
+				
 				if(isset($p->jira))
 				{
 					if(
@@ -327,7 +348,8 @@ class Jiraa extends Cveportal{
 				$nmsg .= $msg;
 				$email->Send(1,'CVE Portal - Sync report',$nmsg,$to);
 			} 
-			
+			$cache = new Cache();
+			$cache->Clean();
 		}
 	}
 }
