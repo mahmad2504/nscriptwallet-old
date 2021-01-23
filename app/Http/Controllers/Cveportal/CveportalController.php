@@ -143,4 +143,24 @@ class CveportalController extends Controller
 		$jira->RequestSync();
 		return "Requested. Wait for a minute";
 	}
+	public function GetProductData(Request $request,$id)
+	{
+		ob_start('ob_gzhandler');
+		$p = new Product();
+		$product = $p->GetProduct($id,"1");
+		if($product == null)
+		{
+			$a['code'] = 404;
+			$a['desc'] = 'object not found';
+			return $a ;
+		}
+		return json_encode($product);
+	}
+	public function GetCveData(Request $request,$productid)
+	{
+		$c =  new CVE();
+		$ids[] = $productid;
+		$data = $c->GetPublished($ids);
+		return $data;
+	}
 }

@@ -58,11 +58,14 @@ class Product extends Cveportal{
 			return null;
 		return $obj;
 	}
-	function GetProducts($admin=null,$active="1")
+	function GetProducts($admin=null,$active="1",$external=null)
 	{
 		$query = [];
 		if($active != null)
 			$query['active'] = $active;
+
+		if($external != null)
+			$query['external'] = $external;
 		
 		if($admin!=null)
 			$query['admin'] = new Regex(preg_quote("".$admin), 'i');
@@ -100,9 +103,9 @@ class Product extends Cveportal{
 		unset($obj->_id);
 		return $obj->monitoring_lists->jsonSerialize();
 	}
-	function GetGroupNames($admin=null,$active="1")
+	function GetGroupNames($admin=null,$active="1",$external=null)
 	{
-		$products = $this->GetProducts($admin,$active);
+		$products = $this->GetProducts($admin,$active,$external);
 		if($products == null)
 			return [];
 		$groups = [];
@@ -116,11 +119,14 @@ class Product extends Cveportal{
 		}
 		return 	array_values($groups);
 	}
-	function GetProductNames($groupname,$active="1")
+	function GetProductNames($groupname,$active="1",$external=null)
 	{
 		$query=['group'=>$groupname];
 		if($active != null)
 			$query['active'] = $active;
+		
+		if($external != null)
+			$query['external'] = $external;
 		
 		$products = $this->db->products->find($query);
 		if($products == null)
@@ -132,11 +138,15 @@ class Product extends Cveportal{
 		}
 		return array_values($names);
 	}
-	function GetVersionNames($group_name,$productname,$active="1")
+	function GetVersionNames($group_name,$productname,$active="1",$external=null)
 	{
 		$query=['group'=>$group_name,'name'=>$productname];
 		if($active != null)
 			$query['active'] = $active;
+		
+		if($external != null)
+			$query['external'] = $external;
+		
 		
 		$products = $this->db->products->find($query);
 		if($products == null)
@@ -148,9 +158,10 @@ class Product extends Cveportal{
 		}
 		return array_values($versions);
 	}
-	public function GetIds($groupname=null,$productname=null,$versionname=null,$admin=null,$active="1")
+	public function GetIds($groupname=null,$productname=null,$versionname=null,$admin=null,$active="1",$external=null)
 	{
-		$products = $this->GetCveProducts($groupname,$productname,$versionname,$admin,$active);
+		
+		$products = $this->GetCveProducts($groupname,$productname,$versionname,$admin,$active,$external);
 		$ids = [];
 		foreach($products as $product)
 		{
@@ -158,7 +169,7 @@ class Product extends Cveportal{
 		}
 		return array_values($ids);
 	}
-	public function GetCveProducts($groupname=null,$productname=null,$versionname=null,$admin=null,$active="1")
+	public function GetCveProducts($groupname=null,$productname=null,$versionname=null,$admin=null,$active="1",$external=null)
 	{
 		$query = [];
 		if($groupname!=null)
@@ -171,6 +182,9 @@ class Product extends Cveportal{
 		if($active != null)
 			$query['active'] = $active;
 		
+		if($external != null)
+			$query['external'] = $external;
+		
 		if($admin!=null)
 			$query['admin'] = new Regex(preg_quote("".$admin), 'i');
 		$options = [
@@ -181,9 +195,11 @@ class Product extends Cveportal{
 		$list = $this->db->products->find($query,$options)->toArray();
 		return $list;
 	}
-	public function GetProduct($id)
+	public function GetProduct($id,$active=null)
 	{
 		$query['id'] = new Regex(preg_quote($id), 'i');
+		if($active != null)
+			$query['active'] = $active; 
 		$options = [
 			'projection'=>
 					["_id"=>0,

@@ -238,12 +238,11 @@ class Jiraa extends Cveportal{
 							$this->GenerateTickets($cve,$p,$version,$ticket->key);
 						}	
 						$cve->jira = $ticket->key;
-						
 						if($ticket->triage != '')
 							$cve->triage = $ticket->triage;
 						else
 							$cve->triage = $ticket->status;
-						;
+					
 						$cve->publish = $ticket->publish;
 						$ticket->cve = $cve;
 					}
@@ -274,7 +273,6 @@ class Jiraa extends Cveportal{
 					$created [] = $ticket;
 				}
 				$status = $cvestatus->GetStatus($cve->cve,$p->id);
-				
 				if(isset($p->jira))
 				{
 					if(

@@ -7,7 +7,7 @@ use App\Email;
 class Pullrequest extends App{
 	public $timezone='Asia/Karachi';
 	public $query='labels in (risk,milestone) and duedate >=';
-	public $jira_fields = ['key','status','statuscategory','summary','resolution','resolutiondate','updated','issuetype','fixVersions'];
+	public $jira_fields = ['key','status','statuscategory','summary','resolution','resolutiondate','updated','issuetype','versions'];
 	public $jira_customfields = ['sprint'=>'Sprint'];  	
 	public $jira_server = 'EPS';
 	public $urls = [

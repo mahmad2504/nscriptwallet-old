@@ -79,4 +79,14 @@ class Cvestatus extends Cveportal{
 		}
 		return $record->status;
 	}
+	public function GetPublished($productid)
+	{
+		$collection = $this->scriptname;
+		$records = $this->db->$collection->find(
+			[
+				'status.productid'=>$productid,
+			]	
+		);
+		return $records->toArray();
+	}
 }

@@ -7,6 +7,7 @@ use Carbon\Carbon;
 
 class Epicupdate extends App{
 	public $timezone='Asia/Karachi';
+	public $scriptname='epicupdate';
 	public $query="key in (VSTARMOD-26574) or ".
 	"issue in linkedIssues(ANDPR-266, 'releases') and type=Epic  and component in (CVBL) and status !=Released or ".
 	"issue in linkedIssues(ANDPR-286, 'releases') and type=Epic  and component in (CVBL) and status !=Released";
@@ -14,7 +15,7 @@ class Epicupdate extends App{
 	public $jira_fields = ['key','status','statuscategory','summary','description','issuelinks',
 		'timespent','resolution','timeremainingestimate','timeoriginalestimate','timetracking',
 		'resolutiondate','updated','duedate','subtasks','issuetype','subtask',
-		'labels','fixVersions'];
+		'labels','versions'];
 		
 	public $jira_customfields = ['epic_link'=>'Epic Link','story_points'=>'Story Points','sprint'=>'Sprint'];
 	public $jira_server = 'IESD';

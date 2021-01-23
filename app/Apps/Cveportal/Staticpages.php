@@ -29,15 +29,15 @@ class Staticpages extends Cveportal{
 	public function ProductData()
 	{
 		$p = new Product();
-		$group_names = $p->GetGroupNames();
+		$group_names = $p->GetGroupNames(null,"1","1");
 		$product_names = [];
 		$version_names = [];
 		foreach($group_names as $group_name)
 		{
-			$productnames = $p->GetProductNames($group_name);
+			$productnames = $p->GetProductNames($group_name,"1","1");
 			foreach($productnames as $productname)
 			{
-				$version_names[] = $p->GetVersionNames($group_name,$productname);
+				$version_names[] = $p->GetVersionNames($group_name,$productname,"1","1");
 			}
 			$product_names[] = $productnames;
 		}
@@ -75,7 +75,7 @@ class Staticpages extends Cveportal{
 		$group = $group=='all'?null:$group;
 		$product = $product=='all'?null:$product;
 		$version = $version=='all'?null:$version;
-		$ids = $p->GetIds($group,$product,$version);
+		$ids = $p->GetIds($group,$product,$version,null,"1","1");
 		sort($ids);
 		$key = md5(implode(",",$ids));
 		$c =  new CVE();

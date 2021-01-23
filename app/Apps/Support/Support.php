@@ -6,6 +6,7 @@ use App\Libs\Jira\Jira;
 use App\Email;
 class Support extends App{
 	public $timezone='America/Chicago';
+	public $scriptname = "support";
 	public $to='dan_schiro@mentor.com';
 	public $bcc='mumtaz_ahmad@mentor.com';
 	public $query='project=Siebel_JIRA AND "Product Name" !~ Vista AND "Product Name" !~ A2B AND "Product Name" !~ XSe and updated >= "2020-01-01" order by key';			 
