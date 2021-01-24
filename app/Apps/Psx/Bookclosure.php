@@ -58,28 +58,28 @@ class Bookclosure extends Psx{
 	}
 	public function SendBasicTelegram($to,$record)
 	{
-		if($this->options['email'] == 0)
+		if($this->options['email'] != 1)
 		{
-			dump($this->toBasicMessage($record));
+			dump("Did not sent basic telegram of id=".$record->id." to ".$to);
 			return;
 		}
 		$this->telegram = TelegramMessage::create()
         ->to($to)
         ->content($this->toBasicMessage($record));
-		$this->notify(new Telegram());	
+		//$this->notify(new Telegram());	
 		dump("Sent basic telegram of id=".$record->id." to ".$to);
 	}
 	public function SendProTelegram($to,$record)
 	{
 		if($this->options['email'] != 1)
 		{
-			dump($this->toProMessage($record));
+			dump("Did not sent pro telegram of id=".$record->id." to ".$to);
 			return;
 		}
 		$this->telegram = TelegramMessage::create()
         ->to($to)
         ->content($this->toProMessage($record));  
-		$this->notify(new Telegram());	
+		//$this->notify(new Telegram());	
 		dump("Sent pro telegram of id=".$record->id." to ".$to);
 	}
 	public function toObject($record)
@@ -135,6 +135,7 @@ class Bookclosure extends Psx{
 				$sent = 1;
 			}
 		}
+		
 		return $sent;
 	}
 	
@@ -155,24 +156,23 @@ class Bookclosure extends Psx{
 		$json = explode("}]};",$json)[0];
 		$json = $json."}]}";
 		$data = json_decode($json);
-		dd($data);
 		foreach($data->cur as $object)
 		{
 			$status=null;
 			$bsfrom = new Carbon($object->bcfrom);
 			$bsfrom_minustwo = $bsfrom->subDays(2);
 			if($bsfrom_minustwo->isToday())
-				$status="Share is Ex today (".$bsfrom_minustwo->format('Y-m-d').")";
-			$bsfrom = new Carbon($object->bcfrom);
-			$bsfrom_minusthree = $bsfrom->subDays(3);
-			if($bsfrom_minusthree->isToday())
-				$status="Share will Ex on ".$bsfrom_minusthree->format('Y-m-d')."(tomorrow)";
+			  $status="\n";
+			//$bsfrom = new Carbon($object->bcfrom);
+			//$bsfrom_minusthree = $bsfrom->subDays(3);
+			//if($bsfrom_minusthree->isToday())
+			//	$status="Share will Ex on ".$bsfrom_minusthree->format('Y-m-d')."(tomorrow)";
 			
 			if($status != null)
 			{
 				$object->status=$status;
 				$object = $this->toObject($object);
-				if($this->SendNotification($object,$status));
+				if($this->SendNotification($object,$status))
 				{
 					if($this->options['rebuild']==0)
 					{
