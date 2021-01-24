@@ -22,8 +22,9 @@ class Kernel extends ConsoleKernel
      * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
      * @return void
      */
-    protected function schedule_1(Schedule $schedule)
+    protected function schedule_MENTOR_SERVER(Schedule $schedule)
     {
+		dump("Running scedule for mentor services");
 		$schedule->exec('del logs\* /q')->daily();
         $schedule->command('ishipment:sync')->everyMinute()
 											 ->appendOutputTo("logs/ishipment.txt")->runInBackground();				 
@@ -39,11 +40,12 @@ class Kernel extends ConsoleKernel
                                              ->appendOutputTo("logs/sprintcalendar.txt")->runInBackground();										
 		$schedule->command('support:sync --email=1')->everyMinute()
                                              ->appendOutputTo("logs/support.txt")->runInBackground();
-		$schedule->exec('curl -L "https://script.google.com/macros/s/AKfycbzsxNokdsDLDv6wcNOYDlPX8gGeAYzvHvNB4Ptdftz9hbPUZvkXclEv/exec?func=alive&device=scriptwallet"')->everyThirtyMinutes()->appendOutputTo("logs/google.txt");									 
+		$schedule->exec('curl -L "https://script.google.com/macros/s/AKfycbzsxNokdsDLDv6wcNOYDlPX8gGeAYzvHvNB4Ptdftz9hbPUZvkXclEv/exec?func=alive&device=scriptwallet')->everyThirtyMinutes()->appendOutputTo("logs/google.txt");									 
 	}
-	
-	protected function schedule(Schedule $schedule)
-    {
+	protected function schedule_PSX_SERVER(Schedule $schedule)
+	{
+		dump("Running scedule for PSX services");
+		return;
 		$schedule->exec('del logs\* /q')->daily();
 		$schedule->command('psx:announcement:sync --email=1')->everyMinute()
 											 ->appendOutputTo("logs/psx_announcement.txt")->runInBackground();	
@@ -53,7 +55,15 @@ class Kernel extends ConsoleKernel
 											 ->appendOutputTo("logs/psx_bookclosure.txt")->runInBackground();
 		$schedule->exec('curl -L "https://script.google.com/macros/s/AKfycbzsxNokdsDLDv6wcNOYDlPX8gGeAYzvHvNB4Ptdftz9hbPUZvkXclEv/exec?func=alive&device=psx"')->everyThirtyMinutes()->appendOutputTo("logs/google.txt");									 
 	}
-
+	protected function schedule(Schedule $schedule)
+    {
+		if(env('APP_NAME') == 'PSX_SERVER')
+			$this->schedule_PSX_SERVER($schedule);
+		else if(env('APP_NAME') == 'MENTOR_SERVER')
+			$this->schedule_MENTOR_SERVER($schedule);
+		else
+			dd('Schedule for '.APP_NAME.' is not defined');
+	}
     /**
      * Register the commands for the application.
      *

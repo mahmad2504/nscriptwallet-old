@@ -66,7 +66,7 @@ class Bookclosure extends Psx{
 		$this->telegram = TelegramMessage::create()
         ->to($to)
         ->content($this->toBasicMessage($record));
-		//$this->notify(new Telegram());	
+		$this->notify(new Telegram());	
 		dump("Sent basic telegram of id=".$record->id." to ".$to);
 	}
 	public function SendProTelegram($to,$record)
@@ -79,7 +79,7 @@ class Bookclosure extends Psx{
 		$this->telegram = TelegramMessage::create()
         ->to($to)
         ->content($this->toProMessage($record));  
-		//$this->notify(new Telegram());	
+		$this->notify(new Telegram());	
 		dump("Sent pro telegram of id=".$record->id." to ".$to);
 	}
 	public function toObject($record)
