@@ -66,11 +66,14 @@ class Announcement extends Psx{
 	{
 		if($this->options['email'] != 1)
 			return;
+		$content = $this->toBasicMessage($record);
+		$content .= 'Details are provided in pro version only. Subscription is 1000 Rs/year. You can transfer online or via Jazz Cash. Send telegram message to @contactmumtaz or sms 03008465671 for details';
 		
 		$this->telegram = TelegramMessage::create()
         ->to($to)
-        ->content($this->toBasicMessage($record));
-		$this->telegram->button('View', 'https://mahmad2504.github.io/psx/subscribe.html');
+        ->content($content);
+		
+		//$this->telegram->button('View', 'https://mahmad2504.github.io/psx/subscribe.html');
 		$this->notify(new Telegram());	
 		dump("Sent basic telegram of id=".$record->id." to ".$to);
 	}
@@ -210,12 +213,14 @@ class Announcement extends Psx{
 			curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			$server_output = curl_exec ($ch);
-			
 			$dom = new \DOMDocument();
 			$dom->loadHTML($server_output); 
 			$dom->preserveWhiteSpace = false; 
 			/*** the table by its tag name ***/ 
 			$tables = $dom->getElementsByTagName('table'); 
+			if($tables == null)
+				dd("Null tables");
+			//dump($tables);
 			$rows = $tables->item(0)->getElementsByTagName('tr'); 
 			foreach ($rows as $row) 
 			{

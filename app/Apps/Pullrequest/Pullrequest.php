@@ -23,6 +23,8 @@ class Pullrequest extends App{
 	public $cc='Waqar_Humayun@mentor.com';
 	public $escalate='Rizwan_Rasheed@mentor.com';
 	public $options = 0;
+	public $scriptname='pullrequest';
+	
 	public function __construct($options=null)
     {
 		$this->namespace = __NAMESPACE__;

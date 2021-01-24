@@ -8,17 +8,12 @@ use App\Email;
 
 class Bspestimate extends App{
 	public $timezone='Asia/Karachi';
+	public $scriptname='bspestimate';
 	public $urls = [
 	'nucleus 4.x'=>'https://alm-jenkins-01.alm.mentorg.com:8443/job/nucleus_4x_driver_catalogue/lastSuccessfulBuild/artifact/nucleus_4x_driver_catalogue.xml/*view*/',
 	'nucleus 3.x'=>'https://alm-jenkins-01.alm.mentorg.com:8443/job/nucleus_4x_driver_catalogue/lastSuccessfulBuild/artifact/nucleus_4x_driver_catalogue.xml/*view*/'
 	
 	];
-	
-	//public $query='labels in (risk,milestone) and duedate >=';
-	//public $jira_fields = ['key','status','statuscategory','summary']; 
-    //public $jira_customfields = ['sprint'=>'Sprint'];  	
-	//public $jira_server = 'EPS';
-	
 	public $options = 0;
 	public function __construct($options=null)
     {

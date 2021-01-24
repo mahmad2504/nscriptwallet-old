@@ -8,6 +8,8 @@ use App\Email;
 
 class Milestone extends App{
 	public $timezone='Asia/Karachi';
+	public $scriptname='milestones';
+	
 	public $query='labels in (risk,milestone) and duedate >=';
 	public $jira_fields = ['key','status','statuscategory','summary','reporter','assignee','updated','fixVersions']; 
     //public $jira_customfields = ['sprint'=>'Sprint'];  	

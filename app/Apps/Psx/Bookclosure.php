@@ -91,7 +91,7 @@ class Bookclosure extends Psx{
 	{
 		$message = "*".'Book Closure'."*\n";
 		$message .= $record->cname."(".$record->symbol.")\n";
-		$message .= "Details are available in Pro version only";
+		$message .= "Details are available in Pro version only.";
 		return $message;
 	}
 	public function toProMessage($record)

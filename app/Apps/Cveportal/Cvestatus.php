@@ -10,7 +10,7 @@ use App\Apps\Cveportal\Product;
 class Cvestatus extends Cveportal{
 	public $timezone='Asia/Karachi';
 	public $options = 0;
-	public $scriptname = "cvestatus";
+	public $scriptname = "cveportal:cvestatus";
 
 	public function __construct($options=null)
     {

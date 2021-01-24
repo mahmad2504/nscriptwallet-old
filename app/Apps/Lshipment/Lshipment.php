@@ -7,7 +7,7 @@ class Lshipment extends App{
 	public $timezone='Asia/Karachi';
 	public $board = '5e96d769cab6ce1d5e4fdb91';
 	public $lists = ["List 1"=>"5e96d7c8ebdb461cc84f83ba","List 2"=>"5e96d7a0dffcf41ccac595c6","Archive"=>"5fc5d45fe9fe3702e6e71433"];
-		
+	public $scriptname='Lshipment';
 	public $options = 0;
 	public function __construct($options=null)
     {

@@ -90,9 +90,10 @@ class Financial extends Psx{
 	public function toBasicMessage($record)
 	{
 		$message = "*".'Financial Result'."*\n";
-		$message .= $record->company."\n";
+		$message .= $record->company."\n\n";
 		//$message .= $record->date."\n";
-		$message .= $record->result."\n";
+		$message .= 'Result details are provided in pro version only';
+		//$message .= $record->result."\n";
 		return $message;
 	}
 	public function toProMessage($record)

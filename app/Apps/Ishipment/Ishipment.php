@@ -16,6 +16,8 @@ class Ishipment extends App{
 	"Resources"=>"5b97bd3738c1cb1a7ca651ad",
 	"Closed"=>"5a851a762654fc6a36e11f48"
 	];
+	public $scriptname='Ishipment';
+	
 	//public $query='';
 	//public $jira_fields = []; 
     //public $jira_customfields = [];  	

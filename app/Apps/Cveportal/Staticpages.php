@@ -9,7 +9,7 @@ use \MongoDB\BSON\Regex;
 use Aws\S3\S3Client;
 
 class Staticpages extends Cveportal{
-	public $scriptname = 'cveportal:static';
+	public $scriptname = 'cveportal:staticpages';
 	public function __construct($options=null)
     {
 		$this->namespace = __NAMESPACE__;
