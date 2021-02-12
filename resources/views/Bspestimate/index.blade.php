@@ -7,7 +7,13 @@
 		<link rel="stylesheet" href="{{ asset('libs/smartwizard/css/smart_wizard_all.min.css') }}" />
 		<link rel="stylesheet" href="{{ asset('libs/form/form.min.css') }}" />
 		<link rel="stylesheet" href="{{ asset('libs/css/common.css') }}" />
+		<link rel="stylesheet" href="{{ asset('libs/autocomplete/tokenize2.css') }}" />
 	<style>
+	input {
+	border: 1px solid grey;}
+	ul {
+		list-style-type:none;
+	}
     </style>
     </head>
     <body>
@@ -20,49 +26,32 @@
 			</div>
 			<br>
 		    <div id="smartwizard" style="display:block">
-			 	<ul class="nav">
+			 	<ul class="nav" >
 					<li>
 						<a class="nav-link" href="#step-1">
-							General Information
+							Dev Tasks
 						</a>
 					</li>
 					<li>
 						<a class="nav-link" href="#step-2">
-							OSS Components
+							QA Tasks
 						</a>
 					</li>
 					<li>
 						<a class="nav-link" href="#step-3">
-							Architecture<br>Port
+							Test
 						</a>
 					</li>
-					<li>
-						<a class="nav-link" href="#step-4">
-							Peripheral Driver Support
-						</a>
-					</li>
-					<li>
-						<a class="nav-link" href="#step-5">
-							MCF Support<br>(For AMP SOCs)
-						</a>
-					</li>
-					
 				</ul>
 				<div class="tab-content">
-				   <div id="step-1" class="tab-pane" role="tabpanel">
-				     @include('bspestimate.general')
+				   <div id="step-1" class="tab-panel" role="tabpanel">
+				     @include('bspestimate.devtasks')
 				   </div>
-				   <div id="step-2" class="tab-pane" role="tabpanel">
-					 @include('bspestimate.oss')
+				   <div id="step-2" class="tab-panel" role="tabpanel">
+					 @include('bspestimate.qatasks')
 				   </div>
-				   <div id="step-3" class="tab-pane" role="tabpanel">
-					  @include('bspestimate.ap')
-				   </div>
-				   <div id="step-4" class="tab-pane" role="tabpanel">
-					  @include('bspestimate.pds')
-				   </div>
-				   <div id="step-5" class="tab-pane" role="tabpanel">
-					  Step content 5
+				   <div id="step-3" class="tab-panel" role="tabpanel">
+					  @include('bspestimate.test')
 				   </div>
 				</div>
 			</div>
@@ -71,11 +60,15 @@
     </body>
 	<script src="{{ asset('libs//jquery/jquery.min.js')}}" ></script>
 	<script src="{{ asset('libs//smartwizard/js/jquery.smartWizard.min.js')}}" ></script>
-	<script>
+	<script src="{{ asset('libs//autocomplete/tokenize2.min.js')}}" ></script>
+
+	<script>	
 	$(document).ready(function()
 	{
-		
-		$(".driver_textbox").change(function(){
+		Pupulate_DevTasks();
+		Pupulate_QATasks();
+		Pupulate_Drivers();
+		/*$(".driver_textbox").change(function(){
 			
 			var group = $(this).data('group');
 			var elements = $('.'+group);
@@ -91,20 +84,14 @@
 					break;
 					case 'SELECT':
 						console.log(element.val());
-					
-					break;
-					
+					break;				
 				}
 			}
-			
-		});
-
-		
+		});*/
 		$('#smartwizard').smartWizard({
 			theme: 'arrows',
 			enablePagination: true
 			});
-		
 	});
 	</script>
 </html>

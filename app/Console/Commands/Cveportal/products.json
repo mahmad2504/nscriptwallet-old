@@ -1,37 +1,14 @@
 {
-	"monitoring_lists" : [ "63E85777", "420EB127", "427DA96C" ],
+	"monitoring_lists" : [ "24A891CF" ],
 	"groups" : {
-		"Mentor® Embedded Linux® Flex OS" : {
-			"MEL" : {
-				"1.0" : {
-					"id" : "63E85777",
+		"Mentor® Embedded Industrial OS" : {
+			"MFP" : {
+				"1.5" : {
+					"id" : "24A891CF",
 					"active" : "1",
 					"external" : "1",
 					"notify" : "mumtaz_ahmad@mentor.com",
 					"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ]
-				},
-				"1.1" : {
-					"id" : "420EB127",
-					"active" : "1",
-					"external" : "0",
-					"notify" : "mumtaz_ahmad@mentor.com",
-					"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ]
-				}
-			}
-		},
-		"Nucleus ® ReadyStart ® Arm" : {
-			"Nucleus" : {
-				"4.0" : {
-					"id" : "427DA96C",
-					"active" : "1",
-					"external" : "0",
-					"notify" : "mumtaz_ahmad@mentor.com",
-					"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ],
-					"parents" : [ "63E85777", "420EB127" ],
-					"jira" : {
-						"project" : "VUL",
-						"affectsversion" : "MEL-1.1"
-					}
 				}
 			}
 		}

@@ -228,6 +228,7 @@ class Announcement extends Psx{
 				if(count($cols)>0)
 				{
 					$object = $this->toObject($title,$cols);
+					dump($object);
 					if($this->SendNotification($object))
 					{
 						if($this->options['rebuild']==0)

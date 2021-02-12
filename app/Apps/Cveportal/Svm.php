@@ -202,6 +202,7 @@ class Svm extends Cveportal{
 			}
 			$monitoring_lists[$monitoring_list->id] = $monitoring_list;
 		}
+		if(isset($this->sublists))
 		foreach($this->sublists as $id=>$sublist)
 		{
 			if(!isset($monitoring_lists[$id]))

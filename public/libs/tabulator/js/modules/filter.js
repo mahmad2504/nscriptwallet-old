@@ -1,6 +1,6 @@
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-/* Tabulator v4.5.3 (c) Oliver Folkerd */
+/* Tabulator v4.9.3 (c) Oliver Folkerd */
 
 var Filter = function Filter(table) {
 
@@ -9,6 +9,9 @@ var Filter = function Filter(table) {
 	this.filterList = []; //hold filter list
 	this.headerFilters = {}; //hold column filters
 	this.headerFilterColumns = []; //hold columns that use header filters
+
+	this.prevHeaderFilterChangeCheck = "";
+	this.prevHeaderFilterChangeCheck = "{}";
 
 	this.changed = false; //has filtering changed since last render
 };
@@ -23,6 +26,7 @@ Filter.prototype.initializeColumn = function (column, value) {
 	function success(value) {
 		var filterType = column.modules.filter.tagType == "input" && column.modules.filter.attrType == "text" || column.modules.filter.tagType == "textarea" ? "partial" : "match",
 		    type = "",
+		    filterChangeCheck = "",
 		    filterFunc;
 
 		if (typeof column.modules.filter.prevSuccess === "undefined" || column.modules.filter.prevSuccess !== value) {
@@ -86,14 +90,19 @@ Filter.prototype.initializeColumn = function (column, value) {
 					}
 				}
 
-				self.headerFilters[field] = { value: value, func: filterFunc, type: type };
+				self.headerFilters[field] = { value: value, func: filterFunc, type: type, params: params || {} };
 			} else {
 				delete self.headerFilters[field];
 			}
 
-			self.changed = true;
+			filterChangeCheck = JSON.stringify(self.headerFilters);
 
-			self.table.rowManager.filterRefresh();
+			if (self.prevHeaderFilterChangeCheck !== filterChangeCheck) {
+				self.prevHeaderFilterChangeCheck = filterChangeCheck;
+
+				self.changed = true;
+				self.table.rowManager.filterRefresh();
+			}
 		}
 
 		return true;
@@ -134,7 +143,7 @@ Filter.prototype.generateHeaderFilterElement = function (column, initialValue, r
 
 		//set empty value function
 		column.modules.filter.emptyFunc = column.definition.headerFilterEmptyCheck || function (value) {
-			return !value && value !== "0";
+			return !value && value !== "0" && value !== 0;
 		};
 
 		filterElement = document.createElement("div");
@@ -253,7 +262,7 @@ Filter.prototype.generateHeaderFilterElement = function (column, initialValue, r
 
 				typingTimer = setTimeout(function () {
 					success(editorElement.value);
-				}, 300);
+				}, self.table.options.headerFilterLiveFilterDelay);
 			};
 
 			column.modules.filter.headerElement = editorElement;
@@ -319,12 +328,21 @@ Filter.prototype.showHeaderFilterElements = function () {
 	});
 };
 
-//programatically set value of header filter
+//programatically set focus of header filter
 Filter.prototype.setHeaderFilterFocus = function (column) {
 	if (column.modules.filter && column.modules.filter.headerElement) {
 		column.modules.filter.headerElement.focus();
 	} else {
 		console.warn("Column Filter Focus Error - No header filter set on column:", column.getField());
+	}
+};
+
+//programmatically get value of header filter
+Filter.prototype.getHeaderFilterValue = function (column) {
+	if (column.modules.filter && column.modules.filter.headerElement) {
+		return column.modules.filter.headerElement.value;
+	} else {
+		console.warn("Column Filter Error - No header filter set on column:", column.getField());
 	}
 };
 
@@ -358,24 +376,24 @@ Filter.prototype.hasChanged = function () {
 };
 
 //set standard filters
-Filter.prototype.setFilter = function (field, type, value) {
+Filter.prototype.setFilter = function (field, type, value, params) {
 	var self = this;
 
 	self.filterList = [];
 
 	if (!Array.isArray(field)) {
-		field = [{ field: field, type: type, value: value }];
+		field = [{ field: field, type: type, value: value, params: params }];
 	}
 
 	self.addFilter(field);
 };
 
 //add filter to array
-Filter.prototype.addFilter = function (field, type, value) {
+Filter.prototype.addFilter = function (field, type, value, params) {
 	var self = this;
 
 	if (!Array.isArray(field)) {
-		field = [{ field: field, type: type, value: value }];
+		field = [{ field: field, type: type, value: value, params: params }];
 	}
 
 	field.forEach(function (filter) {
@@ -416,11 +434,11 @@ Filter.prototype.findFilter = function (filter) {
 
 			if (column) {
 				filterFunc = function filterFunc(data) {
-					return self.filters[filter.type](filter.value, column.getFieldValue(data));
+					return self.filters[filter.type](filter.value, column.getFieldValue(data), data, filter.params || {});
 				};
 			} else {
 				filterFunc = function filterFunc(data) {
-					return self.filters[filter.type](filter.value, data[filter.field]);
+					return self.filters[filter.type](filter.value, data[filter.field], data, filter.params || {});
 				};
 			}
 		} else {
@@ -562,9 +580,12 @@ Filter.prototype.clearHeaderFilter = function () {
 	var self = this;
 
 	this.headerFilters = {};
+	self.prevHeaderFilterChangeCheck = "{}";
 
 	this.headerFilterColumns.forEach(function (column) {
-		column.modules.filter.value = null;
+		if (typeof column.modules.filter.value !== "undefined") {
+			delete column.modules.filter.value;
+		}
 		column.modules.filter.prevSuccess = undefined;
 		self.reloadHeaderFilter(column);
 	});
@@ -733,10 +754,51 @@ Filter.prototype.filters = {
 		}
 	},
 
+	//contains the keywords
+	"keywords": function keywords(filterVal, rowVal, rowData, filterParams) {
+		var keywords = filterVal.toLowerCase().split(typeof filterParams.separator === "undefined" ? " " : filterParams.separator),
+		    value = String(rowVal === null || typeof rowVal === "undefined" ? "" : rowVal).toLowerCase(),
+		    matches = [];
+
+		keywords.forEach(function (keyword) {
+			if (value.includes(keyword)) {
+				matches.push(true);
+			}
+		});
+
+		return filterParams.matchAll ? matches.length === keywords.length : !!matches.length;
+	},
+
+	//starts with the string
+	"starts": function starts(filterVal, rowVal, rowData, filterParams) {
+		if (filterVal === null || typeof filterVal === "undefined") {
+			return rowVal === filterVal ? true : false;
+		} else {
+			if (typeof rowVal !== 'undefined' && rowVal !== null) {
+				return String(rowVal).toLowerCase().startsWith(filterVal.toLowerCase());
+			} else {
+				return false;
+			}
+		}
+	},
+
+	//ends with the string
+	"ends": function ends(filterVal, rowVal, rowData, filterParams) {
+		if (filterVal === null || typeof filterVal === "undefined") {
+			return rowVal === filterVal ? true : false;
+		} else {
+			if (typeof rowVal !== 'undefined' && rowVal !== null) {
+				return String(rowVal).toLowerCase().endsWith(filterVal.toLowerCase());
+			} else {
+				return false;
+			}
+		}
+	},
+
 	//in array
 	"in": function _in(filterVal, rowVal, rowData, filterParams) {
 		if (Array.isArray(filterVal)) {
-			return filterVal.indexOf(rowVal) > -1;
+			return filterVal.length ? filterVal.indexOf(rowVal) > -1 : true;
 		} else {
 			console.warn("Filter Error - filter value is not an array:", filterVal);
 			return false;

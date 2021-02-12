@@ -216,8 +216,10 @@ class App
 	{
 		$datetime->setTimezone(new \DateTimeZone($this->timezone));
 	}
-	function Save($obj)
+	function Save($obj,$col=null)
 	{
+		if($col == null)
+			$col = 'settings';
 		
 		$options=['upsert'=>true];
 		if(is_array($obj))
@@ -228,19 +230,22 @@ class App
 				$o = new \StdClass();
 				$o->id = $key;
 				$o->_value=$value;
-				$this->db->settings->updateOne($query,['$set'=>$o],$options);
+				$this->db->$col->updateOne($query,['$set'=>$o],$options);
 			}
 		}
 		else
 		{
 			$query=['id'=>$obj->id];
-			$this->db->settings->updateOne($query,['$set'=>$obj],$options);
+			$this->db->$col->updateOne($query,['$set'=>$obj],$options);
 		}
 	}
-	function Read($id)
+	function Read($id,$col=null)
 	{
+		if($col == null)
+			$col = 'settings';
+		
 		$query=['id'=>$id];
-		$obj = $this->db->settings->findOne($query);
+		$obj = $this->db->$col->findOne($query);
 		if($obj == null)
 			return null;
 		$obj =  $obj->jsonSerialize();

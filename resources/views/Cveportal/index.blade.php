@@ -304,7 +304,8 @@
 		var table = new Tabulator("#vulnerability-table", {
 			columns:columns,
 			pagination:"local",
-			paginationSize:10,
+			paginationSize:25,
+			paginationSizeSelector: [10, 25, 50, 100],
 			//autoColumns:true,
 			selectable:1,
 			ajaxURL:url,

@@ -22,7 +22,7 @@ class Support extends App{
 				'solution_provided_date'=>'Solution Provided Date',
 				'test_case_provided_date'=>'Test / Use Case Provided',
 				'product_name'=>'Product Name',
-				'component'=>'Component',
+				'component'=>'customfield_12140',
 				'account'=>'Account'];		
 	public $jira_server = 'EPS';
 	public $start_hour=8;   // Hour on which business day start
@@ -58,7 +58,7 @@ class Support extends App{
 	
 	function ClosedTickets()
 	{
-		$date = new \DateTime("-6 months");
+		$date = new \DateTime("-14 months");
 		$query = ['statuscategory' => 'resolved','resolutiondate'=>['$gte'=>$date->getTimestamp()]];
 		$options = ['sort' => ['resolutiondate' => -1],
 				    //'limit' => 50 ,
@@ -677,9 +677,9 @@ class Support extends App{
 				return '';
 				break;
 			case 'component':
-				if(isset($this->issue->fields->customFields[$code]))
+			    if(isset($issue->fields->customFields[$code]))
 				{
-					return $this->issue->fields->customFields[$code]->value;
+					return $issue->fields->customFields[$code]->value;
 				}
 				return '';
 			default:

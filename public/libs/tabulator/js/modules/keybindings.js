@@ -1,6 +1,6 @@
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-/* Tabulator v4.5.3 (c) Oliver Folkerd */
+/* Tabulator v4.9.3 (c) Oliver Folkerd */
 
 var Keybindings = function Keybindings(table) {
 	this.table = table; //hold Tabulator object
@@ -71,7 +71,8 @@ Keybindings.prototype.mapBinding = function (action, symbolsList) {
 		action: this.actions[action],
 		keys: [],
 		ctrl: false,
-		shift: false
+		shift: false,
+		meta: false
 	};
 
 	var symbols = symbolsList.toString().toLowerCase().split(" ").join("").split("+");
@@ -84,6 +85,10 @@ Keybindings.prototype.mapBinding = function (action, symbolsList) {
 
 			case "shift":
 				binding.shift = true;
+				break;
+
+			case "meta":
+				binding.meta = true;
 				break;
 
 			default:
@@ -149,7 +154,7 @@ Keybindings.prototype.checkBinding = function (e, binding) {
 	var self = this,
 	    match = true;
 
-	if (e.ctrlKey == binding.ctrl && e.shiftKey == binding.shift) {
+	if (e.ctrlKey == binding.ctrl && e.shiftKey == binding.shift && e.metaKey == binding.meta) {
 		binding.keys.forEach(function (key) {
 			var index = self.pressedKeys.indexOf(key);
 
@@ -273,18 +278,23 @@ Keybindings.prototype.actions = {
 
 				if (!nav.next()) {
 					if (newRow) {
+
+						cell.getElement().firstChild.blur();
+
 						if (newRow === true) {
 							newRow = this.table.addRow({});
 						} else {
 							if (typeof newRow == "function") {
 								newRow = this.table.addRow(newRow(cell.row.getComponent()));
 							} else {
-								newRow = this.table.addRow(newRow);
+								newRow = this.table.addRow(Object.assign({}, newRow));
 							}
 						}
 
 						newRow.then(function () {
-							nav.next();
+							setTimeout(function () {
+								nav.next();
+							});
 						});
 					}
 				}
@@ -373,7 +383,7 @@ Keybindings.prototype.actions = {
 	copyToClipboard: function copyToClipboard(e) {
 		if (!this.table.modules.edit.currentCell) {
 			if (this.table.modExists("clipboard", true)) {
-				this.table.modules.clipboard.copy(!this.table.options.selectable || this.table.options.selectable == "highlight" ? "active" : "selected", null, null, null, true);
+				this.table.modules.clipboard.copy(false, true);
 			}
 		}
 	}

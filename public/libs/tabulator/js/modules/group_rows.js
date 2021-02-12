@@ -1,4 +1,4 @@
-/* Tabulator v4.5.3 (c) Oliver Folkerd */
+/* Tabulator v4.9.3 (c) Oliver Folkerd */
 
 //public group object
 var GroupComponent = function GroupComponent(group) {
@@ -31,6 +31,11 @@ GroupComponent.prototype.getParentGroup = function () {
 };
 
 GroupComponent.prototype.getVisibility = function () {
+	console.warn("getVisibility function is deprecated, you should now use the isVisible function");
+	return this._group.visible;
+};
+
+GroupComponent.prototype.isVisible = function () {
 	return this._group.visible;
 };
 
@@ -83,6 +88,8 @@ var Group = function Group(groupManager, parent, level, key, field, generator, o
 	this.arrowElement = false;
 
 	this.visible = oldGroup ? oldGroup.visible : typeof groupManager.startOpen[level] !== "undefined" ? groupManager.startOpen[level] : groupManager.startOpen[0];
+
+	this.component = null;
 
 	this.createElements();
 	this.addBindings();
@@ -157,6 +164,10 @@ Group.prototype.addBindings = function () {
 		self.element.addEventListener("contextmenu", function (e) {
 			self.groupManager.table.options.groupContext.call(self.groupManager.table, e, self.getComponent());
 		});
+	}
+
+	if ((self.groupManager.table.options.groupContextMenu || self.groupManager.table.options.groupClickMenu) && self.groupManager.table.modExists("menu")) {
+		self.groupManager.table.modules.menu.initializeGroup.call(self.groupManager.table.modules.menu, self);
 	}
 
 	if (self.groupManager.table.options.groupTap) {
@@ -634,6 +645,15 @@ Group.prototype.generateGroupHeaderContents = function () {
 	this.element.insertBefore(this.arrowElement, this.element.firstChild);
 };
 
+Group.prototype.getPath = function () {
+	var path = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+
+	path.unshift(this.key);
+	if (this.parent) {
+		this.parent.getPath(path);
+	}
+	return path;
+};
 ////////////// Standard Row Functions //////////////
 
 Group.prototype.getElement = function () {
@@ -708,7 +728,11 @@ Group.prototype.clearCellHeight = function () {};
 
 //////////////// Object Generation /////////////////
 Group.prototype.getComponent = function () {
-	return new GroupComponent(this);
+	if (!this.component) {
+		this.component = new GroupComponent(this);
+	}
+
+	return this.component;
 };
 
 //////////////////////////////////////////////////
@@ -870,6 +894,26 @@ GroupRows.prototype.getGroups = function (compoment) {
 	return groupComponents;
 };
 
+GroupRows.prototype.getChildGroups = function (group) {
+	var _this2 = this;
+
+	var groupComponents = [];
+
+	if (!group) {
+		group = this;
+	}
+
+	group.groupList.forEach(function (child) {
+		if (child.groupList.length) {
+			groupComponents = groupComponents.concat(_this2.getChildGroups(child));
+		} else {
+			groupComponents.push(child);
+		}
+	});
+
+	return groupComponents;
+};
+
 GroupRows.prototype.wipe = function () {
 	this.groupList.forEach(function (group) {
 		group.wipe();
@@ -1002,6 +1046,32 @@ GroupRows.prototype.assignRowToGroup = function (row, oldGroups) {
 	return !newGroupNeeded;
 };
 
+GroupRows.prototype.reassignRowToGroup = function (row) {
+	var oldRowGroup = row.getGroup(),
+	    oldGroupPath = oldRowGroup.getPath(),
+	    newGroupPath = this.getExpectedPath(row),
+	    samePath = true;
+	// figure out if new group path is the same as old group path
+	var samePath = oldGroupPath.length == newGroupPath.length && oldGroupPath.every(function (element, index) {
+		return element === newGroupPath[index];
+	});
+	// refresh if they new path and old path aren't the same (aka the row's groupings have changed)
+	if (!samePath) {
+		oldRowGroup.removeRow(row);
+		this.assignRowToGroup(row, self.groups);
+		this.table.rowManager.refreshActiveData("group", false, true);
+	}
+};
+
+GroupRows.prototype.getExpectedPath = function (row) {
+	var groupPath = [],
+	    rowData = row.getData();
+	this.groupIDLookups.forEach(function (groupId) {
+		groupPath.push(groupId.func(rowData));
+	});
+	return groupPath;
+};
+
 GroupRows.prototype.updateGroupRows = function (force) {
 	var self = this,
 	    output = [],
@@ -1027,6 +1097,10 @@ GroupRows.prototype.updateGroupRows = function (force) {
 };
 
 GroupRows.prototype.scrollHeaders = function (left) {
+	if (this.table.options.virtualDomHoz) {
+		left -= this.table.vdomHoz.vDomPadLeft;
+	}
+
 	left = left + "px";
 
 	this.groupList.forEach(function (group) {

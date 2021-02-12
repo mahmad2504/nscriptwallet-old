@@ -48,7 +48,13 @@ class SupportController extends Controller
 			else
 				$ticket->solution_provided_date = '';
 			
-			
+			if($ticket->first_contact_date != '')
+			{
+			    $dt = CDateTime($ticket->first_contact_date,$app->timezone);
+			    $ticket->first_contact_date = $dt->format('Y-m-d');
+			}
+			else
+				$ticket->first_contact_date = '';
 			
 			$ticket->product_name=$this->ParseProductName($ticket->product_name);
 		}
@@ -82,6 +88,15 @@ class SupportController extends Controller
 			}
 			else
 				$ticket->solution_provided_date = '';
+				
+			if($ticket->first_contact_date != '')
+			{
+			    $dt = CDateTime($ticket->first_contact_date,$app->timezone);
+			    $ticket->first_contact_date = $dt->format('Y-m-d');
+			}
+			else
+				$ticket->first_contact_date = '';
+			
 		}
 		$last_updated = $app->ReadUpdateTime('lastupdate');
 		$jira_url = env('JIRA_EPS_URL','')."/browse/";
@@ -113,6 +128,15 @@ class SupportController extends Controller
 			}
 			else
 				$ticket->solution_provided_date = '';
+			
+			if($ticket->first_contact_date != '')
+			{
+			    $dt = CDateTime($ticket->first_contact_date,$app->timezone);
+			    $ticket->first_contact_date = $dt->format('Y-m-d');
+			}
+			else
+				$ticket->first_contact_date = '';
+			
 		}
 		$last_updated = $app->ReadUpdateTime('lastupdate');
 		$jira_url = env('JIRA_EPS_URL','')."/browse/";

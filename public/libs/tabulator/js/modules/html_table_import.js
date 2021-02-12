@@ -1,6 +1,6 @@
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-/* Tabulator v4.5.3 (c) Oliver Folkerd */
+/* Tabulator v4.9.3 (c) Oliver Folkerd */
 
 var HtmlTableImport = function HtmlTableImport(table) {
 	this.table = table; //hold Tabulator object
@@ -157,18 +157,6 @@ HtmlTableImport.prototype._extractHeaders = function (headers, rows) {
 
 		// //check for tablator inline options
 		this._extractOptions(header, col, Column.prototype.defaultOptionList);
-
-		for (var i in attributes) {
-			var attrib = attributes[i],
-			    name;
-
-			if (attrib && (typeof attrib === "undefined" ? "undefined" : _typeof(attrib)) == "object" && attrib.name && attrib.name.indexOf("tabulator-") === 0) {
-
-				name = attrib.name.replace("tabulator-", "");
-
-				col[name] = this._attribValue(attrib.value);
-			}
-		}
 
 		this.fieldIndex[index] = col.field;
 

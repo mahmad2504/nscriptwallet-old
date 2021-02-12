@@ -1,6 +1,42 @@
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-/* Tabulator v4.5.3 (c) Oliver Folkerd */
+/* Tabulator v4.9.3 (c) Oliver Folkerd */
+
+//public calc object
+var CalcComponent = function CalcComponent(row) {
+	this._row = row;
+};
+
+CalcComponent.prototype.getData = function (transform) {
+	return this._row.getData(transform);
+};
+
+CalcComponent.prototype.getElement = function () {
+	return this._row.getElement();
+};
+
+CalcComponent.prototype.getTable = function () {
+	return this._row.table;
+};
+
+CalcComponent.prototype.getCells = function () {
+	var cells = [];
+
+	this._row.getCells().forEach(function (cell) {
+		cells.push(cell.getComponent());
+	});
+
+	return cells;
+};
+
+CalcComponent.prototype.getCell = function (column) {
+	var cell = this._row.getCell(column);
+	return cell ? cell.getComponent() : false;
+};
+
+CalcComponent.prototype._getSelf = function () {
+	return this._row;
+};
 
 var ColumnCalcs = function ColumnCalcs(table) {
 	this.table = table; //hold Tabulator object
@@ -115,7 +151,6 @@ ColumnCalcs.prototype.removeCalcs = function () {
 
 ColumnCalcs.prototype.initializeTopRow = function () {
 	if (!this.topInitialized) {
-		// this.table.columnManager.headersElement.after(this.topElement);
 		this.table.columnManager.getElement().insertBefore(this.topElement, this.table.columnManager.headersElement.nextSibling);
 		this.topInitialized = true;
 	}
@@ -129,10 +164,7 @@ ColumnCalcs.prototype.initializeBottomRow = function () {
 };
 
 ColumnCalcs.prototype.scrollHorizontal = function (left) {
-	var hozAdjust = 0,
-	    scrollWidth = this.table.columnManager.getElement().scrollWidth - this.table.element.clientWidth;
-
-	if (this.botInitialized) {
+	if (this.botInitialized && this.botRow) {
 		this.botRow.getElement().style.marginLeft = -left + "px";
 	}
 };
@@ -182,6 +214,25 @@ ColumnCalcs.prototype.recalcRowGroup = function (row) {
 	this.recalcGroup(this.table.modules.groupRows.getRowGroup(row));
 };
 
+ColumnCalcs.prototype.recalcAll = function () {
+	var _this = this;
+
+	if (this.topCalcs.length || this.botCalcs.length) {
+		if (this.table.options.columnCalcs !== "group") {
+			this.recalc(this.table.rowManager.activeRows);
+		}
+
+		if (this.table.options.groupBy && this.table.options.columnCalcs !== "table") {
+
+			var groups = table.modules.groupRows.getChildGroups();
+
+			groups.forEach(function (group) {
+				_this.recalcGroup(group);
+			});
+		}
+	}
+};
+
 ColumnCalcs.prototype.recalcGroup = function (group) {
 	var data, rowData;
 
@@ -216,10 +267,19 @@ ColumnCalcs.prototype.generateBottomRow = function (rows) {
 };
 
 ColumnCalcs.prototype.rowsToData = function (rows) {
+	var _this2 = this;
+
 	var data = [];
 
 	rows.forEach(function (row) {
 		data.push(row.getData());
+
+		if (_this2.table.options.dataTree && _this2.table.options.dataTreeChildColumnCalcs) {
+			if (row.modules.dataTree.open) {
+				var children = _this2.rowsToData(_this2.table.modules.dataTree.getFilteredTreeChildren(row));
+				data = data.concat(children);
+			}
+		}
 	});
 
 	return data;
@@ -243,6 +303,16 @@ ColumnCalcs.prototype.generateRow = function (pos, data) {
 
 	row.getElement().classList.add("tabulator-calcs", "tabulator-calcs-" + pos);
 
+	row.component = false;
+
+	row.getComponent = function () {
+		if (!this.component) {
+			this.component = new CalcComponent(this);
+		}
+
+		return this.component;
+	};
+
 	row.generateCells = function () {
 
 		var cells = [];
@@ -254,10 +324,9 @@ ColumnCalcs.prototype.generateRow = function (pos, data) {
 			self.genColumn.hozAlign = column.hozAlign;
 
 			if (column.definition[pos + "CalcFormatter"] && self.table.modExists("format")) {
-
 				self.genColumn.modules.format = {
 					formatter: self.table.modules.format.getFormatter(column.definition[pos + "CalcFormatter"]),
-					params: column.definition[pos + "CalcFormatterParams"]
+					params: column.definition[pos + "CalcFormatterParams"] || {}
 				};
 			} else {
 				self.genColumn.modules.format = {
@@ -271,6 +340,7 @@ ColumnCalcs.prototype.generateRow = function (pos, data) {
 
 			//generate cell and assign to correct column
 			var cell = new Cell(self.genColumn, row);
+			cell.getElement();
 			cell.column = column;
 			cell.setWidth();
 
@@ -383,8 +453,7 @@ ColumnCalcs.prototype.calculations = {
 
 		if (values.length) {
 			output = values.reduce(function (sum, value) {
-				value = Number(value);
-				return sum + value;
+				return Number(sum) + Number(value);
 			});
 
 			output = output / values.length;

@@ -43,6 +43,10 @@ Route::get('/bspestimate','App\Http\Controllers\Bspestimate\BspestimateControlle
 Route::get('/bspestimate/driver/search/{identification}','App\Http\Controllers\Bspestimate\BspestimateController@searchdriver')->name('bspestimate.searchdriver');
 Route::get('/bspestimate/driver/estimate/{target}/{identification}','App\Http\Controllers\Bspestimate\BspestimateController@estimate')->name('bspestimate.estimate');
 Route::get('/bspestimate/plan','App\Http\Controllers\Bspestimate\BspestimateController@plan')->name('bspestimate.plan');
+Route::get('/bspestimate/commontasks','App\Http\Controllers\Bspestimate\BspestimateController@CommonTasks')->name('bspestimate.commontasks');
+Route::get('/bspestimate/search','App\Http\Controllers\Bspestimate\BspestimateController@Search')->name('bspestimate.search');
+Route::get('/bspestimate/sync','App\Http\Controllers\Bspestimate\BspestimateController@Sync')->name('bspestimate.sync');
+
 /////////////////////////////////////////
 
 Route::get('/cveportal','App\Http\Controllers\Cveportal\CveportalController@index')->name('cveportal.index');

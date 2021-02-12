@@ -58,9 +58,9 @@ class Bookclosure extends Psx{
 	}
 	public function SendBasicTelegram($to,$record)
 	{
-		if($this->options['email'] != 1)
+		if($this->options['email'] == 0)
 		{
-			dump("Did not sent basic telegram of id=".$record->id." to ".$to);
+			dump($this->toBasicMessage($record));
 			return;
 		}
 		$this->telegram = TelegramMessage::create()
@@ -73,7 +73,7 @@ class Bookclosure extends Psx{
 	{
 		if($this->options['email'] != 1)
 		{
-			dump("Did not sent pro telegram of id=".$record->id." to ".$to);
+			dump($this->toProMessage($record));
 			return;
 		}
 		$this->telegram = TelegramMessage::create()
@@ -135,7 +135,6 @@ class Bookclosure extends Psx{
 				$sent = 1;
 			}
 		}
-		
 		return $sent;
 	}
 	

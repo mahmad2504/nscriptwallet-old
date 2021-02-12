@@ -11,7 +11,7 @@ class Milestone extends App{
 	public $scriptname='milestones';
 	
 	public $query='labels in (risk,milestone) and duedate >=';
-	public $jira_fields = ['key','status','statuscategory','summary','reporter','assignee','updated','fixVersions']; 
+	public $jira_fields = ['key','status','statuscategory','summary','reporter','assignee','updated','versions']; 
     //public $jira_customfields = ['sprint'=>'Sprint'];  	
 	public $jira_server = 'EPS';
 	public $cc = 'Mumtaz_Ahmad@mentor.com';

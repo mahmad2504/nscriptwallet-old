@@ -408,6 +408,7 @@
 			columns:columns,
 			pagination:"local",
 			paginationSize:50,
+			paginationSizeSelector: [10, 25, 50, 100],
 			//autoColumns:true,
 			selectable:1,
 			ajaxURL:url,

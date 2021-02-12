@@ -1,4 +1,4 @@
-/* Tabulator v4.5.3 (c) Oliver Folkerd */
+/* Tabulator v4.9.3 (c) Oliver Folkerd */
 
 var Persistence = function Persistence(table) {
 	this.table = table; //hold Tabulator object
@@ -112,6 +112,10 @@ Persistence.prototype.initialize = function () {
 			}
 		}
 	}
+
+	if (this.config.columns) {
+		this.table.options.columns = this.load("columns", this.table.options.columns);
+	}
 };
 
 Persistence.prototype.initializeColumn = function (column) {
@@ -195,7 +199,7 @@ Persistence.prototype.mergeDefinition = function (oldCols, newCols) {
 			}
 
 			keys.forEach(function (key) {
-				if (typeof column[key] !== "undefined") {
+				if (key !== "columns" && typeof column[key] !== "undefined") {
 					from[key] = column[key];
 				}
 			});
@@ -285,6 +289,8 @@ Persistence.prototype.validateSorters = function (data) {
 };
 
 Persistence.prototype.getGroupConfig = function () {
+	var data = {};
+
 	if (this.config.group) {
 		if (this.config.group === true || this.config.group.groupBy) {
 			data.groupBy = this.table.options.groupBy;
@@ -321,7 +327,8 @@ Persistence.prototype.getPageConfig = function () {
 //parse columns for data to store
 Persistence.prototype.parseColumns = function (columns) {
 	var self = this,
-	    definitions = [];
+	    definitions = [],
+	    excludedKeys = ["headerContextMenu", "headerMenu", "contextMenu", "clickMenu"];
 
 	columns.forEach(function (column) {
 		var defStore = {},
@@ -352,7 +359,9 @@ Persistence.prototype.parseColumns = function (columns) {
 						break;
 
 					default:
-						defStore[key] = colDef[key];
+						if (typeof colDef[key] !== "function" && excludedKeys.indexOf(key) === -1) {
+							defStore[key] = colDef[key];
+						}
 				}
 			});
 		}
@@ -374,7 +383,8 @@ Persistence.prototype.readers = {
 		var cookie = document.cookie,
 		    key = id + "-" + type,
 		    cookiePos = cookie.indexOf(key + "="),
-		    end;
+		    end,
+		    data;
 
 		//if cookie exists, decode and load column data into tabulator
 		if (cookiePos > -1) {
@@ -403,7 +413,7 @@ Persistence.prototype.writers = {
 
 		expireDate.setDate(expireDate.getDate() + 10000);
 
-		document.cookie = id + "_" + type + "=" + JSON.stringify(data) + "; expires=" + expireDate.toUTCString();
+		document.cookie = id + "-" + type + "=" + JSON.stringify(data) + "; expires=" + expireDate.toUTCString();
 	}
 };
 

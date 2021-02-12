@@ -1,6 +1,6 @@
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-/* Tabulator v4.5.3 (c) Oliver Folkerd */
+/* Tabulator v4.9.3 (c) Oliver Folkerd */
 
 var DataTree = function DataTree(table) {
 	this.table = table;
@@ -96,12 +96,20 @@ DataTree.prototype.initializeRow = function (row) {
 
 	var children = isArray || !isArray && (typeof childArray === "undefined" ? "undefined" : _typeof(childArray)) === "object" && childArray !== null;
 
+	if (!children && row.modules.dataTree && row.modules.dataTree.branchEl) {
+		row.modules.dataTree.branchEl.parentNode.removeChild(row.modules.dataTree.branchEl);
+	}
+
+	if (!children && row.modules.dataTree && row.modules.dataTree.controlEl) {
+		row.modules.dataTree.controlEl.parentNode.removeChild(row.modules.dataTree.controlEl);
+	}
+
 	row.modules.dataTree = {
-		index: 0,
-		open: children ? this.startOpen(row.getComponent(), 0) : false,
-		controlEl: false,
-		branchEl: false,
-		parent: false,
+		index: row.modules.dataTree ? row.modules.dataTree.index : 0,
+		open: children ? row.modules.dataTree ? row.modules.dataTree.open : this.startOpen(row.getComponent(), 0) : false,
+		controlEl: row.modules.dataTree && children ? row.modules.dataTree.controlEl : false,
+		branchEl: row.modules.dataTree && children ? row.modules.dataTree.branchEl : false,
+		parent: row.modules.dataTree ? row.modules.dataTree.parent : false,
 		children: children
 	};
 };
@@ -112,18 +120,40 @@ DataTree.prototype.layoutRow = function (row) {
 	    config = row.modules.dataTree;
 
 	if (config.branchEl) {
-		config.branchEl.parentNode.removeChild(config.branchEl);
+		if (config.branchEl.parentNode) {
+			config.branchEl.parentNode.removeChild(config.branchEl);
+		}
+		config.branchEl = false;
+	}
+
+	if (config.controlEl) {
+		if (config.controlEl.parentNode) {
+			config.controlEl.parentNode.removeChild(config.controlEl);
+		}
+		config.controlEl = false;
 	}
 
 	this.generateControlElement(row, el);
+
+	row.getElement().classList.add("tabulator-tree-level-" + config.index);
 
 	if (config.index) {
 		if (this.branchEl) {
 			config.branchEl = this.branchEl.cloneNode(true);
 			el.insertBefore(config.branchEl, el.firstChild);
-			config.branchEl.style.marginLeft = (config.branchEl.offsetWidth + config.branchEl.style.marginRight) * (config.index - 1) + config.index * this.indent + "px";
+
+			if (this.table.rtl) {
+				config.branchEl.style.marginRight = (config.branchEl.offsetWidth + config.branchEl.style.marginLeft) * (config.index - 1) + config.index * this.indent + "px";
+			} else {
+				config.branchEl.style.marginLeft = (config.branchEl.offsetWidth + config.branchEl.style.marginRight) * (config.index - 1) + config.index * this.indent + "px";
+			}
 		} else {
-			el.style.paddingLeft = parseInt(window.getComputedStyle(el, null).getPropertyValue('padding-left')) + config.index * this.indent + "px";
+
+			if (this.table.rtl) {
+				el.style.paddingRight = parseInt(window.getComputedStyle(el, null).getPropertyValue('padding-right')) + config.index * this.indent + "px";
+			} else {
+				el.style.paddingLeft = parseInt(window.getComputedStyle(el, null).getPropertyValue('padding-left')) + config.index * this.indent + "px";
+			}
 		}
 	}
 };
@@ -183,12 +213,15 @@ DataTree.prototype.getRows = function (rows) {
 
 		if (row instanceof Row) {
 
+			row.create();
+
 			config = row.modules.dataTree.children;
 
 			if (!config.index && config.children !== false) {
 				children = _this2.getChildren(row);
 
 				children.forEach(function (child) {
+					child.create();
 					output.push(child);
 				});
 			}
@@ -198,25 +231,25 @@ DataTree.prototype.getRows = function (rows) {
 	return output;
 };
 
-DataTree.prototype.getChildren = function (row) {
+DataTree.prototype.getChildren = function (row, allChildren) {
 	var _this3 = this;
 
 	var config = row.modules.dataTree,
 	    children = [],
 	    output = [];
 
-	if (config.children !== false && config.open) {
+	if (config.children !== false && (config.open || allChildren)) {
 		if (!Array.isArray(config.children)) {
 			config.children = this.generateChildren(row);
 		}
 
-		if (this.table.modExists("filter")) {
+		if (this.table.modExists("filter") && this.table.options.dataTreeFilter) {
 			children = this.table.modules.filter.filter(config.children);
 		} else {
 			children = config.children;
 		}
 
-		if (this.table.modExists("sort")) {
+		if (this.table.modExists("sort") && this.table.options.dataTreeSort) {
 			this.table.modules.sort.sort(children);
 		}
 
@@ -247,8 +280,12 @@ DataTree.prototype.generateChildren = function (row) {
 
 	childArray.forEach(function (childData) {
 		var childRow = new Row(childData || {}, _this4.table.rowManager);
+
+		childRow.create();
+
 		childRow.modules.dataTree.index = row.modules.dataTree.index + 1;
 		childRow.modules.dataTree.parent = row;
+
 		if (childRow.modules.dataTree.children) {
 			childRow.modules.dataTree.open = _this4.startOpen(childRow.getComponent(), childRow.modules.dataTree.index);
 		}
@@ -302,7 +339,142 @@ DataTree.prototype.getTreeParent = function (row) {
 	return row.modules.dataTree.parent ? row.modules.dataTree.parent.getComponent() : false;
 };
 
-DataTree.prototype.getTreeChildren = function (row) {
+DataTree.prototype.getFilteredTreeChildren = function (row) {
+	var config = row.modules.dataTree,
+	    output = [],
+	    children;
+
+	if (config.children) {
+
+		if (!Array.isArray(config.children)) {
+			config.children = this.generateChildren(row);
+		}
+
+		if (this.table.modExists("filter") && this.table.options.dataTreeFilter) {
+			children = this.table.modules.filter.filter(config.children);
+		} else {
+			children = config.children;
+		}
+
+		children.forEach(function (childRow) {
+			if (childRow instanceof Row) {
+				output.push(childRow);
+			}
+		});
+	}
+
+	return output;
+};
+
+DataTree.prototype.rowDelete = function (row) {
+	var parent = row.modules.dataTree.parent,
+	    childIndex;
+
+	if (parent) {
+		childIndex = this.findChildIndex(row, parent);
+
+		if (childIndex !== false) {
+			parent.data[this.field].splice(childIndex, 1);
+		}
+
+		if (!parent.data[this.field].length) {
+			delete parent.data[this.field];
+		}
+
+		this.initializeRow(parent);
+		this.layoutRow(parent);
+	}
+
+	this.table.rowManager.refreshActiveData("tree", false, true);
+};
+
+DataTree.prototype.addTreeChildRow = function (row, data, top, index) {
+	var childIndex = false;
+
+	if (typeof data === "string") {
+		data = JSON.parse(data);
+	}
+
+	if (!Array.isArray(row.data[this.field])) {
+		row.data[this.field] = [];
+
+		row.modules.dataTree.open = this.startOpen(row.getComponent(), row.modules.dataTree.index);
+	}
+
+	if (typeof index !== "undefined") {
+		childIndex = this.findChildIndex(index, row);
+
+		if (childIndex !== false) {
+			row.data[this.field].splice(top ? childIndex : childIndex + 1, 0, data);
+		}
+	}
+
+	if (childIndex === false) {
+		if (top) {
+			row.data[this.field].unshift(data);
+		} else {
+			row.data[this.field].push(data);
+		}
+	}
+
+	this.initializeRow(row);
+	this.layoutRow(row);
+
+	this.table.rowManager.refreshActiveData("tree", false, true);
+};
+
+DataTree.prototype.findChildIndex = function (subject, parent) {
+	var _this5 = this;
+
+	var match = false;
+
+	if ((typeof subject === "undefined" ? "undefined" : _typeof(subject)) == "object") {
+
+		if (subject instanceof Row) {
+			//subject is row element
+			match = subject.data;
+		} else if (subject instanceof RowComponent) {
+			//subject is public row component
+			match = subject._getSelf().data;
+		} else if (typeof HTMLElement !== "undefined" && subject instanceof HTMLElement) {
+			if (parent.modules.dataTree) {
+				match = parent.modules.dataTree.children.find(function (childRow) {
+					return childRow instanceof Row ? childRow.element === subject : false;
+				});
+
+				if (match) {
+					match = match.data;
+				}
+			}
+		}
+	} else if (typeof subject == "undefined" || subject === null) {
+		match = false;
+	} else {
+		//subject should be treated as the index of the row
+		match = parent.data[this.field].find(function (row) {
+			return row.data[_this5.table.options.index] == subject;
+		});
+	}
+
+	if (match) {
+
+		if (Array.isArray(parent.data[this.field])) {
+			match = parent.data[this.field].indexOf(match);
+		}
+
+		if (match == -1) {
+			match = false;
+		}
+	}
+
+	//catch all for any other type of input
+
+	return match;
+};
+
+DataTree.prototype.getTreeChildren = function (row, component, recurse) {
+	var _this6 = this;
+
 	var config = row.modules.dataTree,
 	    output = [];
 
@@ -314,7 +486,11 @@ DataTree.prototype.getTreeChildren = function (row) {
 
 		config.children.forEach(function (childRow) {
 			if (childRow instanceof Row) {
-				output.push(childRow.getComponent());
+				output.push(component ? childRow.getComponent() : childRow);
+
+				if (recurse) {
+					output = output.concat(_this6.getTreeChildren(childRow, component, recurse));
+				}
 			}
 		});
 	}
@@ -324,9 +500,7 @@ DataTree.prototype.getTreeChildren = function (row) {
 
 DataTree.prototype.checkForRestyle = function (cell) {
 	if (!cell.row.cells.indexOf(cell)) {
-		if (cell.row.modules.dataTree.children !== false) {
-			cell.row.reinitialize();
-		}
+		cell.row.reinitialize();
 	}
 };
 

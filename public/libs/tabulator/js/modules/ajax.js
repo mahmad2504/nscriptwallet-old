@@ -1,6 +1,6 @@
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-/* Tabulator v4.5.3 (c) Oliver Folkerd */
+/* Tabulator v4.9.3 (c) Oliver Folkerd */
 
 var Ajax = function Ajax(table) {
 
@@ -149,13 +149,13 @@ Ajax.prototype.getUrl = function () {
 };
 
 //lstandard loading function
-Ajax.prototype.loadData = function (inPosition) {
+Ajax.prototype.loadData = function (inPosition, columnsChanged) {
 	var self = this;
 
 	if (this.progressiveLoad) {
 		return this._loadDataProgressive();
 	} else {
-		return this._loadDataStandard(inPosition);
+		return this._loadDataStandard(inPosition, columnsChanged);
 	}
 };
 
@@ -181,12 +181,12 @@ Ajax.prototype._loadDataProgressive = function () {
 	return this.table.modules.page.setPage(1);
 };
 
-Ajax.prototype._loadDataStandard = function (inPosition) {
+Ajax.prototype._loadDataStandard = function (inPosition, columnsChanged) {
 	var _this = this;
 
 	return new Promise(function (resolve, reject) {
 		_this.sendRequest(inPosition).then(function (data) {
-			_this.table.rowManager.setData(data, inPosition).then(function () {
+			_this.table.rowManager.setData(data, inPosition, columnsChanged).then(function () {
 				resolve();
 			}).catch(function (e) {
 				reject(e);
@@ -259,13 +259,12 @@ Ajax.prototype.sendRequest = function (silent) {
 						data = self.table.options.ajaxResponse.call(self.table, self.url, self.params, data);
 					}
 					resolve(data);
+
+					self.hideLoader();
+					self.loading = false;
 				} else {
 					console.warn("Ajax Response Blocked - An active ajax request was blocked by an attempt to change table data while the request was being made");
 				}
-
-				self.hideLoader();
-
-				self.loading = false;
 			}).catch(function (error) {
 				console.error("Ajax Load Error: ", error);
 				self.table.options.ajaxError.call(self.table, error);
@@ -278,7 +277,7 @@ Ajax.prototype.sendRequest = function (silent) {
 
 				self.loading = false;
 
-				reject();
+				reject(error);
 			});
 		} else {
 			reject();
@@ -343,7 +342,7 @@ Ajax.prototype.defaultURLGenerator = function (url, config, params) {
 			if (!config.method || config.method.toLowerCase() == "get") {
 				config.method = "get";
 
-				url += (url.includes("?") ? "&" : "?") + this.serializeParams(params);
+				url += (url.includes("?") ? "&" : "?") + this.modules.ajax.serializeParams(params);
 			}
 		}
 	}
@@ -358,7 +357,7 @@ Ajax.prototype.defaultLoaderPromise = function (url, config, params) {
 	return new Promise(function (resolve, reject) {
 
 		//set url
-		url = self.urlGenerator(url, config, params);
+		url = self.urlGenerator.call(self.table, url, config, params);
 
 		//set body content if not GET request
 		if (config.method.toUpperCase() != "GET") {

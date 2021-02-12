@@ -45,7 +45,6 @@ class Kernel extends ConsoleKernel
 	protected function schedule_PSX_SERVER(Schedule $schedule)
 	{
 		dump("Running scedule for PSX services");
-		return;
 		$schedule->exec('del logs\* /q')->daily();
 		$schedule->command('psx:announcement:sync --email=1')->everyMinute()
 											 ->appendOutputTo("logs/psx_announcement.txt")->runInBackground();	
@@ -53,6 +52,7 @@ class Kernel extends ConsoleKernel
 											 ->appendOutputTo("logs/psx_financial.txt")->runInBackground();
 		$schedule->command('psx:bookclosure:sync --email=1')->everyMinute()
 											 ->appendOutputTo("logs/psx_bookclosure.txt")->runInBackground();
+										
 		$schedule->exec('curl -L "https://script.google.com/macros/s/AKfycbzsxNokdsDLDv6wcNOYDlPX8gGeAYzvHvNB4Ptdftz9hbPUZvkXclEv/exec?func=alive&device=psx"')->everyThirtyMinutes()->appendOutputTo("logs/google.txt");									 
 	}
 	protected function schedule(Schedule $schedule)

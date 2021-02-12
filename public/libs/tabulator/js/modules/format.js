@@ -1,6 +1,6 @@
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-/* Tabulator v4.5.3 (c) Oliver Folkerd */
+/* Tabulator v4.9.3 (c) Oliver Folkerd */
 
 var Format = function Format(table) {
 	this.table = table; //hold Tabulator object
@@ -8,15 +8,31 @@ var Format = function Format(table) {
 
 //initialize column formatter
 Format.prototype.initializeColumn = function (column) {
-	var self = this,
-	    config = { params: column.definition.formatterParams || {} };
+	column.modules.format = this.lookupFormatter(column, "");
+
+	if (typeof column.definition.formatterPrint !== "undefined") {
+		column.modules.format.print = this.lookupFormatter(column, "Print");
+	}
+
+	if (typeof column.definition.formatterClipboard !== "undefined") {
+		column.modules.format.clipboard = this.lookupFormatter(column, "Clipboard");
+	}
+
+	if (typeof column.definition.formatterHtmlOutput !== "undefined") {
+		column.modules.format.htmlOutput = this.lookupFormatter(column, "HtmlOutput");
+	}
+};
+
+Format.prototype.lookupFormatter = function (column, type) {
+	var config = { params: column.definition["formatter" + type + "Params"] || {} },
+	    formatter = column.definition["formatter" + type];
 
 	//set column formatter
-	switch (_typeof(column.definition.formatter)) {
+	switch (typeof formatter === "undefined" ? "undefined" : _typeof(formatter)) {
 		case "string":
 
-			if (column.definition.formatter === "tick") {
-				column.definition.formatter = "tickCross";
+			if (formatter === "tick") {
+				formatter = "tickCross";
 
 				if (typeof config.params.crossElement == "undefined") {
 					config.params.crossElement = false;
@@ -25,29 +41,30 @@ Format.prototype.initializeColumn = function (column) {
 				console.warn("DEPRECATION WARNING - the tick formatter has been deprecated, please use the tickCross formatter with the crossElement param set to false");
 			}
 
-			if (self.formatters[column.definition.formatter]) {
-				config.formatter = self.formatters[column.definition.formatter];
+			if (this.formatters[formatter]) {
+				config.formatter = this.formatters[formatter];
 			} else {
-				console.warn("Formatter Error - No such formatter found: ", column.definition.formatter);
-				config.formatter = self.formatters.plaintext;
+				console.warn("Formatter Error - No such formatter found: ", formatter);
+				config.formatter = this.formatters.plaintext;
 			}
 			break;
 
 		case "function":
-			config.formatter = column.definition.formatter;
+			config.formatter = formatter;
 			break;
 
 		default:
-			config.formatter = self.formatters.plaintext;
+			config.formatter = this.formatters.plaintext;
 			break;
 	}
 
-	column.modules.format = config;
+	return config;
 };
 
 Format.prototype.cellRendered = function (cell) {
-	if (cell.modules.format && cell.modules.format.renderedCallback) {
+	if (cell.modules.format && cell.modules.format.renderedCallback && !cell.modules.format.rendered) {
 		cell.modules.format.renderedCallback();
+		cell.modules.format.rendered = true;
 	}
 };
 
@@ -62,9 +79,32 @@ Format.prototype.formatValue = function (cell) {
 		}
 
 		cell.modules.format.renderedCallback = callback;
+		cell.modules.format.rendered = false;
 	}
 
 	return cell.column.modules.format.formatter.call(this, component, params, onRendered);
+};
+
+Format.prototype.formatExportValue = function (cell, type) {
+	var formatter = cell.column.modules.format[type],
+	    params;
+
+	if (formatter) {
+		var onRendered = function onRendered(callback) {
+			if (!cell.modules.format) {
+				cell.modules.format = {};
+			}
+
+			cell.modules.format.renderedCallback = callback;
+			cell.modules.format.rendered = false;
+		};
+
+		params = typeof formatter.params === "function" ? formatter.params(component) : formatter.params;
+
+		return formatter.formatter.call(this, cell.getComponent(), params, onRendered);
+	} else {
+		return this.formatValue(cell);
+	}
 };
 
 Format.prototype.sanitizeHTML = function (value) {
@@ -89,7 +129,7 @@ Format.prototype.sanitizeHTML = function (value) {
 };
 
 Format.prototype.emptyToSpace = function (value) {
-	return value === null || typeof value === "undefined" ? "&nbsp;" : value;
+	return value === null || typeof value === "undefined" || value === "" ? "&nbsp;" : value;
 };
 
 //get formatter for cell
@@ -240,8 +280,18 @@ Format.prototype.formatters = {
 
 	//image element
 	image: function image(cell, formatterParams, onRendered) {
-		var el = document.createElement("img");
-		el.setAttribute("src", cell.getValue());
+		var el = document.createElement("img"),
+		    src = cell.getValue();
+
+		if (formatterParams.urlPrefix) {
+			src = formatterParams.urlPrefix + cell.getValue();
+		}
+
+		if (formatterParams.urlSuffix) {
+			src = src + formatterParams.urlSuffix;
+		}
+
+		el.setAttribute("src", src);
 
 		switch (_typeof(formatterParams.height)) {
 			case "number":
@@ -302,7 +352,7 @@ Format.prototype.formatters = {
 		var newDatetime = moment(value, inputFormat);
 
 		if (newDatetime.isValid()) {
-			return newDatetime.format(outputFormat);
+			return formatterParams.timezone ? newDatetime.tz(formatterParams.timezone).format(outputFormat) : newDatetime.format(outputFormat);
 		} else {
 
 			if (invalid === true) {
@@ -557,6 +607,21 @@ Format.prototype.formatters = {
 		}
 
 		onRendered(function () {
+
+			//handle custom element needed if formatter is to be included in printed/downloaded output
+			if (!(cell instanceof CellComponent)) {
+				var holderEl = document.createElement("div");
+				holderEl.style.position = "absolute";
+				holderEl.style.top = "4px";
+				holderEl.style.bottom = "4px";
+				holderEl.style.left = "4px";
+				holderEl.style.right = "4px";
+
+				element.appendChild(holderEl);
+
+				element = holderEl;
+			}
+
 			element.appendChild(barEl);
 
 			if (legend) {
@@ -632,7 +697,7 @@ Format.prototype.formatters = {
 		return el;
 	},
 
-	rowSelection: function rowSelection(cell) {
+	rowSelection: function rowSelection(cell, formatterParams, onRendered) {
 		var _this = this;
 
 		var checkbox = document.createElement("input");
@@ -648,18 +713,23 @@ Format.prototype.formatters = {
 			if (typeof cell.getRow == 'function') {
 				var row = cell.getRow();
 
-				checkbox.addEventListener("change", function (e) {
-					row.toggleSelect();
-				});
+				if (row instanceof RowComponent) {
 
-				checkbox.checked = row.isSelected();
-				this.table.modules.selectRow.registerRowSelectCheckbox(row, checkbox);
+					checkbox.addEventListener("change", function (e) {
+						row.toggleSelect();
+					});
+
+					checkbox.checked = row.isSelected && row.isSelected();
+					this.table.modules.selectRow.registerRowSelectCheckbox(row, checkbox);
+				} else {
+					checkbox = "";
+				}
 			} else {
 				checkbox.addEventListener("change", function (e) {
 					if (_this.table.modules.selectRow.selectedRows.length) {
 						_this.table.deselectRow();
 					} else {
-						_this.table.selectRow();
+						_this.table.selectRow(formatterParams.rowRange);
 					}
 				});
 
