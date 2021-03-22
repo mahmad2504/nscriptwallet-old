@@ -18,6 +18,7 @@ use JiraRestApi\Issue\Version;
 use JiraRestApi\Project\ProjectService;
 use JiraRestApi\Version\VersionService;
 use JiraRestApi\JiraException;
+use JiraRestApi\User\UserService;
 
 use Carbon\Carbon;
 class Jira
@@ -74,6 +75,32 @@ class Jira
 	{
 		$ret = self::$issueService->update($key, $labels);
 	}
+	public static function GetUserDetails($user)
+	{
+		$us = new UserService(new ArrayConfiguration([
+			 'jiraHost' => env('JIRA_'.self::$server.'_URL'),
+              'jiraUser' => env('JIRA_'.self::$server.'_USERNAME'),
+             'jiraPassword' => env('JIRA_'.self::$server.'_PASSWORD'),
+		]));
+		
+		$start = 0;
+		
+		$paramArray = [
+				'username' => $user, // get all users. 
+				'startAt' => 0,
+				'maxResults' => 1000,
+				'includeInactive' => false,
+				//'property' => '*',
+		];
+		$users = $us->findUsers($paramArray);
+		foreach($users as $u)
+			if($u->name==$user)
+				return $u;
+		
+		
+		return null;
+	}
+	
 	public static function UpdateTask($key,$summary=null,$desc=null,$priority=null,$type=null,$version=null,$customefields=null)
 	{
 		$issueField = new IssueField(true);
@@ -264,7 +291,11 @@ class Jira
 		return $output;
 		//return $taskatlevel[0];
 	}
-	
+	public static function Comments($issueKey)
+	{
+		$comments = self::$issueService->getComments($issueKey);
+		return $comments;
+	}
 	public static function WorkLogs($issueKey)
 	{
 		$worklogs = self::$issueService->getWorklog($issueKey)->getWorklogs();

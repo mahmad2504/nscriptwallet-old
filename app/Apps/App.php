@@ -30,10 +30,22 @@ class App
 			$this->options['email_resend'] = 0;
 		
 	}
+	public function InConsole($yes)
+	{
+		// Child should override this to see if application is running in console or from web
+	}
+	
 	public function __construct($app)
 	{
 		$this->InitOption();
 		$this->app = $app;
+		if(app()->runningInConsole())
+		{
+			$app->InConsole(true);
+		}
+		else
+			 $app->InConsole(false);
+		 
 		if(!isset($this->namespace))
 			dd("App namespace not set");
 		$parts = explode("\\",$app->namespace);
@@ -128,6 +140,11 @@ class App
 		if($this->options['rebuild']||$this->options['force']||$sync_requested)
 			return true;
 		
+		$now = Carbon::now($this->timezone);
+		if($now->isWeekend())
+			return false;
+		
+			
 		$sec = $this->SecondsSinceLastUpdate();
 		
 		if($sec == null)
@@ -317,6 +334,14 @@ class App
 			return Jira::FetchTickets($this->query);
 		else
 			return Jira::FetchTickets($jql);
+	}
+	function FetchUser($user)
+	{
+		return Jira::GetUserDetails($user);
+	}
+	function FetchComments($key)
+	{
+		return Jira::Comments($key);
 	}
 	function GetBusinessMinutes($ini_stamp,$end_stamp,$start_hour,$end_hour)
 	{

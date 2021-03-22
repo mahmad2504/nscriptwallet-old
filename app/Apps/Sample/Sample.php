@@ -26,6 +26,10 @@ class Sample extends App{
 	{
 		return parent::TimeToRun($update_every_xmin);
 	}
+	public function InConsole($yes)
+	{
+		
+	}
 	function IssueParser($code,$issue,$fieldname)
 	{
 		switch($fieldname)

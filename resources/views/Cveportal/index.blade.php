@@ -23,6 +23,7 @@
 		<h3 id="cve_title"></h3>
 		<h4>Description</h4>
 		<p id="cve_description"></p>
+		<p id="cve_solution"></p>
 		<div  class="card card-block" style="margin-bottom:0px;">
 			<div>
 				<small style="float:left;margin-top:-10px;"><span style="font-weight:bold;">Vector: </span><span id="cvss_vector"></span></small>
@@ -366,6 +367,7 @@
 		
 		$('#cve_title').text(data.cve);
 		$('#cve_description').text(data.description);
+		$('#cve_solution').text(data.solution);
 		var published = new Date(data.published);
 		var published = published.toString().slice(4,15);
 		$('#cve_published').text(published);

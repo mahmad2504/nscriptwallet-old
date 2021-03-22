@@ -17,6 +17,13 @@ class Staticpages extends Cveportal{
 		$this->options = $options;
 		parent::__construct($this);
     }
+	public function InConsole($yes)
+	{
+		if($yes)
+			$this->datafolder = 'data';
+		else
+			$this->datafolder = '../data';
+	}
 	public function TimeToRun($update_every_xmin=60)
 	{
 		return parent::TimeToRun($update_every_xmin);
@@ -45,7 +52,6 @@ class Staticpages extends Cveportal{
 		$o->group_names = $group_names;
 		$o->product_names = $product_names;
 		$o->version_names = $version_names;
-		
 		return $o;
 	}
 	public function recurse_copy($src,$dst) 
@@ -72,6 +78,7 @@ class Staticpages extends Cveportal{
 	{
 		$filename = $group."_".$product."_".$version.".json";
 		$p = new Product();
+		
 		$group = $group=='all'?null:$group;
 		$product = $product=='all'?null:$product;
 		$version = $version=='all'?null:$version;
@@ -80,9 +87,77 @@ class Staticpages extends Cveportal{
 		$key = md5(implode(",",$ids));
 		$c =  new CVE();
 		$data = $c->GetPublished($ids);
-		file_put_contents('data/cveportal/static/data/'.$filename,json_encode($data));
+		file_put_contents($this->datafolder.'/cveportal/static/data/'.$filename,json_encode($data));
 		$this->Publish(json_encode($data),$filename);
 		return $data;
+	}
+	public function GetRssfeed($group='all',$product='all',$version='all',$productid=null)
+	{
+		$filename = $product."_".$version.".xml";
+		$p= new Product();
+		$group = $group=='all'?null:$group;
+		$product = $product=='all'?null:$product;
+		$version = $version=='all'?null:$version;
+		if($productid != null)
+			$ids [] = $productid;
+		else
+		{
+			if(($group==null)||($product==null)||($version==null))
+				return;
+			$ids = $p->GetIds($group,$product,$version,null,"1","1");
+		}
+		$p = $p->GetProduct($ids[0]);
+
+		$c =  new CVE();
+		$data = $c->GetPublished($ids,1);
+		$PHP_EOL = PHP_EOL;
+		
+		$xml = '<rss version="2.0">'.$PHP_EOL;
+		$xml .= "<channel>".$PHP_EOL;
+		$xml .= "<title>CVE RSS Feed</title>".$PHP_EOL;
+		$xml .= "<link></link>".$PHP_EOL;
+		$xml .= "<description>".$p->name." ".$p->version."</description>".$PHP_EOL;
+		$xml .= "<product>".$p->name."</product>".$PHP_EOL;
+		$xml .= "<version>".$p->version."</version>".$PHP_EOL;
+		$xml .= "<language>en-us</language>".$PHP_EOL;
+		$i=0;
+		foreach($data as $d)
+		{
+			$title = $d->cve;
+			$description = $d->description;
+			$severity =  $d->severity;
+			$solution = $d->solution;
+			$vectorString = $d->cvss->vectorString;
+			$attackVector = '';
+			if(isset($d->cvss->attackVector))
+				$attackVector = $d->cvss->attackVector;
+			else if(isset($d->cvss->accessVector))
+				$attackVector = $d->cvss->accessVector;
+			
+			$baseScore = $d->cvss->baseScore;
+		
+			$triage = $d->status->triage;
+			$xml .= "<item>".$PHP_EOL;
+			$xml .= "<title>".$title."</title>".$PHP_EOL;
+			$xml .= "<description><![CDATA[".$description."]]></description>".$PHP_EOL;
+			$xml .= "<severity>".$severity."</severity>".$PHP_EOL;
+			$xml .= "<vectorString>".$vectorString."</vectorString>".$PHP_EOL;
+			$xml .= "<attackVector>".$attackVector."</attackVector>".$PHP_EOL;
+			$xml .= "<baseScore>".$baseScore."</baseScore>".$PHP_EOL;
+			$xml .= "<triage>".$triage."</triage>".$PHP_EOL;
+			$xml .= "<solution><![CDATA[".$solution."]]></solution>".$PHP_EOL;
+			$xml .= "</item>".$PHP_EOL;
+			$i++;
+		}
+		$xml .= "</channel>".$PHP_EOL;
+		$xml .= "</rss>".$PHP_EOL;
+		if($productid == null)
+		{
+			file_put_contents($this->datafolder .'/cveportal/static/data/'.$filename,$xml);
+			$this->Publish($xml,$filename);
+		}
+		return $xml;
+		
 	}
 	public function Publish($data,$filename)
 	{
@@ -109,27 +184,30 @@ class Staticpages extends Cveportal{
 		//@mkdir('data/cveportal/static/data');
 		$pdata = $this->ProductData();
 		$this->Publish(json_encode($pdata),'product.json');
-		file_put_contents('data/cveportal/static/data/product.json',json_encode($pdata));
+		file_put_contents($this->datafolder.'/cveportal/static/data/product.json',json_encode($pdata));
 		$this->GetCves('all','all','all');
+		$this->GetRssfeed('all','all','all');
 		$i = 0;
 		$j=0;
 		foreach($pdata->group_names as $group)
 		{
 			$this->GetCves($group,'all','all');
+			$this->GetRssfeed($group,'all','all');
 			$products = $pdata->product_names[$i];
-			
 			foreach($products as $product)
 			{
 				$this->GetCves($group,$product,'all');
+				$this->GetRssfeed($group,$product,'all');
 				$versions = $pdata->version_names[$j];
 				foreach($versions as $version)
 				{
 					$this->GetCves($group,$product,$version);
+					$this->GetRssfeed($group,$product,$version);
 				}
 				$j++;
 			}
 			$i++;
-		}	
+		}
 		//dd($this->GetCves('all','all','all'));
 	}
 }

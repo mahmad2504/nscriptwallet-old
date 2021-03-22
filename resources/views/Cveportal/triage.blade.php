@@ -28,6 +28,11 @@
 		<h3 id="cve_title"></h3>
 		<h4>Description</h4>
 		<p id="cve_description"></p>
+		<p id="cve_solution"></p>
+		<div id="commentdiv" style="display:none">
+			<label for="comment">Comment</label>
+			<input size="50" type="text" id="comment" name="comment"><button id="save">Save</button>
+		</div>
 		<div  class="card card-block" style="margin-bottom:0px;">
 			<div>
 				<small style="float:left;margin-top:-10px;"><span style="font-weight:bold;">Vector: </span><span id="cvss_vector"></span></small>
@@ -225,6 +230,7 @@
     }
 	function Get3Columns()
 	{
+		col=3;
 		columns = [
         {title:"CVE", field:"cve", sorter:"string", width:130},
 		{title:"Description", field:"description", sorter:"string", width:690},
@@ -235,6 +241,7 @@
 	}
 	function Get4Columns()
 	{
+		col=4;
 		columns = [
 			{title:"CVE", field:"cve", sorter:"string", width:130},
 			{title:"Jira", field:"jira", sorter:"string", width:90,
@@ -283,7 +290,7 @@
 		];
 		return columns;
 	}
-	function UpdateStatus(cell)
+	function UpdateStatus(cell=gcell,comment=null)
 	{
 		selected_group = $('#select_group option:selected').val();
 		selected_product = $('#select_product option:selected').val();
@@ -296,11 +303,13 @@
 			data.status.publish = "1";
 		else
 			data.status.publish = "0";
-			
+		
 		d.status = data.status;
 		d.group = selected_group;
 		d.product = selected_product;
 		d.version = selected_version;
+		if(comment != null)
+			data.status.comment = $('#comment').val();
 		
 		d._token = "{{ csrf_token() }}";
 		$.ajax({
@@ -318,6 +327,7 @@
 					{
 						d.product[i].status.triage = d.status.triage;
 						d.product[i].status.publish = d.status.publish;
+						d.product[i].status.comment = d.status.comment;
 						//console.log(d.product[i].status);
 					}
 				}
@@ -372,8 +382,6 @@
 		combined_product_names = [];
 		for(i=0;i<product_names.length;i++)
 			combined_product_names = combined_product_names.concat(product_names[i]);
-		
-
 		product_index = combined_product_names.indexOf(this.value);
 		$('#select_version').children().remove();
 		AddOption('select_version','All Versions','all',0);
@@ -402,6 +410,7 @@
 		console.log(url);
 		CreateTable(url,columns);
 	}
+	var gcell = null;
 	function CreateTable(url,columns)
 	{
 		var table = new Tabulator("#vulnerability-table", {
@@ -452,7 +461,7 @@
 				//cell - cell component
 				//cve.jira
 				var cve = cell.getRow().getData();
-	
+				
 				
 				if((cell.getField() == 'status.triage')||(cell.getField() == 'status.publish'))
 				{
@@ -461,12 +470,14 @@
 					if(cve.jir == '')
 					{
 						PopulateModal(cell.getRow().getData());
+						gcell = cell;
 						$('#modal').show();
 					}
 				}
 				else
 				{
 					PopulateModal(cell.getRow().getData());
+					gcell = cell;
 					$('#modal').show();
 				}
 			},
@@ -479,12 +490,25 @@
 			},
 		});
 	}
+	var col=0;
 	function PopulateModal(data)
 	{
 		console.log(data);
 		
 		$('#cve_title').text(data.cve);
 		$('#cve_description').text(data.description);
+		$('#cve_solution').text(data.solution);
+		console.log(data.status.comment);
+		if(col==3)
+		{
+			$('#comment').val('disabled');
+			$('#commentdiv').hide();
+		}
+		else
+		{
+			$('#comment').val(data.status.comment);
+			$('#commentdiv').show();
+		}
 		var published = new Date(data.published);
 		var published = published.toString().slice(4,15);
 		$('#cve_published').text(published);
@@ -552,6 +576,10 @@
 	$(document).ready(function()
 	{
 		console.log("Vulnerability Page Loaded");
+		$('#save').click(function(){
+			console.log('Save');
+			UpdateStatus(gcell,$('#comment').val());
+		});
 		AddOption('select_group','All Products','all',0);
 		AddOption('select_product','All Parts','all',0);
 		AddOption('select_version','All Versions','all',0);

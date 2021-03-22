@@ -1,10 +1,21 @@
 {
-	"monitoring_lists" : [ "24A891CF" ],
+	"monitoring_lists" : [ "24A891CF", "3FCF4617" ],
 	"groups" : {
 		"Mentor® Embedded Industrial OS" : {
 			"MFP" : {
 				"1.5" : {
 					"id" : "24A891CF",
+					"active" : "1",
+					"external" : "1",
+					"notify" : "mumtaz_ahmad@mentor.com",
+					"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ]
+				}
+			}
+		},
+		"Mentor® Omni OS" : {
+			"Omni" : {
+				"2.1.0" : {
+					"id" : "3FCF4617",
 					"active" : "1",
 					"external" : "1",
 					"notify" : "mumtaz_ahmad@mentor.com",

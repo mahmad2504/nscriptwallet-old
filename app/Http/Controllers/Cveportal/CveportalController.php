@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use App\Apps\Cveportal\Cve;
 use App\Libs\Ldap\Ldap;
 use App\Apps\Cveportal\Cvestatus;
+use App\Apps\Cveportal\Staticpages;
 use App\Apps\Cveportal\Cache;
 use App\Apps\Cveportal\Jiraa;
 
@@ -33,6 +34,11 @@ class CveportalController extends Controller
 		$jira_url = $p->jira_url;
 		$refresh = 0;
 		return view('cveportal.index',compact('group_names','product_names','version_names','jira_url'));
+	}
+	public function sync_staticpages(Request $request)
+	{
+		$sp = new Staticpages();
+		$sp->Script();
 	}
 	public function Triage(Request $request)
 	{
@@ -102,17 +108,26 @@ class CveportalController extends Controller
 		$ids = $p->GetIds($group,$product,$version,$admin);
 		sort($ids);
 		$key = md5(implode(",",$ids));
-	
-		$data = $cache->Get($key);
+		$data =  null;
+		if($admin ==  null)
+			$data = $cache->Get($key);
+		$data=null;
 		if($data==null)
 		{
 			$c =  new CVE();
-			$data = $c->GetPublished($ids);
+			if($admin ==  null)
+				$data = $c->GetPublished($ids);
+			else	
+				$data = $c->GetPublished($ids,1);
 			$cache->Put($key,json_encode($data));
 		}
 		return $data;
 	}
-
+	public function RssFeed(Request $request,$productid)
+	{
+		$sp = new Staticpages();
+		return $sp->GetRssfeed(null,null,null,$productid);
+	}
 	public function StatusUpdate(Request $request)
 	{
 		$data = $request->session()->get('data');
@@ -128,7 +143,6 @@ class CveportalController extends Controller
 		//$ids = $p->GetIds($group,$product,$version);
 		//sort($ids);
 		//$key = md5(implode(",",$ids));
-		
 		$cvestatus = new CVEStatus();
 		$cvestatus->UpdateStatus($request->status);
 		$status = $cvestatus->GetStatus($request->status['cve'],$request->status['productid']);

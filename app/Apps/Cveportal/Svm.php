@@ -177,14 +177,19 @@ class Svm extends Cveportal{
 
 					foreach($component->notifications as $notification)
 					{
-							if(isset($notification->data->cve_references))
+						if(isset($notification->data->cve_references))
+						{
+							foreach($notification->data->cve_references as $cve)
 							{
-									foreach($notification->data->cve_references as $cve)
-									{
-											$cve = 'CVE-'.$cve->year."-".$cve->number;
-											$component->cve[$cve] = $cve;
-									}
+								$cve = 'CVE-'.$cve->year."-".$cve->number;
+								$component->cve[$cve] = $cve;
+								if(isset($notification->data->solution_status))
+									$sol = $notification->data->solution_status.":".$notification->data->solution_details;
+								else
+									$sol = $notification->data->solution_details;
+								$component->solution[$cve][] = $sol;
 							}
+						}
 					}
 					$component->cve = array_values($component->cve);
 					unset($component->notifications);

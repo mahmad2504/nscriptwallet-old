@@ -42,6 +42,7 @@ class Cvestatus extends Cveportal{
 			$s->triage = $status['triage'];
 			$s->publish = $status['publish'];
 			$s->source = $status['source'];
+			$s->comment = $status['comment'];
 			$status = $s;
 		}
 		$collection = $this->scriptname;
@@ -74,9 +75,13 @@ class Cvestatus extends Cveportal{
 			$ret->triage=$this->default_triage_status;
 			$ret->publish=0;
 			$ret->source='manual';
+			$ret->comment='';
 			$this->UpdateStatus($ret);
 			return $this->GetStatus($cve,$productid);
 		}
+		if(!isset($record->status->comment))
+			$record->status->comment = '';
+		
 		return $record->status;
 	}
 	public function GetPublished($productid)

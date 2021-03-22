@@ -59,7 +59,19 @@ Route::put('/cveportal/status/update','App\Http\Controllers\Cveportal\CveportalC
 Route::get('/cveportal/jira/sync/request','App\Http\Controllers\Cveportal\CveportalController@jirasyncrequest')->name('cveportal.jirasyncrequest');
 Route::get('/cveportal/rest/product/{id}','App\Http\Controllers\Cveportal\CveportalController@getproductdata')->name('cveportal.getproductdata');
 Route::get('/cveportal/rest/cve/{productid}','App\Http\Controllers\Cveportal\CveportalController@getcvedata')->name('cveportal.getcvedata');
+Route::get('/cveportal/rss/cve/{productid}','App\Http\Controllers\Cveportal\CveportalController@rssfeed')->name('cryptography.rssfeed');
 
+Route::get('/cveportal/sync/staticpages','App\Http\Controllers\Cveportal\CveportalController@sync_staticpages')->name('cryptography.sync_staticpages');
+
+
+/////////////////////////////////////////
+
+Route::get('/psx/sync','App\Http\Controllers\Psx\PsxController@sync')->name('psx.sync');
+Route::get('/psx/bullish','App\Http\Controllers\Psx\PsxController@bullish')->name('psx.bullish');
+
+/////////////////////////////////////////
+Route::get('/cryptography/file/{project}/{id?}','App\Http\Controllers\Cryptography\CryptController@showfile')->name('cryptography.showfile');
+Route::get('/cryptography/{product}/{package?}','App\Http\Controllers\Cryptography\CryptController@showproduct')->name('cryptography.showproduct');
 
 /////////////////////////////////////////
 Route::get('/{param1?}/{param2?}/{param3?}', function (Request $request,$param1=null,$param2=null,$param3=null) 

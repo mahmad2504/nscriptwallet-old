@@ -185,7 +185,7 @@
 					row = cell.getRow();
 					$(row.getElement()).css({"color":"grey"});
 				}
-				return cell.getValue()
+				return cell.getValue();
 			}
 		},
 		

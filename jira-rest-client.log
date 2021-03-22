@@ -6,3 +6,5 @@
 [2021-01-14T16:59:22.879239+05:00] JiraClient.ERROR: CURL Error: http response=0,  [] []
 [2021-01-16T20:55:57.200087+05:00] JiraClient.ERROR: CURL Error: http response=0, Could not resolve host: jira.alm.mentorg.com [] []
 [2021-01-17T09:49:24.116570+05:00] JiraClient.ERROR: CURL Error: http response=0, Could not resolve host: jira.alm.mentorg.com [] []
+[2021-03-02T08:28:04.494028+05:00] JiraClient.ERROR: CURL Error: http response=0, Could not resolve host: jira.alm.mentorg.com [] []
+[2021-03-02T08:29:17.565530+05:00] JiraClient.ERROR: CURL Error: http response=0, Could not resolve host: jira.alm.mentorg.com [] []

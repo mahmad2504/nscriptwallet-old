@@ -45,8 +45,13 @@ class Sprintcalendar extends App
 			$end = Carbon::now();
 			$end=  $end->addDays(50);
 		}
+		if($start->format('Y')=='2020')
+			$base='2019-12-30';	
+		else if($start->format('Y')=='2021')
+			$base='2021-01-11';	
+		else
+			dd('Please mark base in sprint calender');
 		
-		$base='2019-12-30';	
 		$sprint_number = 1;
 		
 		$base = Carbon::parse($base)->startOfWeek();

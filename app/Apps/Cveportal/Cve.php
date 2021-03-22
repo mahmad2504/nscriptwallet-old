@@ -99,19 +99,18 @@ class Cve extends Cveportal{
 			dd($product_id." is empty");
 		}
 		$cpes = $svm->GetCpe($mlist->components);
-		
 		foreach($cpes as $cpe)
 		{
 			$component_id = $cpe->id;
 			$component_name = $cpe->component_name;
 			$component_version = $cpe->version;
-			
 			foreach($cpe->cve as $cve)
 			{
 				if(!array_key_exists($cve,$this->cves))
 				{
 					$this->cves[$cve] = new \StdClass();
 					$this->cves[$cve]->cve = $cve;
+					$this->cves[$cve]->solution = $cpe->solution->$cve;
 					$this->cves[$cve]->product = [];
 					$this->cves[$cve]->severity = 'NA';
 					$cve_nvd_data = $nvd->GetCve($cve);
@@ -283,6 +282,7 @@ class Cve extends Cveportal{
 		$cve->modified = $record->nvd->lastModifiedDate;
 		$cve->published = $record->nvd->publishedDate;
 		$cve->severity = $record->severity;
+		$cve->solution = $record->solution[count($record->solution)-1];
 		if($record->nvd->cvss == null)
 			return null;
 		
@@ -318,7 +318,7 @@ class Cve extends Cveportal{
 		return $cve;
 	}
 	function Get($ids)
-	{		
+	{
 		$options = [
 			'sort' => ['nvd.lastModifiedDate' => -1],
 			'projection'=>
@@ -331,12 +331,11 @@ class Cve extends Cveportal{
 					"product.component.name"=>1,
 					"product.component.version"=>1,
 					"severity"=>1,
+					"solution"=>1,
 					"cve"=>1]
 		];
 		$query  = ['product.id'=>['$in'=>$ids]];
-		
 		$cves = $this->db->cves->find($query,$options)->toArray();
-		
 		$cvedata = [];
 		foreach($cves as $record)
 		{
@@ -346,12 +345,14 @@ class Cve extends Cveportal{
 		}
 		return $cvedata;
 	}
-	function GetPublished($ids)
+	function GetPublished($ids,$all=0)
 	{
 		$cves = $this->Get($ids);
 		$cve_delete_indexes = [];
 		$cve_index = 0;
-		/*foreach($cves as $cve)
+		if($all == 1)
+			return $cves;
+		foreach($cves as $cve)
 		{
 			$index = 0;
 			$delete_indexes = [];
@@ -377,7 +378,6 @@ class Cve extends Cveportal{
 		}
 		foreach($cve_delete_indexes as $cve_index)
 			unset($cves[$cve_index]);
-		*/
 		return array_values($cves);
 	}
 	public function SendErrorNotification($p)
@@ -424,7 +424,6 @@ class Cve extends Cveportal{
 	}
 	public function Script()
 	{
-		
 		$product = new Product();
 		$products = $product->GetProducts();
 		$sproducts = [];
@@ -432,7 +431,6 @@ class Cve extends Cveportal{
 		{
 			if($p->active == 0)
 				continue;
-			
 			if(isset($p->jira))
 			{
 				$versions = Jira::GetVersions($p->jira->project);
@@ -456,7 +454,6 @@ class Cve extends Cveportal{
 			$this->BuildCVEs($p,$components);
 			foreach($this->cves as $cve)
 			{
-					
 				foreach($cve->product as $prod)
 					$prod->component = array_values($prod->component);
 				$cve->product = array_values($cve->product);
@@ -464,15 +461,11 @@ class Cve extends Cveportal{
 			}
 			$sproducts[]=$p; 
 		}
-	
 		//dd($sproducts);
-		
 		$this->db->cves->drop();
 		$this->db->cves->insertMany(array_values($this->cves));
-		
 		$cache = new Cache();
 		$cache->Clean();
-		
 		return;
 	}
 }

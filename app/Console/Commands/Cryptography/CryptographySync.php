@@ -1,24 +1,23 @@
 <?php
-namespace App\Console\Commands\Psx;
+namespace App\Console\Commands\Cryptography;
 
 use Illuminate\Console\Command;
-use App\Apps\Psx\Rsi;
-
-class RsiSync extends Command
+use App\Apps\Cryptography\Cryptography;
+use App\Email;
+class CryptographySync extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'psx:rsi:sync {--rebuild=0} {--force=0} {--email=2} {--email_resend=0}';
-
+    protected $signature = 'cryptography:sync {--rebuild=0} {--force=0} {--email=2} {--email_resend=0}';
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'PSX Fiancial results to telegram';
+    protected $description = 'Description';
 
     /**
      * Create a new command instance.
@@ -31,10 +30,10 @@ class RsiSync extends Command
 		parent::__construct();
     }
 	
-    public function handle()
+    public function handle()//
     {
 		
-		$app = new Rsi($this->option());
+		$app = new Cryptography($this->option());
 		$app->Run();
     }
 }
