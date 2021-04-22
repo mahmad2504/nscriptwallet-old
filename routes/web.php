@@ -60,7 +60,6 @@ Route::get('/cveportal/jira/sync/request','App\Http\Controllers\Cveportal\Cvepor
 Route::get('/cveportal/rest/product/{id}','App\Http\Controllers\Cveportal\CveportalController@getproductdata')->name('cveportal.getproductdata');
 Route::get('/cveportal/rest/cve/{productid}','App\Http\Controllers\Cveportal\CveportalController@getcvedata')->name('cveportal.getcvedata');
 Route::get('/cveportal/rss/cve/{productid}','App\Http\Controllers\Cveportal\CveportalController@rssfeed')->name('cryptography.rssfeed');
-
 Route::get('/cveportal/sync/staticpages','App\Http\Controllers\Cveportal\CveportalController@sync_staticpages')->name('cryptography.sync_staticpages');
 
 
@@ -68,10 +67,16 @@ Route::get('/cveportal/sync/staticpages','App\Http\Controllers\Cveportal\Cveport
 
 Route::get('/psx/sync','App\Http\Controllers\Psx\PsxController@sync')->name('psx.sync');
 Route::get('/psx/bullish','App\Http\Controllers\Psx\PsxController@bullish')->name('psx.bullish');
+Route::get('/psx/graph/{symbol}','App\Http\Controllers\Psx\PsxController@graph')->name('psx.graph');
+
 
 /////////////////////////////////////////
-Route::get('/cryptography/file/{project}/{id?}','App\Http\Controllers\Cryptography\CryptController@showfile')->name('cryptography.showfile');
-Route::get('/cryptography/{product}/{package?}','App\Http\Controllers\Cryptography\CryptController@showproduct')->name('cryptography.showproduct');
+Route::get('/oss/hits/{project}/{id?}','App\Http\Controllers\Cryptography\CryptController@showhits')->name('oss.showhits');
+Route::get('/oss/file/{project}/{id?}','App\Http\Controllers\Cryptography\CryptController@showfile')->name('oss.showfile');
+Route::get('/oss/{product}/{package?}','App\Http\Controllers\Cryptography\CryptController@showproduct')->name('oss.showproduct');
+Route::put('/oss/triage','App\Http\Controllers\Cryptography\CryptController@triage')->name('oss.triage');
+Route::get('/oss/search/{project}/{package?}/{hitid}','App\Http\Controllers\Cryptography\CryptController@search')->name('oss.search');
+
 
 /////////////////////////////////////////
 Route::get('/{param1?}/{param2?}/{param3?}', function (Request $request,$param1=null,$param2=null,$param3=null) 

@@ -2,7 +2,7 @@
 <html class="no-js" lang="en">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Security - Mentor Graphics</title>
+<title>Project - OSS Governance</title>
 
 <link rel="stylesheet" href="{{ asset('libs/tabulator/css/tabulator.min.css') }}" />
 
@@ -53,7 +53,7 @@
 			<br>
 			<div style="font-weight:bold;font-size:20px;line-height: 50px;height:50px;background-color:#4682B4;color:white;" class="flex-item"> 
 			<img style="float:left;" height="50px" src="{{ asset('apps/ishipment/images/mentor.png') }}"></img>
-			<div style="margin-right:150px;"> Cryptography Analysis Dashoard - <span style="color:orange">{{$project_name}}</span></div>
+			<div style="margin-right:150px;"> OSS Governance [ Project - <span style="">{{$project_name}}]</span></div>
 			</div>
 			<div class="flex-item"> 
 			<small class="flex-item" style="font-size:12px;"><a id="" href="#"></a></small>
@@ -97,7 +97,7 @@
 		package.progress = Math.round((package.triaged/package.hits) * 100);
 	}
 	columns = [
-        {title:"Package", field:"name", sorter:"string", width:150},
+        {title:"Package", field:"name", sorter:"string", width:350},
         {title:"Hits", field:"hits", sorter:"number"},
 		{title:"Triaged", field:"triaged", sorter:"number"},
 		{title:"Suspicios", field:"suspicios", sorter:"number"},
@@ -126,8 +126,6 @@
 		if(project.triaged > 0)
 			progress=Math.round((project.triaged/project.hits) * 100);
 		
-		progress = 50;
-		console.log(progress);
 		
 		var circle = new ProgressBar.Line('#progress', {
         color: '#00FF00',
@@ -171,6 +169,7 @@
 			columns:columns,
 			pagination:"local",
 			paginationSize:50,
+			layout:"fitDataFill",
 			paginationSizeSelector: [10, 25, 50, 100],
 			rowClick:function(e,row)
 			{

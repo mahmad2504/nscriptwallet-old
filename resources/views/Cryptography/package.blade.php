@@ -2,7 +2,7 @@
 <html class="no-js" lang="en">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Security - Mentor Graphics</title>
+<title>Package - OSS Governance</title>
 
 <link rel="stylesheet" href="{{ asset('libs/tabulator/css/tabulator.min.css') }}" />
 
@@ -45,15 +45,15 @@
       border-radius:25px;
     }
 </style
-</style>
 </head>
 <body>
+
 	<div class="flex-container">
 		<div class="row"> 
 			<br>
-			<div style="font-weight:bold;font-size:20px;line-height: 50px;height:50px;background-color:#4682B4;color:white;" class="flex-item"> 
+			<div style="font-weight:bold;font-size:20px;line-height: 50px;height:50px;background-color:#0099FF;color:white;" class="flex-item"> 
 			<img style="float:left;" height="50px" src="{{ asset('apps/ishipment/images/mentor.png') }}"></img>
-			<div style="margin-right:150px;"> Cryptography Analysis Dashoard <span style="color:orange"> {{$package_name}} </span></div>
+			<div style="margin-right:150px;"> OSS Governance [ Package - <span style=""> {{$package_name}}]</span></div>
 			</div>
 			<div class="flex-item"> 
 			<small class="flex-item" style="font-size:12px;"><a id="" href="#"></a></small>
@@ -82,12 +82,13 @@
 			</div>
 		</div>
 	</div>
+	<div>	
 	<script src="{{ asset('apps/cryptography/js/progressbar.min.js') }}"></script>
 	<script src="{{ asset('libs/jquery/jquery.min.js') }}"></script>
 	<script src="{{ asset('libs/tabulator/js/tabulator.min.js') }}" ></script>
 	<script>
 	var package = @json($package);
-	var project = '{{$project}}';
+	var project = @json($project);
 	console.log(package);
 	$('#hits').text(package.hits);
 	$('#triaged').text(package.triaged);
@@ -173,11 +174,11 @@
 			columns:columns,
 			pagination:"local",
 			paginationSize:50,
+			layout:"fitDataFill",
 			paginationSizeSelector: [10, 25, 50, 100],
 			rowClick:function(e,row)
 			{
 				var cells = row.getCells();
-				 
 				if(last_row_clicked != null)
 				{
 					var last_row_cells = last_row_clicked.getCells();
@@ -191,7 +192,7 @@
 				
 				var file = row.getData();
 				console.log(file);
-				var url = '/cryptography/file/'+project+"/"+file.file_identifier;
+				var url = '/oss/hits/'+project.name+"/"+file.file_identifier+'?package='+package.name;
 				window.open(url, '_blank');
 				//console.log(package);
 			

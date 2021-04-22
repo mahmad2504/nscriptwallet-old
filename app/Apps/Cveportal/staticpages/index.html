@@ -178,7 +178,7 @@
 							</div>
 							<div id="loadingDiv">
 								<div class="loadingMsg">Loading</div>
-							</div>
+							</div>				
 						</div>
 					</div>
 				</div>
@@ -219,6 +219,10 @@
 			</div>
 		</div>
 	</footer>
+	<script src="//cdn.jsdelivr.net/bluebird/3.5.0/bluebird.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.js"></script>
+	<script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>
+	<script src="{{ asset('libs/sheetjs/xlsx.full.min.js')}}" ></script>
 	<script src="js/svg.js"></script>
 	<script src="jquery/jquery.min.js"></script>
 	<script src="tabulator/js/tabulator.min.js" ></script>
@@ -270,10 +274,10 @@
 	}
 	function AddOption(id,optionText,optionValue,selected) 
 	{ 
-		if(!selected)
-			$('#'+id).append(`<option value="${optionValue}"> ${optionText} </option>`); 
+	    if(!selected)
+			$('#'+id).append('<option value="'+optionValue+'">'+ optionText +"</option>"); 
 		else							
-			$('#'+id).append(`<option value="${optionValue}" selected> ${optionText} </option>`);							
+			$('#'+id).append('<option value="'+optionValue+'" selected>'+ optionText +"</option>");							
     } 
 	$('#select_group').on('change', function()
 	{

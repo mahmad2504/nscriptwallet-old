@@ -277,8 +277,16 @@ class FileLister():
         """
         file_list = []
 
-        for dirpath, _, filenames in walk(path, followlinks=False):
+        for dirpath, _, filenames in walk(path, followlinks=False): 
+            print("dir:"+dirpath, flush=True)
             for filename in filenames:
+                if '\\\\.\\aux' == filename:
+                    continue
+                xtension = os.path.splitext(filename)[1]
+                if xtension == '.png':
+                    continue
+                if xtension == '.svg':
+                    continue
                 full_path = abspath(join(dirpath, filename))
                 if islink(full_path):
                     Output.print_warning("Skipping symbolic link: " + full_path)

@@ -28,10 +28,10 @@ class Cryptography extends App{
 	{
 		if($yes)
 		{
-			$this->datafolder = "D://Assignments//OSS//2.1.0//base";//data cryptography";
+			$this->datafolder = "D://Assignments//OSS//ossproject3";//data cryptography";
 		}
 		else
-			$this->datafolder = "D://Assignments//OSS//2.1.0//base";//.. data/cryptography";
+			$this->datafolder = "D://Assignments//OSS//ossproject3";//.. data/cryptography";
 	}
 	public function Rebuild()
 	{
@@ -65,6 +65,20 @@ class Cryptography extends App{
 			return null;
 		return $obj->toArray();
 	}
+	function SearchHits($package,$line_text,$line_text_after_1,$line_text_after_2,$line_text_after_3)
+	{
+		$query = [];
+		$query['package'] = $package;
+		$query['line_text'] = $line_text;
+		$query['line_text_after_1'] = $line_text_after_1;
+		$query['line_text_after_2'] = $line_text_after_2;
+		$query['line_text_after_3'] = $line_text_after_3;
+		$obj = $this->db->hits->find($query);
+		if($obj == null)
+			return null;
+		return $obj->toArray();
+		
+	}
 	function ReadProject($id=null,$name=null)
 	{
 		$query = [];
@@ -79,17 +93,81 @@ class Cryptography extends App{
 		unset($obj->_id);
 		return $obj;
 	}
+	function UpdateProjects($file_identifier)
+	{
+		$query=['packages.files.file_identifier'=>$file_identifier];
+		$projects = $this->db->projects->find($query);
+		if($projects == null)
+			return null;
+		$projects =  $projects->toArray();
+		foreach($projects as $project)
+		{
+			$project->triaged=0;
+			$project->suspicios = 0;
+			foreach($project->packages as $package)
+			{
+				$package->triaged = 0;
+				$package->suspicios = 0;
+				foreach($package->files as $file)
+				{
+					if($file->file_identifier == $file_identifier)
+					{
+						$file->triaged = 0;
+						$file->suspicios = 0;
+						$hits = $this->ReadHits(null,null,$file_identifier);
+						foreach($hits as $hit)
+						{
+							$triage = $this->ReadTriage($hit->id);
+							$file->triaged += $triage->triaged;
+							$file->suspicios += $triage->suspicious;
+							
+						}
+				
+					}
+					$package->triaged += $file->triaged;
+					$package->suspicios += $file->suspicios;
+				}
+				$project->triaged += $package->triaged;
+				$project->suspicios += $package->suspicios;
+			}
+			$this->SaveProject($project);
+		}
+	}
 	function SaveProject($project)
 	{
 		$query=['id'=>$project->id];
 		$options=['upsert'=>true];
 		$this->db->projects->updateOne($query,['$set'=>$project],$options);
 	}
+	
 	function SaveHit($hit)
 	{
 		$query=['id'=>$hit->id];
 		$options=['upsert'=>true];
 		$this->db->hits->updateOne($query,['$set'=>$hit],$options);
+	}
+	function SaveTriage($triage)
+	{
+		$query=['id'=>$triage->id];
+		$options=['upsert'=>true];
+		$this->db->triage->updateOne($query,['$set'=>$triage],$options);
+	}
+	function ReadTriage($id)
+	{
+		$query=['id'=>$id];
+		$triage = $this->db->triage->findOne($query);
+		if($triage == null)
+		{
+			$o = new \StdClass();
+			$o->id = $id;
+			$o->text = '';
+			$o->comment = '';
+			$o->triaged = 0;
+			$o->suspicious = 0;
+			$this->SaveTriage($o);
+			$triage = $this->db->triage->findOne($query);
+		}
+		return $triage->jsonSerialize();
 	}
 	public function PreProcess()
 	{
@@ -101,6 +179,13 @@ class Cryptography extends App{
 			{
 				if($fileinfo->isDir())
 				{
+					//$package  = basename($fileinfo->getFilename());
+					//dump($package);
+					//if	(($package == 'linux-base-4.5')||
+					//	($package == 'linux-4.14.195-4.14.195')
+					//	)
+					//continue;
+					
 					if(!file_exists($this->datafolder."/".$fileinfo->getFilename().'.crypto'))
 					{
 						$cmd = 'python  scan-for-crypto.py '.$fileinfo->getPathname()." -o ".$this->datafolder;
@@ -161,6 +246,10 @@ class Cryptography extends App{
 				
 				foreach ($data->crypto_evidence as $property => $value) 
 				{
+					$f = strtolower(basename($value->file_paths[0]));
+					
+					if( ( $f!='readme')&&( $f!='license'))
+					{
 					$ext = strtolower(pathinfo($value->file_paths[0], PATHINFO_EXTENSION));
 					if( ($ext == 'cc')||
 						($ext == 'c')||
@@ -170,17 +259,21 @@ class Cryptography extends App{
 						($ext == 'hpp')||
 						($ext == 'java')||
 						($ext == 'ipp')||
-						($ext == 'py')
+						($ext == 'py')||
+						($ext == 'sh')||
+						($ext == 'rst')||
+						($ext == 'copyright')||
+						($ext == 'templates')
 						)
 					{
 						//dump($value->file_paths[0]."  ".count($value->hits));
 					}
 					else
 					{
-						//dump($ext);
 						continue;
 					}
-					dump($value->file_paths[0]);
+					}
+					//dump($value->file_paths[0]);
 					$file  = explode($package,$value->file_paths[0])[1];
 					
 					if(!isset($package_object->files[$file]))
@@ -206,12 +299,17 @@ class Cryptography extends App{
 					
 					$i=0;
 					$ids=[];
+					$last_line = -100;
 					foreach($value->hits as $hit)
 					{
-						if($i==20)
-							break;
+						//if($i==20)
+						//	break;
+						if($hit->line_number <= $last_line+3)
+						    continue;
+						$last_line = $hit->line_number;
 						$i++;
-						$id = md5($file.$hit->file_index_begin);
+						
+						$id = md5($file.$hit->line_number.$hit->line_text);
 						if(isset($shits[$id]))
 						{
 							$hit = $shits[$id];
@@ -219,11 +317,39 @@ class Cryptography extends App{
 						else
 						{	
 							$hit->file = $file;
-							$hit->file_identifier = md5($package.$file);
-							$hit->package[]= $package;
+							$hit->file_identifier = [];
+							$hit->package = [];
 							$hit->location = [];
 							$hit->id =$id;
 						}
+						$fd = md5($package.$file);
+						$found=0;
+						$save=0;
+		
+						$found=0;
+						foreach($hit->package as $pkg)
+						{
+							if($pkg == $package)
+								$found=1;
+						}
+						if(!$found)
+						{
+							$hit->package[] = $package;
+							$save = 1;
+						}
+						
+						$found=0;
+						foreach($hit->file_identifier as $file_identifier)
+						{
+							if($file_identifier == $fd)
+								$found=1;
+						}
+						if(!$found)
+						{
+							$hit->file_identifier[] = $fd;
+							$save = 1;
+						}
+							
 						$found=0;
 						foreach($hit->location as $loc)
 						{
@@ -231,26 +357,28 @@ class Cryptography extends App{
 								$found=1;
 						}
 						if(!$found)
+						{
 							$hit->location[] = $value->file_paths[0];
-							
+							$save = 1;
+						}
 						if(isset($ids[$hit->id]))
 						{
 							continue; // already created
 						}
 						$ids[$hit->id] = $hit->id;
-						if(isset($hit->triaged))
+						$triage = $this->ReadTriage($hit->id);
+						if($triage->triaged==1)
 							$file_object->triaged++;
 						
-						if(isset($hit->suspicios))
+						if($triage->suspicious==1)
 							$file_object->suspicios++;
 							
 						$file_object->hits++;
-						if(!$found)
+						if($save == 1)
 							$this->SaveHit($hit);
 					}
 				}
 				$package_object->files =  array_values($package_object->files);
-				
 				if(!isset($data->imported))
 				{
 					$data = json_decode(file_get_contents($this->datafolder."/".$fileinfo->getFilename()));
@@ -277,13 +405,15 @@ class Cryptography extends App{
 			$package->hits=0;
 			foreach($package->files as $file)				
 			{
-				$package->triaged += $file_object->triaged;
-				$package->suspicios += $file_object->suspicios;
-				$package->hits += $file_object->hits;
+				$package->triaged += $file->triaged;
+				$package->suspicios += $file->suspicios;
+				$package->hits += $file->hits;
 			}
+			
 			$project->triaged += $package->triaged;
 			$project->suspicios += $package->suspicios;
 			$project->hits += $package->hits;
+			
 			$i++;
 		}
 		foreach($del as $d)
@@ -291,6 +421,7 @@ class Cryptography extends App{
 			unset($project->packages[$d]);
 		}
 		$project->packages = array_values($project->packages);
+		
 		$this->SaveProject($project);
 		
 	}

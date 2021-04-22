@@ -198,6 +198,10 @@ class CryptoDetector(object):
                     self.quick_scan_result[package_name] = False
 
                 for file_path in file_list:
+                    print("name:"+file_path["physical_path"],flush=True)
+                    if '\\\\.\\aux' == file_path["physical_path"]:
+                        continue
+
                     content, language = self.read_file(file_path["physical_path"])
                     if content is None:
                         raise FailedFileRead("Failed to open the file '" + file_path["display_path"] \

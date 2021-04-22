@@ -3,3 +3,8 @@ php artisan schedule:work
 
 D:\xampp\htdocs\nscriptwallet\data\cveportal\static>aws s3 rm s3://eps.mentorcloudservices.com/cveportal --recursive
 D:\xampp\htdocs\nscriptwallet\data\cveportal\static>aws s3 sync . s3://eps.mentorcloudservices.com/cveportal --acl public-read-write
+
+Force delete
+E:\OSS\IOS1.5.5>rd /s "\\?\E:\OSS\IOS1.5.5\tbd - lvm2-2.02.168-34"
+
+D:\xampp\htdocs\nscriptwallet\app\Apps\Cveportal\staticpages>aws s3 cp index.html s3://eps.mentorcloudservices.com/cveportal/ --acl public-read

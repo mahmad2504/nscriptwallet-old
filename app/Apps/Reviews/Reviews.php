@@ -37,7 +37,7 @@ class Reviews extends App{
 	public function Rebuild()
 	{
 		$this->db->tickets->drop();
-		$this->options['email']=0;// no emails when rebuild
+		//$this->options['email']=0;// no emails when rebuild
 	}
 	public function SaveTicket($ticket)
 	{
@@ -155,9 +155,13 @@ class Reviews extends App{
 				else
 				{
 					$parts = explode('cc',$line);
+					//dump($ticket->key);
+					//dump($parts);
 					if(count($parts)==2)
 					{
 						$parts = explode('~',$parts[1]);
+						if(!isset($parts[1]))
+						  continue;
 						$parts = explode(']',$parts[1]);
 						
 						if(!array_key_exists($parts[0],$users))
@@ -180,7 +184,7 @@ class Reviews extends App{
 				$comments = $this->FetchComments($ticket->key);
 				foreach($comments->comments as $comment)
 				{
-					if(strtolower($comment->body)=='approved')
+					if(( strtolower($comment->body)=='approved')||(strtolower($comment->body)=='approved.'))
 					{
 						if(!array_key_exists($comment->author->name,$users))
 						{
@@ -228,25 +232,34 @@ class Reviews extends App{
 				else if($sticket->updated != $ticket->updated)
 				{
 					$subject = 'Notification:Review Request - Updated:'.$ticket->key;
-					if($now->isMonday()||$now->isThursday()) 
-					{
-						
-					}
-					else
-						$this->options['email']=2;
 				}
 				else
 				{
 					//if($isupdatedtoday)
 					//	continue;
 					$subject = 'Notification:Review Request - Reminder:'.$ticket->key;
+					
+					if($this->options['force']==0)
+					{
 					if($now->isMonday()||$now->isThursday()) 
 					{
-						
+							if($isupdatedtoday)
+							{
+								if($this->options['force']==0)
+									continue;
+							}
 					}
 					else
-						$this->options['email']=2;
+							continue;
+					}
 				}
+				if($this->options['force']==0)
+				{ }
+				else if($this->options['key']!=$ticket->key)
+				{
+					continue;
+				}
+					
 				$email->AddAttachement('public/apps/Reviews/checkmark.png');
 				$email->AddAttachement('public/apps/Reviews/incomplete.jpg');
 				$reviewer = [];
@@ -257,11 +270,15 @@ class Reviews extends App{
 				}
 				$cc = [];
 				$cc[] = $ticket->reporter['emailAddress'];
+				if(!isset($ticket->cc))
+					$ticket->cc = [];
+				
 				foreach($ticket->cc as $c)
 				{
 					if($c->email != '')
 						$cc[] = $c->email;
 				}
+				
 				$email->Send($this->options['email'],$subject,$html,$reviewer,$cc);
 				
 			}

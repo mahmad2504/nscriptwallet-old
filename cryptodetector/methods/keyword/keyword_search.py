@@ -22,7 +22,7 @@ class KeywordSearch(Method):
     kwlist_version = None
 
     options = {
-        "ignore_case": False,
+        "ignore_case": True,
         "kwlist_path": join(dirname(realpath(__file__)), "keyword_list.txt")
     }
 

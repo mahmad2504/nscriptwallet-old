@@ -19,7 +19,8 @@ class Ldap
 	}   
 	function Login($user,$password)
 	{
-		return $this->FakeLogin($user,$password);
+		if($user == 'himp')
+		    return $this->FakeLogin($user,$password);
 		$this->ldap_conn=ldap_connect($this->ldaphost);  // must be a valid LDAP server!
 		$ldap_conn = $this->ldap_conn;
 		$bindDN = $user.'@mgc.mentorg.com';

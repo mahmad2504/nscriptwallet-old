@@ -1,5 +1,13 @@
 {
-	"monitoring_lists" : [ "24A891CF", "3FCF4617" ],
+	"monitoring_lists" : [
+		"24A891CF",
+		"3FCF4617",
+		"60E18454",
+		"223A6F58",
+		"172E171C",
+		"558C6FBF",
+		"7947066E"
+	],
 	"groups" : {
 		"Mentor® Embedded Industrial OS" : {
 			"MFP" : {
@@ -8,7 +16,16 @@
 					"active" : "1",
 					"external" : "1",
 					"notify" : "mumtaz_ahmad@mentor.com",
-					"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ]
+					"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq", "bbhola", "khula", "chombour" ],
+					"publish" : "1"
+				},
+				"1.5.4" : {
+					"id" : "7947066E",
+					"active" : "1",
+					"external" : "1",
+					"notify" : "mumtaz_ahmad@mentor.com",
+					"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq", "bbhola", "khula", "chombour" ],
+					"publish" : "1"
 				}
 			}
 		},
@@ -19,7 +36,43 @@
 					"active" : "1",
 					"external" : "1",
 					"notify" : "mumtaz_ahmad@mentor.com",
-					"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq" ]
+					"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq", "bbhola", "khula", "chombour" ],
+					"publish" : "0"
+				}
+			}
+		},
+		"Mentor® Flex OS" : {
+			"i.MX6Quad Sabre" : {
+				"12.0.0" : {
+					"id" : "223A6F58",
+					"active" : "1",
+					"external" : "1",
+					"notify" : "mumtaz_ahmad@mentor.com",
+					"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq", "bbhola", "khula", "chombour" ],
+					"parents" : [ "60E18454" ],
+					"publish" : "1"
+				}
+			},
+			"i.MX ULL" : {
+				"12.0.0" : {
+					"id" : "172E171C",
+					"active" : "1",
+					"external" : "1",
+					"notify" : "mumtaz_ahmad@mentor.com",
+					"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq", "bbhola", "khula", "chombour" ],
+					"parents" : [ "60E18454" ],
+					"publish" : "1"
+				}
+			},
+			"i.MX8M NANO" : {
+				"12.0.0" : {
+					"id" : "558C6FBF",
+					"active" : "1",
+					"external" : "1",
+					"notify" : "mumtaz_ahmad@mentor.com",
+					"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq", "bbhola", "khula", "chombour" ],
+					"parents" : [ "60E18454" ],
+					"publish" : "1"
 				}
 			}
 		}

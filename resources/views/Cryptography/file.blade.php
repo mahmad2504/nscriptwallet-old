@@ -1,10 +1,9 @@
+
 <!DOCTYPE html>
 <html class="no-js" lang="en">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Security - Mentor Graphics</title>
-
-<link rel="stylesheet" href="{{ asset('libs/tabulator/css/tabulator.min.css') }}" />
 
 <style>
 .progress 
@@ -45,9 +44,10 @@
       border-radius:25px;
     }
 </style
-</style>
 </head>
 <body>
+	
+
 	<div class="flex-container">
 		<div class="row"> 
 			<br>
@@ -62,48 +62,31 @@
 			<hr>
 			
 			<div class="flex-item"> 
-			<div id="tabulator-table"></div>
+			<div id="file">
+				
+			</div>
 			</div>
 		</div>
 	</div>
-	<script src="{{ asset('apps/cryptography/js/progressbar.min.js') }}"></script>
 	<script src="{{ asset('libs/jquery/jquery.min.js') }}"></script>
-	<script src="{{ asset('libs/tabulator/js/tabulator.min.js') }}" ></script>
 	<script>
-	var hits = @json($hits);
-	console.log(hits);
-	
-	columns = 
-	[
-        {title:"Evidence", field:"evidence_type", sorter:"string"},
-        {title:"Line", field:"line_number", sorter:"number"},
-		{title:"Library", field:"encryption_library", sorter:"string"},
-		{title:"Suspicios", field:"suspicios", sorter:"number"},
-		{title:"Progress", field:"progress", width:120,formatter:"progress", 
-			formatterParams:function(cell)
-			{
-				return {
-					min:0,
-					max:100,
-					color:["green", "green", "green"],
-					legendColor:"#000000",
-					legendAlign:"center",
-					legend:cell.getValue()+"%"
-					}
-			}
-		}
-	];
+	var file_data =  @json($file_data);
 	$(document).ready(function()
 	{
-		console.log("Cryptography Page Loaded");
-		var table = new Tabulator("#tabulator-table", {
-		data:hits,
-		columns:columns,
-		pagination:"local",
-		paginationSize:50,
-		paginationSizeSelector: [10, 25, 50, 100],
-		
-		});
+		var style = '';
+		for(var i=0;i<file_data.length;i++)
+		{
+			var line = file_data[i];
+			if(line.startsWith("HIT"))
+				style = 'color:red;font-weight:bold;';
+			$('#file').append('<div style="float:left;'+style+'">'+line+'</div><br>');
+			if(line.startsWith("HIT"))
+				style ='color:red;font-weight:bold;';
+			else
+				style ='color:black';
+			
+			console.log(line);
+		}
 	});
 	</script>
 </body>

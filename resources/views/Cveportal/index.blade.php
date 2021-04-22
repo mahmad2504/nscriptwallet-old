@@ -115,7 +115,7 @@
 					</div>
 					@for ($i = 0; $i < count($group_names); $i++)
 					<li class="list-group-item list-group-item-nav p-a-0">
-						<a class="productbutton" data-index="{{$i}}"  title="{{$group_names[$i]}}">{{$group_names[$i]}}</a>
+						<a  class="productbutton" data-index="{{$i}}"  title="{{$group_names[$i]}}">{{$group_names[$i]}}</a>
 					</li>
 					@endfor
 				</div>
@@ -155,6 +155,8 @@
 						</select>
 						<select  id="select_version" style="margin-left:10px;float:none;">
 						</select>
+						<div style="float:right;color:white"><a style="color:white" id="download" href="#">Download</a> </div><br>
+							
 					</div>
 					<div class="card-block">
 						<div class="row-container  ">
@@ -201,8 +203,12 @@
 			</div>
 		</div>
 	</footer>
+	<script src="//cdn.jsdelivr.net/bluebird/3.5.0/bluebird.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.js"></script>
+	<script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>
 	<script src="{{ asset('apps/cveportal/js/svg.js') }}"></script>
 	<script src="{{ asset('libs/jquery/jquery.min.js') }}"></script>
+	<script src="{{ asset('libs/sheetjs/xlsx.full.min.js')}}" ></script>
 	<script src="{{ asset('libs/tabulator/js/tabulator.min.js') }}" ></script>
 
 	<script>
@@ -245,12 +251,12 @@
 	}
 	function AddOption(id,optionText,optionValue,selected) 
 	{ 
-		if(!selected)
-			$('#'+id).append(`<option value="${optionValue}"> ${optionText} </option>`); 
+	    if(!selected)
+			$('#'+id).append('<option value="'+optionValue+'">'+ optionText +"</option>"); 
 		else							
-			$('#'+id).append(`<option value="${optionValue}" selected> ${optionText} </option>`);							
+			$('#'+id).append('<option value="'+optionValue+'" selected>'+ optionText +"</option>");							
     } 
-	$('#select_group').on('change', function()
+	$("#select_group").on("change", function()
 	{
 		index = group_names.indexOf(this.value);
 		$('#select_product').children().remove();
@@ -300,9 +306,10 @@
 		console.log(url);
 		CreateTable(url,columns);
 	}
+	var table =null;
 	function CreateTable(url,columns)
 	{
-		var table = new Tabulator("#vulnerability-table", {
+		table = new Tabulator("#vulnerability-table", {
 			columns:columns,
 			pagination:"local",
 			paginationSize:25,
@@ -448,6 +455,10 @@
 		
 		url = '/cveportal/cve/'+selected_group+'/'+selected_product+'/'+selected_version;
 		CreateTable(url,Get3Columns());
+		$('#download').on('click',function()
+		{
+			table.download("xlsx", "cves.xlsx", {sheetName:"cve"});
+		});
 	});
 	</script>
 </body>

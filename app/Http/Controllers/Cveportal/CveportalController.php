@@ -47,10 +47,8 @@ class CveportalController extends Controller
 			return view('cveportal.login');
 		if(!isset($data->user_name))
 			return view('cveportal.login');
-
 		$p = new Product();
 		$group_names = $p->GetGroupNames($data->user_name);
-
 		$product_names = [];
 		$version_names = [];
 		foreach($group_names as $group_name)

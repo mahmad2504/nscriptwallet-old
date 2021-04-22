@@ -15,6 +15,10 @@
 	font-weight:bold;
 }
 
+table, tr, td {
+    border: none;
+}
+
 </style>
 </head>
 
@@ -30,8 +34,16 @@
 		<p id="cve_description"></p>
 		<p id="cve_solution"></p>
 		<div id="commentdiv" style="display:none">
-			<label for="comment">Comment</label>
-			<input size="50" type="text" id="comment" name="comment"><button id="save">Save</button>
+			<table style="border: none;">
+				<tr>
+					<td>
+			           <textarea  placeholder="Comment" rows="3" cols="100" id="comment" name="comment" ></textarea>
+					</td>
+					<td>
+					   <button style="margin-left:20px;margin-bottom:-10px" id="save">Save</button>
+					</td>
+				</tr>
+			</table>
 		</div>
 		<div  class="card card-block" style="margin-bottom:0px;">
 			<div>

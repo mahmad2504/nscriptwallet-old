@@ -69,11 +69,14 @@ class Cvestatus extends Cveportal{
 		);
 		if($record == null)
 		{
+			$product = new Product();
 			$ret = new \StdClass();
 			$ret->cve=$cve;
 			$ret->productid=$productid;
+			$p = $product->GetProduct($ret->productid);
+			
 			$ret->triage=$this->default_triage_status;
-			$ret->publish=0;
+			$ret->publish=$p->publish;
 			$ret->source='manual';
 			$ret->comment='';
 			$this->UpdateStatus($ret);

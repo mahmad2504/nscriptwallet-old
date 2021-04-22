@@ -159,6 +159,24 @@ class Staticpages extends Cveportal{
 		return $xml;
 		
 	}
+	public function Upload2($data,$dest)// dest  is 'cveportal/data/filename',
+	{
+		$s3Client = new S3Client([
+			//'profile' => 'default',
+			'region' => 'us-west-2',
+			'version'     => 'latest',
+			'credentials' => [
+				'key'    => env('AWS_KEY'),
+				'secret' => env('AWS_SECRET'),
+			]
+		]);
+		$result = $s3Client->putObject([
+        'Bucket' => env('AWS_URL'),
+        'Key'    => $dest,
+        'Body'   => $data,
+        'ACL'    => 'public-read'
+		]);
+	}
 	public function Publish($data,$filename)
 	{
 		dump($filename);

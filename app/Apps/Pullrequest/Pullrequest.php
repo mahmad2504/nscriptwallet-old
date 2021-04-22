@@ -196,6 +196,7 @@ class Pullrequest extends App{
 					$del = ',';
 				}	
 				$openpr->author = $pr->author->user->displayName;
+				if(isset($pr->author->user->emailAddress))
 				$openpr->author_email = $pr->author->user->emailAddress;
 				$repository = $pr->fromRef->repository->slug;
 				$openpr->reviewers = [];
@@ -267,11 +268,15 @@ class Pullrequest extends App{
 				usort($pending_prs, [$this,'sortfunc']);
 				$html = $this->HtmlFormat($repository,$pending_prs);
 				$cc['mumtaz_ahmad@mentor.com']='mumtaz_ahmad@mentor.com';
+				if(isset($openpr->author_email))
 				$to[$openpr->author_email]=$openpr->author_email;
 				$to = array_values($to);
 				$cc = array_values($cc);
 				$email = new Email();
+				if(isset($openpr->author_email))
 				$subject = 'Notification:Open PR:NUC:'.$repository;
+				else
+					$subject = 'Notification:Open PR:NUC:'.$repository.' (Author email missing !!!)';
 				$email->AddAttachement('public/apps/Pullrequest/checkmark.png');
 				$email->AddAttachement('public/apps/Pullrequest/incomplete.jpg');
 				dump('Email sent for '.$repository);
