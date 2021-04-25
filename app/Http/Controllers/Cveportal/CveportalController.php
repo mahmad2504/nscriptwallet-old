@@ -40,6 +40,41 @@ class CveportalController extends Controller
 		$sp = new Staticpages();
 		$sp->Script();
 	}
+	
+	public function TriageCve(Request $request,$cve)
+	{
+		$data = $request->session()->get('data');
+		if($data == null)
+			return 'You are not logged';
+		if(!isset($data->user_name))
+			return 'You are not logged';
+		
+		$c =  new CVE();
+		$cvedata = $c->Get(null,$cve);
+		
+		$cvedata = $cvedata[0];
+		
+		$product = new Product();
+		$products = $product->GetProducts($data->user_name);
+		$myproducts = [];
+		foreach($products as $product)
+		{
+			$myproducts[$product->id] = $product;
+		}
+		
+		//$cvestatus = new CVEStatus();
+		//$cvedata->products = $cvestatus->GetAllStatus($cve);
+		
+		foreach($cvedata->product as $product)
+		{
+			if(!isset($myproducts[$product->status->productid]))
+				$product->readonly=1;
+			else
+				$product->readonly=0;
+		}
+		
+		return [$cvedata];
+	}
 	public function Triage(Request $request)
 	{
 		$data = $request->session()->get('data');
@@ -103,8 +138,18 @@ class CveportalController extends Controller
 		$product = $product=='all'?null:$product;
 		$version = $version=='all'?null:$version;
 		$admin = $admin=='all'?null:$admin;
+		$ids_ = [];
+		$pu = $p->GetProductByUser($admin);
+		foreach($pu as $_p)
+		{
+			$ids_[$_p->id] = $_p->id;
+		}
+		
 		$ids = $p->GetIds($group,$product,$version,$admin);
+		
+			
 		sort($ids);
+		
 		$key = md5(implode(",",$ids));
 		$data =  null;
 		if($admin ==  null)
@@ -118,6 +163,23 @@ class CveportalController extends Controller
 			else	
 				$data = $c->GetPublished($ids,1);
 			$cache->Put($key,json_encode($data));
+		}
+		foreach($data as $d)
+		{
+			foreach($d->product as $p)
+			{ 
+				if(isset($ids_[$p->status->productid]))
+				{
+					if($admin == null)
+						$p->status->readonly=1;
+					else
+						$p->status->readonly=0;
+				}
+				else
+				{
+					$p->status->readonly=1;
+				}
+			}
 		}
 		return $data;
 	}

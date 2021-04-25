@@ -28,15 +28,14 @@ class Cache extends Cveportal{
 	}
 	function Clean()
 	{
-		$scriptname = $this->scriptname;
-		$this->db->$scriptname->drop();
+		$this->db->cache->drop();
 		dump("Cache cleaned");
 	}
 	function Get($key)
 	{
 		$scriptname = $this->scriptname;
 		$query=['key'=>$key];
-		$obj = $this->db->$scriptname->findOne($query);
+		$obj = $this->db->cache->findOne($query);
 		if($obj == null)
 			return null;
 		$obj =  $obj->jsonSerialize();
@@ -51,6 +50,6 @@ class Cache extends Cveportal{
 		$scriptname = $this->scriptname;
 		$query=['key'=>$o->key];
 		$options=['upsert'=>true];
-		$this->db->$scriptname->updateOne($query,['$set'=>$o],$options);
+		$this->db->cache->updateOne($query,['$set'=>$o],$options);
 	}
 }

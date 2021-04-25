@@ -5,6 +5,7 @@
 <title>Security - Mentor Graphics</title>
 
 <link type="text/css" rel="stylesheet" href="{{ asset('apps/cveportal/css/mgc_agg.css') }}" />
+<link rel="stylesheet" href="{{ asset('libs/fontawesome/all.min.css') }}" />
 <link rel="stylesheet" href="{{ asset('libs/tabulator/css/tabulator.min.css') }}" />
 <link type="text/css" rel="stylesheet" href="{{ asset('apps/cveportal/css/mgc-icons-legacy.css') }}" />
 <link type="text/css" rel="stylesheet" href="{{ asset('apps/cveportal/css/cveportal.css') }}" />
@@ -18,21 +19,57 @@
 table, tr, td {
     border: none;
 }
+.tabulator .tabulator-tableHolder {
+	background-color :#F5F5F5
+}
 
+body{
+    font-family: 'Open Sans', sans-serif;
+}
 </style>
 </head>
 
 <body class=" mgc flex-body products">
 	<header class="header-main bg-secondary flex-none" role="navigation">
 	<!-- The Modal -->
+	<div id="tmodal" class="modal">
+	  <!-- Modal content -->
+	  <div class="modal-content" style="width:90%;margin: auto;">
+		<span id="closetmodal" class="close">&times;</span><br>
+		<h3 class="cve_title"></h3>
+		<small class="cve_description"></small><br>
+		<small style="font-weight:bold" class="cve_solution"></small>
+		<div  class="card card-block" style="margin-bottom:0px;">
+			<div>
+				<small style="float:left;margin-top:-10px;"><span style="font-weight:bold;">Vector: </span><span class="cvss_vector"></span></small>
+				<small style="float:right;margin-top:-10px;"><span style="font-weight:bold;">Attack Vector: </span><small class="cvss_attackvector"></small></small>
+			</div>
+			<br>
+			<div>
+				<small style="float:left;margin-top:-10px;"><span style="font-weight:bold;">Score: </span><span class="cvss_basescore"></span></small>
+				<small style="float:right;margin-top:-10px;"><span style="font-weight:bold;">Severity: </span><small class="cvss_severity"></small></small>
+			</div>
+			<br>
+			<div>
+				<small style="float:left;margin-top:-10px;"><span style="font-weight:bold;">Published: </span><span class="cve_published"></span></small>
+				<small style="float:right;margin-top:-10px;"><span style="font-weight:bold;">Modified: </span><small class="cve_modified"></small></small>
+			</div>
+		</div>
+		<div id="triage-table"></div>
+		<hr>
+		<small style="font-size:10px;margin-top:0px;float:right">Find out more about <span style="font-weight:bold;" class="cve_number"></span> from the <a id="mitre_link">MITRE-CVE</a> dictionary and <a class="nvd_link">NIST NVD</a></small>
+	  </div>
+	</div>
+	
+	<!-- The Modal -->
 	<div id="modal" class="modal">
 	  <!-- Modal content -->
 	  <div class="modal-content" style="width:60%;margin: auto;">
 		<span id="closemodal" class="close">&times;</span>
-		<h3 id="cve_title"></h3>
+		<h3 class="cve_title"></h3>
 		<h4>Description</h4>
-		<p id="cve_description"></p>
-		<p id="cve_solution"></p>
+		<p class="cve_description"></p>
+		<p class="cve_solution"></p>
 		<div id="commentdiv" style="display:none">
 			<table style="border: none;">
 				<tr>
@@ -47,22 +84,23 @@ table, tr, td {
 		</div>
 		<div  class="card card-block" style="margin-bottom:0px;">
 			<div>
-				<small style="float:left;margin-top:-10px;"><span style="font-weight:bold;">Vector: </span><span id="cvss_vector"></span></small>
-				<small style="float:right;margin-top:-10px;"><span style="font-weight:bold;">Attack Vector: </span><small id="cvss_attackvector"></small></small>
+				<small style="float:left;margin-top:-10px;"><span style="font-weight:bold;">Vector: </span><span class="cvss_vector"></span></small>
+				<small style="float:right;margin-top:-10px;"><span style="font-weight:bold;">Attack Vector: </span><small class="cvss_attackvector"></small></small>
 			</div>
 			<br>
 			<div>
-				<small style="float:left;margin-top:-10px;"><span style="font-weight:bold;">Score: </span><span id="cvss_basescore"></span></small>
-				<small style="float:right;margin-top:-10px;"><span style="font-weight:bold;">Severity: </span><small id="cvss_severity"></small></small>
+				<small style="float:left;margin-top:-10px;"><span style="font-weight:bold;">Score: </span><span class="cvss_basescore"></span></small>
+				<small style="float:right;margin-top:-10px;"><span style="font-weight:bold;">Severity: </span><small class="cvss_severity"></small></small>
 			</div>
 			<br>
 			<div>
-				<small style="float:left;margin-top:-10px;"><span style="font-weight:bold;">Published: </span><span id="cve_published"></span></small>
-				<small style="float:right;margin-top:-10px;"><span style="font-weight:bold;">Modified: </span><small id="cve_modified"></small></small>
+				<small style="float:left;margin-top:-10px;"><span style="font-weight:bold;">Published: </span><span class="cve_published"></span></small>
+				<small style="float:right;margin-top:-10px;"><span style="font-weight:bold;">Modified: </span><small class="cve_modified"></small></small>
 			</div>
 		</div>
 		<h4 style="margin-top:5px;">Products Affected</h4>
 		<div id="package_table"></div>
+		
 		<hr>
 		<small style="font-size:10px;margin-top:0px;float:right">Find out more about <span style="font-weight:bold;" id="cve_number"></span> from the <a id="mitre_link">MITRE-CVE</a> dictionary and <a id="nvd_link">NIST NVD</a></small>
 	  </div>
@@ -70,6 +108,7 @@ table, tr, td {
 	<!-- **************************************************************************** -->
 	<div class="header-main-logo">
 		<a class="logo-mentor m-t-xs" href="https://mentor.com"><span class="sr-only">Mentor, A Siemens Business</span></a>
+	
 	</div>
 	<nav class="header-main-navigation navbar-primary" id="primary">
 		<ul>
@@ -273,6 +312,7 @@ table, tr, td {
 					"Vulnerable":"Vulnerable",
 					"Won't Fix":"Won't Fix",
 					"Fixed":"Fixed",
+					"Not Applicable":"Not Applicable"
 				},
 				cellEdited:function(cell)
 				{
@@ -338,6 +378,10 @@ table, tr, td {
 					if(d.product[i].id == d.status.productid)
 					{
 						d.product[i].status.triage = d.status.triage;
+						if((d.status.publish == "1")||(d.status.publish == 1))
+							d.status.publish = true;
+						else
+							d.status.publish = false;
 						d.product[i].status.publish = d.status.publish;
 						d.product[i].status.comment = d.status.comment;
 						//console.log(d.product[i].status);
@@ -445,7 +489,6 @@ table, tr, td {
 					for(j=0;j<cve.product.length;j++)
 					{
 						product=cve.product[j];
-						
 						for(k=0;k<product.component.length;k++)
 						{
 							component  = product.component[k];
@@ -461,9 +504,16 @@ table, tr, td {
 						{
 							cve.jira = cve.status.source;
 						}
-						
+					}
+					if(cve.status.publish !== undefined)
+					{
+						if((cve.status.publish == "1")||(cve.status.publish == 1))
+							cve.status.publish = true;
+						else
+							cve.status.publish = false;
 					}
 				}
+				
 				console.log(response);
 				return response; //return the tableData property of a response json object
 			},
@@ -472,14 +522,20 @@ table, tr, td {
 				//e - the click event object
 				//cell - cell component
 				//cve.jira
-				var cve = cell.getRow().getData();
+				//var cve = cell.getRow().getData();
 				
-				
+				if((cell.getField() == 'cve'))
+				{
+					ShowTriageView(cell);
+					return;
+				}
 				if((cell.getField() == 'status.triage')||(cell.getField() == 'status.publish'))
 				{
-					// Do default click and list functions;
-					//console.log(cve.jira);
-					if(cve.jir == '')
+				}
+				else
+					ShowTriageView(cell);
+				return;
+				/*	if(cve.jir == '')
 					{
 						PopulateModal(cell.getRow().getData());
 						gcell = cell;
@@ -491,7 +547,7 @@ table, tr, td {
 					PopulateModal(cell.getRow().getData());
 					gcell = cell;
 					$('#modal').show();
-				}
+				}*/
 			},
 			rowClick:function(e, row)
 			{
@@ -507,9 +563,9 @@ table, tr, td {
 	{
 		console.log(data);
 		
-		$('#cve_title').text(data.cve);
-		$('#cve_description').text(data.description);
-		$('#cve_solution').text(data.solution);
+		$('.cve_title').text(data.cve);
+		$('.cve_description').text(data.description);
+		$('.cve_solution').text(data.solution);
 		console.log(data.status.comment);
 		if(col==3)
 		{
@@ -523,29 +579,29 @@ table, tr, td {
 		}
 		var published = new Date(data.published);
 		var published = published.toString().slice(4,15);
-		$('#cve_published').text(published);
+		$('.cve_published').text(published);
 		
 		var modified = new Date(data.modified);
 		var modified = modified.toString().slice(4,15);
-		$('#cve_modified').text(modified);
+		$('.cve_modified').text(modified);
 		
-		$('#cvss_vector').text(data.cvss.vectorString);
-		$('#cvss_basescore').text(data.cvss.baseScore);
+		$('.cvss_vector').text(data.cvss.vectorString);
+		$('.cvss_basescore').text(data.cvss.baseScore);
 		
 		if(data.cvss.accessVector !== undefined)
-			$('#cvss_attackvector').text(data.cvss.accessVector);
+			$('.accessVector').text(data.cvss.accessVector);
 		
 		if(data.cvss.attackVector !== undefined)
-			$('#cvss_attackvector').text(data.cvss.attackVector);
+			$('.cvss_attackvector').text(data.cvss.attackVector);
 		
 		if(data.cvss.baseSeverity !== undefined)
-			$('#cvss_severity').text(data.severity);
+			$('.cvss_severity').text(data.severity);
 		
-		$('#cve_number').text(data.cve);
+		$('.cve_number').text(data.cve);
 		link = "https://cve.mitre.org/cgi-bin/cvename.cgi?name="+data.cve;
-		$("#mitre_link").attr("href",link);
+		$(".mitre_link").attr("href",link);
 		link = "https://nvd.nist.gov/vuln/detail/"+data.cve;
-		$("#nvd_link").attr("href",link);
+		$(".nvd_link").attr("href",link);
 		
 		html='<table>';
 		html+='<tr>';
@@ -585,6 +641,12 @@ table, tr, td {
 	{
 		$('#modal').hide();
 	});
+	$('#closetmodal').on( "click", function() 
+	{
+		$('#tmodal').hide();
+		
+	});
+	
 	$(document).ready(function()
 	{
 		console.log("Vulnerability Page Loaded");
@@ -606,6 +668,226 @@ table, tr, td {
 		url = '/cveportal/cve/'+selected_group+'/'+selected_product+'/'+selected_version+'/'+admin;
 		CreateTable(url,Get3Columns());
 	});
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	function TriageditCheck(cell)
+	{
+		var data = cell.getRow().getData();
+		if(data.status.source == 'manual')
+			return 1;
+		
+		return !data.status.readonly;
+    }
+	function CreateTriageTable(url,data,selected_productid)
+	{
+		
+		columns = [
+		{title:"", field:"error", sorter:"string",width:20,
+			formatter:function(cell, formatterParams, onRendered)
+			{
+				var data = cell.getRow().getData();
+				if(data.status.source != 'manual')
+					return '<i title="Triage Via Jira Only" class="fas fa-crosshairs"></i>';
+				
+				if(data.status.readonly)
+					return '<i title="You donot have permissions to triage" class="fas fa-lock"></i>';
+				
+				if(data.status.current)
+					return '<i class="fas fa-arrow-circle-right"></i>';
+				
+			}
+		},
+        //{title:"id", field:"id", sorter:"string"},
+		//{title:"i", field:"status.current", sorter:"string"},
+		{title:"Product", field:"group", sorter:"string",width:250},
+		{title:"Version", field:"_name", sorter:"string",width:200},
+		{title:"Component", field:"_component", sorter:"string",width:150},
+		{title:"Triage", field:"status.triage", editor:"select", width:100,editorParams:
+				{
+					"Investigate":"Investigate",
+					"Vulnerable":"Vulnerable",
+					"Won't Fix":"Won't Fix",
+					"Fixed":"Fixed",
+					"Not Applicable":"Not Applicable",
+				},
+				cellEdited:function(cell)
+				{
+					UpdateTriageStatus(cell);
+				},
+				editable:TriageditCheck
+		},
+		{title:"Publish", field:"status.publish", width:100,editor:"tick",
+				cssClass:'editable',
+				formatter:function(cell, formatterParams, onRendered)
+				{	
+					if(cell.getValue() == '1')
+						return 'Published';
+					else
+						return '';
+					return cell.getValue();
+				},
+				cellEdited:function(cell)
+				{
+					UpdateTriageStatus(cell);
+				},
+				editable:TriageditCheck
+		},
+		{title:"Comment", field:"status.comment", editor:"textarea",
+				cellEdited:function(cell)
+				{
+					UpdateTriageStatus(cell);
+				},
+				editable:TriageditCheck
+		
+		}
+		
+		];
+		
+		
+		for(var i=0;i<data.length;i++)
+		{
+			var product=data[i];
+			product._component = product.component[0].name+" "+product.component[0].version;
+			product._name = product.name+"  "+product.version;
+			
+			product.status.current = 0;
+			if(product.status.productid == selected_productid)
+				product.status.current = 1;
+			
+			if((product.status.publish == "1")||(product.status.publish == 1))
+				product.status.publish= true;
+			else
+				product.status.publish= false;
+		}
+		console.log(data);
+		var table = new Tabulator("#triage-table", {
+			data:data,
+			columns:columns,
+			//autoColumns:true,
+			layout:"fitColumns",
+			 minHeight:90,
+			 tooltips:true,
+			/*ajaxURL:url,
+			ajaxResponse:function(url, params, response)
+			{
+				console.log(response[0]);
+				for(var i=0;i<response[0].product.length;i++)
+				{
+					var product=response[0].product[i];
+					product._component = product.component[0].name+" "+product.component[0].version;
+					product._name = product.name+"  "+product.version;
+					
+					if((product.status.publish == "1")||(product.status.publish == 1))
+						product.status.publish= true;
+					else
+						product.status.publish= false;
+				}
+				return response[0].product;
+			}*/
+			rowFormatter:function(row)
+			{
+				//row - row component
+				var data = row.getData();
+				
+				if(data.status.current)
+					row.getElement().style.color = "green";
+				
+				if(data.status.readonly)
+				{
+					row.getElement().style.color = "#cacaca";
+				}
+			},
+		});
+	}
+	function UpdateTriageStatus(cell)
+	{
+		data = cell.getRow().getData();
+		d = {};
+		
+		if(data.status.publish)
+			data.status.publish = "1";
+		else
+			data.status.publish = "0";
+		
+		d.status = data.status;
+		
+		d._token = "{{ csrf_token() }}";
+		$.ajax({
+			type:"PUT",
+			url:'{{route("cveportal.status.update")}}',
+			cache: false,
+			data:d,
+			success: function(response)
+			{
+				cell.getRow().getElement().style.backgroundColor = "#8FBC8F";
+				function colorrevert()
+				{
+					element = cell.getRow().getElement();
+					if($(element).hasClass('tabulator-row-even'))
+						element.style.backgroundColor = "#EFEFEF";
+					else
+						element.style.backgroundColor = "#ffffff";
+					var tdata = triage_cell.getRow().getData();
+					if(tdata.status.publish !== undefined)
+					{
+						if(data.status.publish == "1")
+							tdata.status.publish = true;
+						else
+							tdata.status.publish = false;
+						tdata.status.triage = data.status.triage;
+						tdata.status.comment = data.status.comment;
+					}
+					triage_cell.getRow().update(tdata);
+				};
+				setTimeout(colorrevert, 2000);
+			},
+			error: function(response)
+			{
+			}
+		});
+	}
+	
+	var triage_cell = null;
+	function ShowTriageView(cell)
+	{
+		triage_cell = cell;
+		var data = cell.getRow().getData();
+			
+		$('.cve_title').text(data.cve);
+		$('.cve_description').text(data.description);
+		$('.cve_solution').text(data.solution);
+		
+		$('.cvss_vector').text(data.cvss.vectorString);
+		
+		if(data.cvss.accessVector !== undefined)
+			$('.accessVector').text(data.cvss.accessVector);
+		
+		if(data.cvss.attackVector !== undefined)
+			$('.cvss_attackvector').text(data.cvss.attackVector);
+		
+		$('.cvss_basescore').text(data.cvss.baseScore);
+		var published = new Date(data.published);
+		var published = published.toString().slice(4,15);
+		$('.cve_published').text(published);
+		
+		if(data.cvss.baseSeverity !== undefined)
+			$('.cvss_severity').text(data.severity);
+		
+		var modified = new Date(data.modified);
+		var modified = modified.toString().slice(4,15);
+		$('.cve_modified').text(modified);
+		
+		$('.cve_number').text(data.cve);
+		link = "https://cve.mitre.org/cgi-bin/cvename.cgi?name="+data.cve;
+		$(".mitre_link").attr("href",link);
+		link = "https://nvd.nist.gov/vuln/detail/"+data.cve;
+		$(".nvd_link").attr("href",link);
+		
+		var url = '{{route("cveportal.triage")}}/'+data.cve;
+		//console.log(url);
+		//console.log(data.product);
+		CreateTriageTable(url,data.product,data.status.productid);
+		$('#tmodal').show();
+	}
 	</script>
 </body>
 </html>

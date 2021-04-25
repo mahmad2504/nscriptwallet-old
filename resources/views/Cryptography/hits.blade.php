@@ -136,6 +136,7 @@ tr { font-size:12px } /* Add borders to cells */
 		
 	columns = 
 	[
+		//{title:"ID", field:"id", sorter:"string"},
         {title:"Evidence", field:"evidence_type", sorter:"string"},
         {title:"Line", field:"line_number", sorter:"number"},
 		{title:"Text", field:"line_text", sorter:"string",width:600},

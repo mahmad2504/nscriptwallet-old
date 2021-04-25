@@ -48,7 +48,7 @@
 					"active" : "1",
 					"external" : "1",
 					"notify" : "mumtaz_ahmad@mentor.com",
-					"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq", "bbhola", "khula", "chombour" ],
+					"admin" : [ "ahsann", "snaaz", "hmsadiq", "bbhola", "khula", "chombour" ],
 					"parents" : [ "60E18454" ],
 					"publish" : "1"
 				}

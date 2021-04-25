@@ -207,6 +207,17 @@ class Product extends Cveportal{
 		];
 		return $this->db->products->findOne($query,$options);	
 	}
+	public function GetProductByUser($user)
+	{
+		$query['admin'] = new Regex(preg_quote("".$user), 'i');
+		$options = [
+			'projection'=>
+					["_id"=>0,
+					]
+		];
+		$list = $this->db->products->find($query,$options)->toArray();
+		return $list;
+	}
 	public function DumpInfo()
 	{
 		$group_names = $this->GetGroupNames(null,null);

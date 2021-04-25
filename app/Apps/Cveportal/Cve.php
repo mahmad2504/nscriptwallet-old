@@ -300,8 +300,9 @@ class Cve extends Cveportal{
 		$valid = 0;
 		$product_id = "-1";
 		$p = new Product();
-		if(count($id)==1)
-			$product_id = $id[0];
+		if($id != null)
+			if(count($id)==1)
+				$product_id = $id[0];
 		$cve->status = 'Not Applicable';
 		foreach($cve->product as $product)
 		{
@@ -317,7 +318,7 @@ class Cve extends Cveportal{
 		}
 		return $cve;
 	}
-	function Get($ids)
+	function Get($ids,$cve=null)
 	{
 		$options = [
 			'sort' => ['nvd.lastModifiedDate' => -1],
@@ -334,8 +335,14 @@ class Cve extends Cveportal{
 					"solution"=>1,
 					"cve"=>1]
 		];
-		$query  = ['product.id'=>['$in'=>$ids]];
+		$query = [];
+		if($ids != null)
+			$query['product.id']=['$in'=>$ids];
+		if($cve != null)
+			$query['cve']=$cve;
+		
 		$cves = $this->db->cves->find($query,$options)->toArray();
+		
 		$cvedata = [];
 		foreach($cves as $record)
 		{

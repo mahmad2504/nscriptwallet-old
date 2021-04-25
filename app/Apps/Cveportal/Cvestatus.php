@@ -45,8 +45,7 @@ class Cvestatus extends Cveportal{
 			$s->comment = $status['comment'];
 			$status = $s;
 		}
-		$collection = $this->scriptname;
-		$this->db->$collection->updateOne(
+		$this->db->status->updateOne(
             [
 				'status.cve'=>$status->cve,
 				'status.productid'=>$status->productid
@@ -58,10 +57,18 @@ class Cvestatus extends Cveportal{
             ['upsert' => true]
         );
 	}
+	public function GetAllStatus($cve)
+	{
+		$records = $this->db->status->find(
+			[
+				'status.cve'=>$cve
+			]
+		);
+		return $records->toArray();
+	}
 	public function GetStatus($cve,$productid)
 	{
-		$collection = $this->scriptname;
-		$record = $this->db->$collection->findOne(
+		$record = $this->db->status->findOne(
 			[
 				'status.cve'=>$cve,
 				'status.productid'=>$productid
@@ -89,8 +96,7 @@ class Cvestatus extends Cveportal{
 	}
 	public function GetPublished($productid)
 	{
-		$collection = $this->scriptname;
-		$records = $this->db->$collection->find(
+		$records = $this->db->status->find(
 			[
 				'status.productid'=>$productid,
 			]	
