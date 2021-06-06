@@ -158,10 +158,10 @@ class Pullrequest extends App{
 			$data = $this->Get($url);
 			$pending_prs = [];
 			$repository = null;
-			
+			dump($url);
 			foreach($data->values as $pr)
 			{
-				//dump($pr->title);
+				dump($pr->title);
 				$openpr =  new \StdClass();
 				$openpr->title = $pr->title;
 				$jira_ref = explode(" ",$pr->title);
@@ -281,10 +281,11 @@ class Pullrequest extends App{
 				$email->AddAttachement('public/apps/Pullrequest/incomplete.jpg');
 				dump('Email sent for '.$repository);
 				$email->Send($this->options['email'],$subject,$html,$to,$cc);
+				$now = Carbon::now($this->timezone); 
+				$lastemailsenton = $this->app->Save(['lastemailsenton'=>$now->format('Y-m-d')]);
 				//$this->SendEmail($html,'Notification:Open PR:NUC:'.$repository,$to,$cc);
 			}
 		}
-		$now = Carbon::now($this->timezone); 
-		$lastemailsenton = $this->app->Save(['lastemailsenton'=>$now->format('Y-m-d')]);
+		
 	}
 }

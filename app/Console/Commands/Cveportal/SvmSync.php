@@ -11,7 +11,7 @@ class SvmSync extends Command
      *
      * @var string
      */
-    protected $signature = 'cveportal:svm:sync {--rebuild=0} {--force=0} {--email=2} {--email_resend=0}';
+    protected $signature = 'cveportal:svm:sync {--rebuild=0} {--force=0} {--email=2} {--organization=default}';
 
     /**
      * The console command description.

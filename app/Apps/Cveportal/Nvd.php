@@ -9,10 +9,11 @@ use \MongoDB\BSON\UTCDateTime;
 
 class Nvd extends Cveportal{
     private $datafolder = "data/cveportal/nvd";
-	public $scriptname = "cveportal:nvd";
+	public $scriptname = "cveportal_nvd";
 	public $urls = [
-			"https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-2020.json.zip",	
-		    "https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-2019.json.zip",
+	    "https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-2021.json.zip",	
+	    "https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-2020.json.zip",	
+	     "https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-2019.json.zip",
             "https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-2018.json.zip",
             "https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-2017.json.zip",	
             "https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-2016.json.zip",
@@ -31,22 +32,19 @@ class Nvd extends Cveportal{
             "https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-2003.json.zip",
             "https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-2002.json.zip",
         ];
-	public function __construct($options=null)
+	public function __construct($options)
     {
 		ini_set("memory_limit","2000M");
 		set_time_limit(3000);
 		
 		$this->namespace = __NAMESPACE__;
-		$this->mongo_server = env("MONGO_DB_SERVER", "mongodb://127.0.0.1");
-		$this->options = $options;
 		if(!file_exists($this->datafolder))
 			mkdir($this->datafolder, 0, true);
-		parent::__construct($this);
+		parent::__construct($options);
 
     }
-	public function TimeToRun($update_every_xmin=10)
+	public function TimeToRun($update_every_xmin=1440)
 	{
-		return true;
 		return parent::TimeToRun($update_every_xmin);
 	}
 	
@@ -127,6 +125,7 @@ class Nvd extends Cveportal{
 	}
 	private function  PreProcess($filename)
 	{
+		
 		$data = file_get_contents($filename);
 		//echo memory_get_usage()."\n";
 		$json = json_decode($data);

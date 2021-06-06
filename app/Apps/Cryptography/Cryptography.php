@@ -28,10 +28,10 @@ class Cryptography extends App{
 	{
 		if($yes)
 		{
-			$this->datafolder = "D://Assignments//OSS//ossproject3";//data cryptography";
+			$this->datafolder = "D://OSS//comfort-2.3";//data cryptography";
 		}
 		else
-			$this->datafolder = "D://Assignments//OSS//ossproject3";//.. data/cryptography";
+			$this->datafolder = "D://OSS//comfort-2.3";//.. data/cryptography";
 	}
 	public function Rebuild()
 	{
@@ -68,11 +68,12 @@ class Cryptography extends App{
 	function SearchHits($package,$line_text,$line_text_after_1,$line_text_after_2,$line_text_after_3)
 	{
 		$query = [];
-		$query['package'] = $package;
+		$query['package'] = str_replace(" ","+",$package);
 		$query['line_text'] = $line_text;
 		$query['line_text_after_1'] = $line_text_after_1;
 		$query['line_text_after_2'] = $line_text_after_2;
 		$query['line_text_after_3'] = $line_text_after_3;
+		
 		$obj = $this->db->hits->find($query);
 		if($obj == null)
 			return null;

@@ -28,6 +28,8 @@ class App
 			$this->options['email'] = 2;
 		if(!isset($this->options['email_resend']))
 			$this->options['email_resend'] = 0;
+		if(!isset($this->options['dbname']))
+			$this->options['dbname']=null;
 		
 	}
 	public function InConsole($yes)
@@ -38,6 +40,7 @@ class App
 	public function __construct($app)
 	{
 		$this->InitOption();
+		
 		$this->app = $app;
 		if(app()->runningInConsole())
 		{
@@ -47,11 +50,16 @@ class App
 			 $app->InConsole(false);
 		 
 		if(!isset($this->namespace))
-			dd("App namespace not set");
+			$this->namespace = __NAMESPACE__;
+			
 		$parts = explode("\\",$app->namespace);
 		$key = strtolower($parts[count($parts)-1]);
 		$this->key = $key;
-		$this->dbname=$key;
+		if($this->options['dbname'] == null) 
+			$this->dbname=$key;
+		else
+			$this->dbname=$this->options['dbname'];
+		
 		if(isset($this->timezone))
 			date_default_timezone_set($this->timezone);
 		
@@ -60,7 +68,10 @@ class App
 		
 		$mongoclient =new Client($this->mongo_server);
 		$this->mongo = $mongoclient;
-		$this->db = $mongoclient->$key;
+		$dbname = $this->dbname;
+		$this->db = $mongoclient->$dbname;
+		
+		
 		if(isset($this->jira_server))
 		{
 			$this->fields = new Fields($this);
@@ -73,6 +84,51 @@ class App
 				if($this->isAssoc($this->jira_customfields))
 					$this->fields->Set($this->jira_customfields);
 				$this->fields->Dump();
+			}
+		}
+	}
+	public function DeleteDirectory($dir) 
+	{
+		if (!file_exists($dir)) 
+		{
+			return true;
+		}
+		if (!is_dir($dir)) 
+		{
+			return unlink($dir);
+		}
+		foreach (scandir($dir) as $item) 
+		{
+			if ($item == '.' || $item == '..') 
+			{
+				continue;
+			}
+			if (!$this->DeleteDirectory($dir . DIRECTORY_SEPARATOR . $item)) 
+			{
+				return false;
+			}
+		}
+		return rmdir($dir);
+	}
+	public function EmptyDirectory($dir) 
+	{
+		if (!file_exists($dir)) 
+		{
+			return true;
+		}
+		if (!is_dir($dir)) 
+		{
+			return unlink($dir);
+		}
+		foreach (scandir($dir) as $item) 
+		{
+			if ($item == '.' || $item == '..') 
+			{
+				continue;
+			}
+			if (!$this->DeleteDirectory($dir . DIRECTORY_SEPARATOR . $item)) 
+			{
+				return false;
 			}
 		}
 	}
@@ -110,22 +166,25 @@ class App
 	}
 	public function Run()
 	{
+		
 		if($this->app->TimeToRun())
 		{
 			if($this->options['rebuild'])
 				$this->Rebuild();
 			dump("#########  Running script ".$this->scriptname."  #########");
+			$this->Save([$this->scriptname.'_sync_requested'=>1]);
+			
 			$this->Script();
 			$this->SaveUpdateTime();
-			$this->Save(['sync_requested'=>0]);
+			$this->Save([$this->scriptname.'_sync_requested'=>0]);
 			
 			$sec = $this->SecondsSinceLastUpdate();
-			$error_sync = $this->Read('error_sync');
+			$error_sync = $this->Read($this->scriptname.'_error_sync');
 			if($error_sync==1)
 			{
 				$subject = "Service Status Alert : ".strtoupper($this->scriptname)." : Up ";
 				$this->NotifyAdmin('Service '.$this->scriptname." is restored",$subject);
-				$this->Save(['error_sync'=>0]);
+				$this->Save([$this->scriptname.'_error_sync'=>0]);
 			}
 			dump("Done");
 		}
@@ -134,17 +193,33 @@ class App
 	{
 		dd("Implement Scriot function");
 	}
+	public function IsSyncRequested()
+	{
+		$val = $this->Read($this->scriptname.'_sync_requested');
+		if($val == 0)
+			return 0;
+		return 1;
+	}
+	public function RequestSync()
+	{
+		$this->Save([$this->scriptname.'_sync_requested'=>1]);
+	}
+	public function ClearSyncRequest()
+	{
+		$this->Save([$this->scriptname.'_sync_requested'=>0]);
+	}
 	public function TimeToRun($update_every_xmin=1)
 	{
-		$sync_requested = $this->Read('sync_requested');
+		$sync_requested = $this->Read($this->scriptname.'_sync_requested');
+		
 		if($this->options['rebuild']||$this->options['force']||$sync_requested)
 			return true;
 		
 		$now = Carbon::now($this->timezone);
 		if($now->isWeekend())
 			return false;
+
 		
-			
 		$sec = $this->SecondsSinceLastUpdate();
 		
 		if($sec == null)
@@ -154,14 +229,14 @@ class App
 		}
 		if($sec >=  $update_every_xmin*3*60)
 		{
-			$timeout=$this->Read('timeout');
+			$timeout=$this->Read($this->scriptname.'_timeout');
 			$min_since_last_update = round($sec/60);
 			dump("Timeout #".$timeout."  [".$min_since_last_update."] minutes gone since last update. Update time out is ".($update_every_xmin*60)." seconds");
 			if($min_since_last_update > 1440)
 			{
 				$timeout=0;
 				$this->SaveUpdateTime();
-				$this->Save(['timeout'=>$timeout=0]);
+				$this->Save([$this->scriptname.'_timeout'=>$timeout]);
 			}
 			if($timeout==null)
 				$timeout=0;
@@ -171,22 +246,22 @@ class App
 				$this->NotifyAdmin('Service '.$this->scriptname.' has some issue and not updating',$subject);
 				dump("Sending Service Error Notification [".round($sec/60)."] minutes gone since last update. Update time out is ".($update_every_xmin*60)." seconds");
 				$timeout++;
-				$this->Save(compact('timeout'));
-				$this->Save(['error_sync'=>1]);
+				$this->Save([$this->scriptname.'_timeout'=>$timeout]);
+				$this->Save([$this->scriptname.'_error_sync'=>1]);
 				return false;
 			}
 			else
 			{
 				$timeout++;
 				//dump("timeout #".$timeout);
-				$this->Save(compact('timeout'));
+				$this->Save([$this->scriptname.'_timeout'=>$timeout]);
 				return true;
 			}
 		}
 		if($sec >=  $update_every_xmin*60)
 		{
 			$timeout = 0;
-			$this->Save(compact('timeout'));
+			$this->Save([$this->scriptname.'_timeout'=>$timeout]);
 			dump("Updating after [".round($sec/60)."] minutes");
 			return true;
 		}
@@ -284,17 +359,22 @@ class App
 		return $cursor;
 	}
 	
-	public function SaveUpdateTime()
+	public function SaveUpdateTime($id=null)
 	{
+		if($id==null)
+			$id=$this->scriptname.'_lastupdate';
 		$obj = new \StdClass();
 		$obj->date =  new \DateTime();
 		$obj->date = $obj->date->format('Y-m-d H:i:s');
-		$obj->id = 'lastupdate';
+		$obj->id = $id;
 		$lastupdate = $this->Save($obj);
 	}
-	public function ReadUpdateTime()
+	public function ReadUpdateTime($id=null)
 	{
-		$ud = $this->Read('lastupdate');
+		if($id==null)
+			$id=$this->scriptname.'_lastupdate';
+		
+		$ud = $this->Read($id);
 		if($ud ==  null)
 			return null;
 		else

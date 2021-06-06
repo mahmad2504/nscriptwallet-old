@@ -8,168 +8,50 @@ use App\Email;
 use \MongoDB\BSON\Regex;
 
 class Product extends Cveportal{
-	public $scriptname = 'cveportal:product';
-	public $jira_server = 'EPS';
-	public function __construct($options=null,$data=null)
+	public $scriptname = 'cveportal_product';
+	public function __construct($options)
     {
-		if($data == null)
-		{
-			$this->data = null;
-		}
-		else
-			$this->data = $data;
 		$this->namespace = __NAMESPACE__;
-		$this->mongo_server = env("MONGO_DB_SERVER", "mongodb://127.0.0.1");
-		$this->options = $options;
-		parent::__construct($this);
+		parent::__construct($options);
     }
-	public function TimeToRun($update_every_xmin=1)
+	public function TimeToRun($update_every_xmin=1440)
 	{
 		return parent::TimeToRun($update_every_xmin);
 	}
-	/*function IssueParser($code,$issue,$fieldname)
-	{
-		switch($fieldname)
-		{
-			default:
-				dd('"'.$fieldname.'" not handled in IssueParsers');
-		}
-	}*/
+	
 	public function Rebuild()
 	{
-		//$this->db->products->drop();
-		//$this->options['email']=0;// no emails when rebuild
+			
 	}
-	function DbGet($id)
+	public function GetGroups($query=[])
 	{
-		$query=['id'=>$id];
-		$obj = $this->db->products->findOne($query);
-		if($obj == null)
-			return null;
-		$obj =  $obj->jsonSerialize();
-		unset($obj->_id);
-		return $obj;
+		$products =  $this->GetProducts($query,['_id'=>0,'group'=>1],'group');
+		return $products;
 	}
-	function DbGetAll()
+	public function GetNames($query=[])
 	{
-		$query=[];
-		$obj = $this->db->products->find($query);
-		if($obj == null)
-			return null;
-		return $obj;
+		$products = $this->GetProducts($query,['_id'=>0,'name'=>1],'name');
+		return $products;
 	}
-	function GetProducts($admin=null,$active="1",$external=null)
+	public function GetVersions($query=[])
 	{
-		$query = [];
-		if($active != null)
-			$query['active'] = $active;
-
-		if($external != null)
-			$query['external'] = $external;
-		
-		if($admin!=null)
-			$query['admin'] = new Regex(preg_quote("".$admin), 'i');
-		
-		$obj = $this->db->products->find($query);
-		if($obj == null)
-			return null;
-		
-		return $obj->toArray();
-		
+		$products = $this->GetProducts($query,['_id'=>0,'version'=>1],'version');
+		return $products;
 	}
-	function GetComponents($id)
+	public function GetProducts($query=[],$projection=[],$distinct=null)
 	{
-		$query=['id'=>$id];
-		$obj = $this->db->monitoring_lists->findOne($query);
-		if($obj == null)
-			return null;
-		$obj =  $obj->jsonSerialize();
-		unset($obj->_id);
-		return $obj->components;
-	}
-	function DbPut($product)
-	{
-		$query=['id'=>$product->id];
-		$options=['upsert'=>true];
-		$this->db->products->updateOne($query,['$set'=>$product],$options);
-	}
-	function MonitoringLists()
-	{
-		$query=[];
-		$obj = $this->db->monitoring_lists->findOne($query);
-		if($obj == null)
-			return null;
-		$obj =  $obj->jsonSerialize();
-		unset($obj->_id);
-		return $obj->monitoring_lists->jsonSerialize();
-	}
-	function GetGroupNames($admin=null,$active="1",$external=null)
-	{
-		$products = $this->GetProducts($admin,$active,$external);
-		if($products == null)
-			return [];
-		$groups = [];
-		foreach($products as $product)
+		if($distinct == null)
 		{
-			if(isset($product->active))
-				if($product->active == 0)
-					continue;
-				
-			$groups[$product->group]=$product->group;
+			$obj = $this->db->products->find($query,['projection'=>$projection]);
+			return $obj->toArray();
 		}
-		return 	array_values($groups);
-	}
-	function GetProductNames($groupname,$active="1",$external=null)
-	{
-		$query=['group'=>$groupname];
-		if($active != null)
-			$query['active'] = $active;
-		
-		if($external != null)
-			$query['external'] = $external;
-		
-		$products = $this->db->products->find($query);
-		if($products == null)
-			return [];
-		$names = [];
-		foreach($products as $product)
+		else
 		{
-			$names[$product->name]=$product->name;
+			$obj = $this->db->products->distinct($distinct, $query,['projection'=>$projection]);
+			return $obj;
 		}
-		return array_values($names);
 	}
-	function GetVersionNames($group_name,$productname,$active="1",$external=null)
-	{
-		$query=['group'=>$group_name,'name'=>$productname];
-		if($active != null)
-			$query['active'] = $active;
-		
-		if($external != null)
-			$query['external'] = $external;
-		
-		
-		$products = $this->db->products->find($query);
-		if($products == null)
-			return [];
-		$versions  = [];
-		foreach($products as $product)
-		{
-			$versions[$product->version]=$product->version;
-		}
-		return array_values($versions);
-	}
-	public function GetIds($groupname=null,$productname=null,$versionname=null,$admin=null,$active="1",$external=null)
-	{
-		
-		$products = $this->GetCveProducts($groupname,$productname,$versionname,$admin,$active,$external);
-		$ids = [];
-		foreach($products as $product)
-		{
-			$ids[$product->id] = $product->id;	
-		}
-		return array_values($ids);
-	}
-	public function GetCveProducts($groupname=null,$productname=null,$versionname=null,$admin=null,$active="1",$external=null)
+	public function Search($groupname=null,$productname=null,$versionname=null,$admin=null,$external=null)
 	{
 		$query = [];
 		if($groupname!=null)
@@ -178,126 +60,74 @@ class Product extends Cveportal{
 			$query['name'] = new Regex(preg_quote($productname), 'i');
 		if($versionname!=null)
 			$query['version'] = $versionname;//new Regex(preg_quote("".$versionname), 'i');	
-		
-		if($active != null)
-			$query['active'] = $active;
-		
 		if($external != null)
 			$query['external'] = $external;
-		
 		if($admin!=null)
 			$query['admin'] = new Regex(preg_quote("".$admin), 'i');
-		$options = [
-			'projection'=>
-					["_id"=>0,
-					]
-		];
-		$list = $this->db->products->find($query,$options)->toArray();
-		return $list;
+		
+		return $this->GetIds($query);
 	}
-	public function GetProduct($id,$active=null)
+	public function GetIds($query=[])
 	{
-		$query['id'] = new Regex(preg_quote($id), 'i');
-		if($active != null)
-			$query['active'] = $active; 
-		$options = [
-			'projection'=>
-					["_id"=>0,
-					]
-		];
-		return $this->db->products->findOne($query,$options);	
-	}
-	public function GetProductByUser($user)
-	{
-		$query['admin'] = new Regex(preg_quote("".$user), 'i');
-		$options = [
-			'projection'=>
-					["_id"=>0,
-					]
-		];
-		$list = $this->db->products->find($query,$options)->toArray();
-		return $list;
+		$retval =  $this->GetProducts($query,['_id'=>0,'id'=>1],'id');
+		return $retval;
 	}
 	public function DumpInfo()
 	{
-		$group_names = $this->GetGroupNames(null,null);
-		$product_names = [];
-		$version_names = [];
-		foreach($group_names as $group_name)
+		$groups= $this->GetGroups();
+		$names = [];
+		$versions = [];
+		foreach($groups as $group)
 		{
-			dump($group_name);
-			$productnames = $this->GetProductNames($group_name,null);
-			foreach($productnames as $productname)
+			dump($group);
+			$names = $this->GetNames(["group"=>$group]);
+			foreach($names as $name)
 			{
-				$ps = $this->GetCveProducts($group_name,$productname,null,null,null);
-				if(count($ps) > 0)
+				$versions = $this->GetVersions(['group'=>$group,'name'=>$name]);
+				foreach($versions as $version)
 				{
-					foreach($ps as $p)
-					dump("    ".$p->name." ".$p->version."[id=".$p->id."][active=".$p->active."]");
+					$products = $this->GetProducts(["group"=>$group,"name"=>$name,"version"=>$version]);
+					foreach($products as $p)
+					{
+						dump("    ".$p->name." ".$p->version."[id=".$p->id."][external=".$p->external."][Lock=".$p->lock."]");
+					}
 				}
 			}
-			$product_names[] = $productnames;
 		}
 	}
+	
+	public function LastUpdated()
+	{
+		return $this->ReadUpdateTime('product_update');
+	}
+	
+	
 	public function Script()
 	{
-		$data = $this->data;
-		if(!isset($data->monitoring_lists))
+		$data = json_decode(file_get_contents($this->producturl));
+		if($data->status != 'ok')
 		{
-			dd("monitoring_lists not declared");
+			dd('Error in product update');
+			return ;
 		}
 		$monitoring_lists= [];
-		foreach($data->monitoring_lists as $id)
+		foreach($data->data as $product)
 		{
-			if(isset($monitoring_lists[$id]))
-				dd('Monitoring list '.$id." is duplicate");
-			$monitoring_lists[$id]=$id;
-		}
-		if(!isset($data->groups))
-		{
-			dd("groups not declared");
-		}
-		$products = [];
-		foreach($data->groups as $groupname=>$group_list)
-		{
-			foreach($group_list as $productname=>$product)
-			{
-				foreach($product as $versionname=>$version)
-				{
-					if(!isset($monitoring_lists[$version->id]))
-						dd($productname.'['.$versionname.'] has invalid monitoring list id'.$version->id);
-					if(!isset($version->parents))
-					{
-						$version->parents = [];
-					}
-					foreach($version->parents as $parent)
-					{
-						if(!isset($monitoring_lists[$parent]))
-							dd($productname.' has invalid parent '.$parent);
-					
-					}
-					$version->name = $productname;
-					$version->version = $versionname;
-					$version->group = $groupname;
-					$products[] = $version;
-				}
-			}
-		}
+			$monitoring_lists[$product->id] = $product->id;
+			foreach($product->parents as $pid)
+				$monitoring_lists[$pid]=$pid;
+				
+			$query=['id'=>$product->id];
+			$options=['upsert'=>true];
+			$this->db->products_temp->updateOne($query,['$set'=>$product],$options);
+		}	
 		$this->db->products->drop();
-		foreach($products as $product)
-		{
-			$this->DbPut($product);
-		}
-		$monitoring_lists = array_values($monitoring_lists);
-		$obj = new \StdClass();
-		$obj->monitoring_lists = $monitoring_lists;
-		$query=[];
-		$options=['upsert'=>true];
-		$this->db->monitoring_lists->updateOne($query,['$set'=>$obj],$options);
-		dump("***************************");
-		dump("Product Data Sync - success");
-		dump("***************************");
+		$this->mongo->admin->command(['renameCollection'=>$this->dbname.'.products_temp','to'=>$this->dbname.'.products']);
+		$this->db->products_temp->drop();		
+		$this->SaveUpdateTime('product_update');
 		
+		//$obj = $this->db->products->distinct('group',[],['projection'=>['group'=>1]]);
+		//dd($obj);
 		$this->DumpInfo();
 	}
 }

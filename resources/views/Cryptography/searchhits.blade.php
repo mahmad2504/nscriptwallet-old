@@ -223,8 +223,8 @@ tr { font-size:12px } /* Add borders to cells */
 		var table = new Tabulator("#tabulator-table", {
 		data:hits,
 		columns:columns,
-		pagination:"local",
-		paginationSize:50,
+		//pagination:"local",
+		//paginationSize:50,
 		layout:"fitDataStretch",
 		paginationSizeSelector: [10, 25, 50, 100],
 		cellClick:function(e, cell)

@@ -11,7 +11,7 @@ class ProductSync extends Command
      *
      * @var string
      */
-    protected $signature = 'cveportal:product:sync {--rebuild=0} {--force=0} {--email=2} {--email_resend=0}';
+    protected $signature = 'cveportal:product:sync {--rebuild=0} {--force=0} {--email=2} {--organization=default}';
 
     /**
      * The console command description.
@@ -33,11 +33,7 @@ class ProductSync extends Command
 	
     public function handle()
     {
-		$data = file_get_contents("app/Console/Commands/Cveportal/products.json");
-		$data = preg_replace('/\s+/', ' ', trim($data));
-		//$data = json_decode( preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $data), false );
-		$data = json_decode(utf8_encode($data));
-		$app = new Product($this->option(),$data);
+		$app = new Product($this->option(),null);
 		$app->Run();
     }
 }

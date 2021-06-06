@@ -50,17 +50,21 @@ Route::get('/bspestimate/sync','App\Http\Controllers\Bspestimate\BspestimateCont
 /////////////////////////////////////////
 
 Route::get('/cveportal','App\Http\Controllers\Cveportal\CveportalController@index')->name('cveportal.index');
-Route::get('/cveportal/cve/{group}/{product}/{version}/{admin?}','App\Http\Controllers\Cveportal\CveportalController@getcves')->name('cveportal.getcves');
+Route::get('/cveportal/cve/{group}/{product}/{version}/{admin?}/{organization?}','App\Http\Controllers\Cveportal\CveportalController@getcves')->name('cveportal.getcves');
 Route::get('/cveportal/login','App\Http\Controllers\Cveportal\CveportalController@login')->name('cveportal.login');
 Route::get('/cveportal/logout', 'App\Http\Controllers\Cveportal\CveportalController@logout')->name('cveportal.logout'); 
 Route::post('/cveportal/authenticate','App\Http\Controllers\Cveportal\CveportalController@authenticate')->name('cveportal.authenticate');
+Route::get('/cveportal/authenticate','App\Http\Controllers\Cveportal\CveportalController@authenticate')->name('cveportal.authenticate');
+
 Route::get('/cveportal/triage','App\Http\Controllers\Cveportal\CveportalController@triage')->name('cveportal.triage');
 Route::put('/cveportal/status/update','App\Http\Controllers\Cveportal\CveportalController@statusupdate')->name('cveportal.status.update');
 Route::get('/cveportal/jira/sync/request','App\Http\Controllers\Cveportal\CveportalController@jirasyncrequest')->name('cveportal.jirasyncrequest');
 Route::get('/cveportal/rest/product/{id}','App\Http\Controllers\Cveportal\CveportalController@getproductdata')->name('cveportal.getproductdata');
 Route::get('/cveportal/rest/cve/{productid}','App\Http\Controllers\Cveportal\CveportalController@getcvedata')->name('cveportal.getcvedata');
-Route::get('/cveportal/rss/cve/{productid}','App\Http\Controllers\Cveportal\CveportalController@rssfeed')->name('cryptography.rssfeed');
-Route::get('/cveportal/sync/staticpages','App\Http\Controllers\Cveportal\CveportalController@sync_staticpages')->name('cryptography.sync_staticpages');
+Route::get('/cveportal/rss/cve/{productid}','App\Http\Controllers\Cveportal\CveportalController@rssfeed')->name('cveportal.rssfeed');
+Route::get('/cveportal/sync','App\Http\Controllers\Cveportal\CveportalController@SyncRequest')->name('cveportal.sync');
+Route::get('/cveportal/issyncrequested','App\Http\Controllers\Cveportal\CveportalController@IsSyncRequested')->name('cveportal.issyncrequested');
+
 
 
 /////////////////////////////////////////

@@ -39,3 +39,16 @@
 table {width:50%;text-align:center } /* Make table wider */  
 td, th { border: 1px solid #CCC; text-align:left} /* Add borders to cells */  
 tr { font-size:12px } /* Add borders to cells */
+
+.editable{
+	font-weight:bold;
+}
+   border: none;
+}
+.tabulator .tabulator-tableHolder {
+	background-color :#F5F5F5
+}
+
+body{
+    font-family: 'Open Sans', sans-serif;
+}

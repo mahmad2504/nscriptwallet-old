@@ -282,6 +282,9 @@ class FileLister():
             for filename in filenames:
                 if '\\\\.\\aux' == filename:
                     continue
+                if '\\\\.\\con' == filename:
+                    continue
+				
                 xtension = os.path.splitext(filename)[1]
                 if xtension == '.png':
                     continue
@@ -290,8 +293,10 @@ class FileLister():
                 full_path = abspath(join(dirpath, filename))
                 if islink(full_path):
                     Output.print_warning("Skipping symbolic link: " + full_path)
-                    continue
 
+                if full_path == '\\\\.\\con':
+                    continue
+                print(full_path,flush=True)
                 archive_type = FileLister.archive_type(full_path)
 
                 if archive_type:

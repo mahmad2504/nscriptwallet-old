@@ -55,4 +55,7 @@
 	"\bECCN"
 
 [{"evidence_type": "Prohibition", "language": "all"}]
-	"PROHIBITION"
+	"\bPROHIBITION"
+	
+[{"evidence_type": "Royalty", "language": "all"}]
+	"\bRotalty"

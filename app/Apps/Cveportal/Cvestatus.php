@@ -10,25 +10,20 @@ use App\Apps\Cveportal\Product;
 class Cvestatus extends Cveportal{
 	public $timezone='Asia/Karachi';
 	public $options = 0;
-	public $scriptname = "cveportal:cvestatus";
+	public $scriptname = "cveportal_cvestatus";
 
-	public function __construct($options=null)
+	public function __construct($options)
     {
-
 		$this->namespace = __NAMESPACE__;
-		$this->mongo_server = env("MONGO_DB_SERVER", "mongodb://127.0.0.1");
-		$this->options = $options;
-		parent::__construct($this);
+		parent::__construct($options);
     }
 	public function TimeToRun($update_every_xmin=10)
 	{
-		return true;
 		return parent::TimeToRun($update_every_xmin);
 	}
 	
 	public function Rebuild()
 	{
-		//$this->db->monitoring_lists->drop();
 		$this->options['email']=0;// no emails when rebuild
 	}
 	
@@ -43,8 +38,16 @@ class Cvestatus extends Cveportal{
 			$s->publish = $status['publish'];
 			$s->source = $status['source'];
 			$s->comment = $status['comment'];
+			$s->user=  $status['user'];
 			$status = $s;
 		}
+		$date = new \DateTime();
+		$date = $date->format('Y-m-d h:i:s');
+		$log=new \StdClass();
+		$log->date = $date;
+		$log->type = 'triage';
+		$log->data = $status;
+		
 		$this->db->status->updateOne(
             [
 				'status.cve'=>$status->cve,
@@ -56,6 +59,7 @@ class Cvestatus extends Cveportal{
 			],
             ['upsert' => true]
         );
+		$this->db->logs->insertOne($log);
 	}
 	public function GetAllStatus($cve)
 	{
@@ -76,13 +80,13 @@ class Cvestatus extends Cveportal{
 		);
 		if($record == null)
 		{
-			$product = new Product();
+			$product = new Product($this->options);
 			$ret = new \StdClass();
 			$ret->cve=$cve;
 			$ret->productid=$productid;
-			$p = $product->GetProduct($ret->productid);
-			
 			$ret->triage=$this->default_triage_status;
+			$p = $product->GetProducts(['id'=>$ret->productid]);
+			$p = $p[0];
 			$ret->publish=$p->publish;
 			$ret->source='manual';
 			$ret->comment='';

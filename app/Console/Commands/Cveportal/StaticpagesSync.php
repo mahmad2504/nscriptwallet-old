@@ -11,7 +11,7 @@ class StaticpagesSync extends Command
      *
      * @var string
      */
-    protected $signature = 'cveportal:staticpages:sync {--rebuild=0} {--force=0} {--email=2} {--email_resend=0}';
+    protected $signature = 'cveportal:staticpages:sync {--rebuild=0} {--force=0} {--email=2} {--email_resend=0} {--organization=default}';
 
     /**
      * The console command description.

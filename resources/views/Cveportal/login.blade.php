@@ -1,176 +1,119 @@
 <!DOCTYPE html>
-<html>
+<html class="no-js" lang="en">
 <head>
-<meta charset="utf-8">
-<title>Mentor Login</title>
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta HTTP-EQUIV="Pragma" CONTENT="no-cache">
-<meta HTTP-EQUIV="cache-control" CONTENT="no-cache, no-store, must-revalidate">
-<meta HTTP-EQUIV="Expires" CONTENT="Mon, 01 Jan 1970 23:59:59 GMT">
-<meta name="viewport" content="width=device-width,initial-scale=1.0" />
-<link href="{{ asset('apps/cveportal/css/loading.css') }}" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Security - Siemens Embedded CVE Portal - Login</title>
 
+<link rel="stylesheet" href="https://static.sw.cdn.siemens.com/css/resource/disw-style.css" />
+<link rel="shortcut icon" href="https://www.plm.automation.siemens.com/favicon.ico" type="image/x-icon" />
+<script type="module"
+	src="https://static.sw.cdn.siemens.com/disw/universal-components/1.x/esm/index.module.js"></script>
+<script src="https://static.sw.cdn.siemens.com/disw/disw-utils/next/disw-utils.min.js"></script>
+<script type="module">
+    window.universalComponents.init(['disw-header-v2', 'disw-footer']);
+	
+</script>
 <style>
-	* {
-		box-sizing: border-box;
-	}
-	
-	body {
-    font-size: 0.875rem;
-		font-family: Roboto, "Segoe UI", "Helvetica Neue", Verdana, sans-serif;
-    padding-top: 2.5rem;
-    padding-bottom: 2.5rem;
-    background-color: #f4f4f4;
-	}
-	
-	.container {
-		max-width: 350px;
-		padding: 1.5rem 1.875rem;
-		background-color: #fff;
-		border-radius:2px;
-		margin: 3rem auto;
-		border: 1px solid #ddd;
-		box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
-	}
+
+body{
+  font-family: 'Open Sans', sans-serif;
+  overflow: hidden; 
+  margin: 0 auto 0 auto;  
+  width:100%; 
+  text-align:center;
+  margin: 20px 0px 20px 0px;   
+}
+
+p{
+  font-size:12px;
+  text-decoration: none;
+  color:#ffffff;
+}
+
+h1{
+  font-size:1.5em;
+  color:#525252;
+}
+
+.box{
+  background:0xaaaaaa;
+  width:300px;
+  border-radius:6px;
+  margin: 0 auto 0 auto;
+  padding:0px 0px 70px 0px;
+  border: #2980b9 4px solid;
+  margin-top:200px;  
+}
+
+.user{
+  background:#ecf0f1;
+  border: #ccc 1px solid;
+  border-bottom: #ccc 2px solid;
+  padding: 8px;
+  width:250px;
+  color:#AAAAAA;
+  margin-top:10px;
+  font-size:1em;
+  border-radius:4px;
+}
+
+.organization{
+  background:#ecf0f1;
+  border: #ccc 1px solid;
+  border-bottom: #ccc 2px solid;
+  padding: 8px;
+  width:250px;
+  color:#AAAAAA;
+  margin-top:10px;
+  font-size:1em;
+  border-radius:4px;
+}
+.password{
+  border-radius:4px;
+  background:#ecf0f1;
+  border: #ccc 1px solid;
+  padding: 8px;
+  width:250px;
+  font-size:1em;
+}
+
+.btn{
+  background:#2ecc71;
+  width:125px;
+  padding-top:5px;
+  padding-bottom:5px;
+  color:white;
+  border-radius:4px;
+  border: #27ae60 1px solid;
   
-  .login-title {
-    margin: -1.5rem -1.875rem 2rem;
-    background-color: #0772c3;
-    padding: 1rem 1.5rem;
-  }
-  
-  h2 {
-    font-family: "Roboto","Segoe UI","Helvetica Neue",Roboto,sans-serif;
-    font-weight: 200;
-    font-size: 1.75rem;
-    color: #fff;
-    margin: 0;
-  }
-	
-	img.ie10andup {
-		display:block;
-		width: 9rem;
-		margin: auto auto 2rem;
-	}
-	
-	img.ielt9 {
-		display:none;
-	}
-	
-	input {
-		margin-bottom: 1.5rem;
-    padding: 7px 9px;
-		display:block;
-		width: 100%;
-	}
-	
-	input[type="text"],
-	input[type="password"] {
-		border: 1px solid #ddd;
-		box-shadow: 0 1px 2px rgba(10, 10, 10, 0.1) inset;
-		background-color: #FFF;
-		transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s;
-		border-radius: 2px;
-	}
-	
-	input[type="text"]:focus,
-	input[type="password"]:focus {
-		border-color: #cacaca; 
-		outline: 0; 
-		box-shadow: 0 0 5px #cacaca;
-	}
-	
-	label {
-		margin-bottom: 0.33rem;
-		display:block;
-    color: #8a8a8a;
-	}
-	
-	.checkbox {
-		display:block;
-		padding: .5rem 0;
-	}
-	
-	.checkbox label {
-		display: inline-block;		 
-	}
-	
-	input[type="checkbox"] {
-		width: auto;
-		display: inline-block;
-	}
-	
-	button {
-		cursor:pointer;
-    margin-bottom: 1rem;
-    padding: 0.85em 1em;;
-		border-radius: 2px;
-    font-weight: bold;
-		color: #FFF; 
-		background-color:#0772c3;
-		transition:  background 0.5s;
-    border: 1px solid transparent;
-	}
-	
-	button:hover,
-	button:active {
-		background-color:#005692;
-	}
+  margin-top:20px;
+  margin-bottom:0px;
+  float:none;
+  margin-left:0px;
+  font-weight:800;
+  font-size:0.8em;
+}
 
-	#login-error-msg {
-		font-size: 10px;
-		color: red;
-    display:none;
-  }
-  p {
-    font-size: .8rem;
-    color: #bbb;
-  }
-	
+.btn:hover{
+  background:#2CC06B; 
+}
 </style>
-
-<!--[ie lt IE 9]>
-<style>
-	img.ie10andup {
-		display:none;
-	}
-	img.ielt9 {
-		display:block;
-		width: 206px;
-		margin: 0 auto;
-	}
-</style>
-<![endif]-->
-
-</head>
-
+<html>
 <body>
 
-
-<img class="ie10andup" src="{{ asset('apps/cveportal/images/mgc-asb-logo.svg') }}" alt="Mentor Graphics, A Siemens Business logo" title="Log in using your Mentor network credentials">
-<img class="ielt9" src="{{ asset('apps/cveportal/images/mgc-asb-logo.png')}}" alt="Mentor Graphics, A Siemens Business logo" title="Log in using your Mentor network credentials">
-<div class="container">
-<div class="login-title">
-  <h2>Login</h2>
-</div>
+<disw-header-v2 account="true" scroll="true" locales="true">
+</disw-header-v2>	
 <div style="display:none;" class="loading">Loading&#8230;</div>
 <form  action="#" id="loginform" method="#">
-	<label for="username">User name</label>
-	<input type="text" name="USER" id="username" placeholder="User name" autocomplete="on" autofocus >
-	
-	<label for="password">Password</label>
-	<input type="password" name="PASSWORD" id="password" placeholder="Password" autocomplete="on">
-	
-
-	<button id="submit" type="submit">Login</button>
-
-	<input type="hidden" name="SMENC" value="ISO-8859-1">
-	
-
-<p>Intended for Mentor workforce only</p>
+	<div class="box">
+		<h1 style="margin-top:10px">Login</h1>
+		<input type="organization" name="organization" value="organization" onFocus="field_focus(this, 'organization');" onblur="field_blur(this, 'organization');" class="user" />  
+		<input type="user" name="user" value="user" onFocus="field_focus(this, 'user');" onblur="field_blur(this, 'user');" class="user" />  
+		<input type="password" name="password" value="password" onFocus="field_focus(this, 'password');" onblur="field_blur(this, 'password');" class="user" />
+		<button class="btn" id="submit" type="submit">Login</button>
+		
+	</div>
 </form>
-
-</div><!-- end container div -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 <script>
 
@@ -183,49 +126,71 @@ function HideLoading()
 	$('.loading').hide();	
 }
 
+function field_focus(field, default_value)
+{
+	if(field.value == default_value)
+	{
+	  field.value = '';
+	  $(field).css('color','black');
+	  console.log('black');
+	}
+}
+
+function field_blur(field, default_value)
+{
+	if(field.value == '')
+	{
+	  field.value = default_value;
+	  $(field).css('color','grey');
+	  
+	}
+}
+
 $(document).ready(function()
 {
 	console.log("Login Page Loaded");
-	$("#loginform").submit(
-		function (e)
+	window.disw.init();
+	$("#loginform").submit(function (e)
+	{
+		console.log("Submitted");
+		e.preventDefault();
+		formdata = {};
+		formdata.data = {};
+		$("#loginform").serializeArray().map(function(x)
 		{
-			e.preventDefault();
-			formdata = {};
-			formdata.data = {};
-			//formdata.data = $('#loginform').serializeArray();
-			$("#loginform").serializeArray().map(function(x)
+			if(x.value == '')
 			{
-				if(x.value == '')
-				{
-					alert(x.name+" is empty");
-					formdata.data = null;
-				}
-				formdata.data[x.name] = x.value;
-			}); 
+				alert(x.name+" is empty");
+				formdata.data = null;
+			}
+			formdata.data[x.name] = x.value;
+		}); 
+		console.log(formdata);
+		if(formdata.data == null)
+			return;
 			
-			if(formdata.data == null)
-				return;
-			ShowLoading();
-			formdata._token = "{{ csrf_token() }}";
-			console.log(formdata);
-			$.ajax({
-				type:"POST",
-				url:'{{route("cveportal.authenticate")}}',
-				cache: false,
-				data:formdata,
-				success: function(response)
-				{
-					window.location.href = "{{route('cveportal.triage')}}";
-				},
-				error: function(response)
-				{
-					HideLoading();
-					alert("Invalid user or password");
-				}
-			});			
-		}
-	);
+		ShowLoading();
+		formdata._token = "{{ csrf_token() }}";
+		
+		$.ajax(
+		{
+			type:"POST",
+			url:'{{route("cveportal.authenticate")}}',
+			cache: false,
+			data:formdata,
+			success: function(response)
+			{
+				window.location.href = "{{route('cveportal.index')}}";
+			},
+			error: function(response)
+			{
+				HideLoading();
+				alert(response.responseJSON.error);
+			}
+		});	
+	});
 });
+
 </script>
 </body>
 </html>

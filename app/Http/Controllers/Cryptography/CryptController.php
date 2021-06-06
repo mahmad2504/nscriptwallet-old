@@ -137,7 +137,11 @@ class CryptController extends Controller
 		if($hit == null)
 			dd('Not Found');
 		
+		//dump($project);
+		//dump($package);
+		//dump($hitid);
 		$hits = $app->SearchHits($package,$hit->line_text,$hit->line_text_after_1,$hit->line_text_after_2,$hit->line_text_after_3);
+		//dd($hits);
 		if(count($hits)==0)
 		    dd('Not Found');
 		

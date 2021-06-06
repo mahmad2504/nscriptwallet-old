@@ -8,7 +8,7 @@ use App\Email;
 
 class Reviews extends App{
 	public $timezone='Asia/Karachi';
-	public $query='labels in (Review_Request) and statusCategory = "In Progress"';
+	public $query='labels in (Review_Request) and statusCategory != Done';
 	public $jira_fields = ['key','status','description','summary','updated','created','assignee','reporter','duedate']; 
 	public $jira_server = 'EPS';
 	public $scriptname = 'reviews';
@@ -124,6 +124,7 @@ class Reviews extends App{
 		$tickets =  $this->FetchJiraTickets();
 		foreach($tickets as $ticket)
 		{
+			echo "Processing ".$ticket->key."\n";
 			$ticket->url = $url.$ticket->key;
 			$sticket = $this->ReadTicket($ticket->key);
 			
@@ -137,7 +138,10 @@ class Reviews extends App{
 				if(count($parts)==2)
 				{
 					$parts = explode('~',$parts[1]);
+					if(count($parts)==2)
 					$parts = explode(']',$parts[1]);
+					else
+						continue;
 					
 					if(!array_key_exists($parts[0],$users))
 					{
@@ -184,7 +188,8 @@ class Reviews extends App{
 				$comments = $this->FetchComments($ticket->key);
 				foreach($comments->comments as $comment)
 				{
-					if(( strtolower($comment->body)=='approved')||(strtolower($comment->body)=='approved.'))
+					if(substr( strtolower($comment->body), 0, 8 ) === "approved")
+					//if(( strtolower($comment->body)=='approved')||(strtolower($comment->body)=='approved.'))
 					{
 						if(!array_key_exists($comment->author->name,$users))
 						{

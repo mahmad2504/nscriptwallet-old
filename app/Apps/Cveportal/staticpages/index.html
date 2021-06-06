@@ -2,19 +2,45 @@
 <html class="no-js" lang="en">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Security - Mentor Graphics</title>
+<title>Security - Siemens Embedded CVE Portal</title>
 
+<link rel="stylesheet" href="https://static.sw.cdn.siemens.com/css/resource/disw-style.css" />
 <link type="text/css" rel="stylesheet" href="css/mgc_agg.css" />
 <link rel="stylesheet" href="tabulator/css/tabulator.min.css" />
 <link type="text/css" rel="stylesheet" href="css/mgc-icons-legacy.css" />
 <link type="text/css" rel="stylesheet" href="css/cveportal.css" />
 
+<link rel="shortcut icon" href="https://www.plm.automation.siemens.com/favicon.ico" type="image/x-icon" />
+<script type="module"
+	src="https://static.sw.cdn.siemens.com/disw/universal-components/1.x/esm/index.module.js"></script>
+<script src="https://static.sw.cdn.siemens.com/disw/disw-utils/next/disw-utils.min.js"></script>
+<script type="module">
+    window.universalComponents.init(['disw-header-v2', 'disw-footer']);
+</script>
+
+
 <style>
 </style>
 </head>
 
+
+<link rel="shortcut icon" href="https://www.plm.automation.siemens.com/favicon.ico" type="image/x-icon" />
+
+<script type="module"
+	src="https://static.sw.cdn.siemens.com/disw/universal-components/1.x/esm/index.module.js"></script>
+<script src="https://static.sw.cdn.siemens.com/disw/disw-utils/next/disw-utils.min.js"></script>
+<script type="module">
+    window.universalComponents.init(['disw-header-v2', 'disw-footer']);
+</script>
+
+<style>
+
+</style>
+
+</head>
+
 <body class=" mgc flex-body products">
-	<header class="header-main bg-secondary flex-none" role="navigation">
+	
 	<!-- The Modal -->
 	<div id="modal" class="modal">
 	  <!-- Modal content -->
@@ -46,183 +72,70 @@
 	  </div>
 	</div>
 	<!-- **************************************************************************** -->
-	<div class="header-main-logo">
-		<a class="logo-mentor m-t-xs" href="https://mentor.com"><span class="sr-only">Mentor, A Siemens Business</span></a>
-	</div>
-	<nav class="header-main-navigation navbar-primary" id="primary">
-		<ul>
-			<a href="https://mentor.com/products/" title="Products">
-				<i class="menu-icon menu-icon-animated position-relative m-r-sm" style="top: -3px;"><span></span></i>
-					Products & Solutions
-			</a>
-			<li class="training"><a href="https://mentor.com/training/" title="Training and Services">Training</a></li>
-			<li class="services"><a href="https://mentor.com/training-and-services/" title="Training and Services">Services</a></li>
-			<li class="company"><a href="/company/" title="Company">Company</a></li>
-			<li class="blogs"><a href="https://mentor.com/blogs/" title="Blogs">Blogs</a></li>
-			<li class="support"><a href="https://mentor.com/support/" title="Support">Support</a></li>
-		</ul>
-	</nav>
-	</header>
 	
-	<header id="header-secondary" class="bg-secondary-darker p-y" role="banner">
-		<div class="container">
-			<div class="row row-flex middle-lg">
-				<div class="col-md-9 col-xs-12">
-					<div id="section">
-						<a href="#" title="Security Vulnerabilities">Security Vulnerability Database</a>
-					</div>
-				</div>
-			</div>
+	<disw-header-v2 account="true" scroll="true"></disw-header-v2>	
+	<BR>
+	<BR>
+	<BR>
+	
+	<div class="card-header-secondary  card-page-title" >
+		<div class="row" style="margin:25px;margin-bottom:5px">
+			<table style="width: 100%;border: none;margin-left:20px">
+				<tr style="border: none;">
+					<td style="border: none;">
+						<h1 class="fontSize1_4rem"><span>Common Vulnerabilities and Exposures (CVE)</span></h1>
+					</td style="border: none;">
+					<td style="border: none;">
+						<div class="row" style="margin:0px;margin-bottom:5px">
+						<div style="margin-left:0px;width:300px" class="form-select form-select-sm display-block">
+							<select id="select_group" class="select-options"></select>
+						</div>	
+						<div style="margin-left:20px;width:250px" class="form-select form-select-sm display-block">
+							<select id="select_product" class="select-options"></select>
+						</div>
+						<div style="margin-left:20px;width:150px" class="form-select form-select-sm display-block">
+							<select id="select_version" class="select-options"></select>
+						</div>
+						</div>
+					</td>
+				</tr>
+				<tr style="border: none;">
+					<td style="border: none;">
+					</td>
+					<td style="border: none;">
+						<small style="color:white;margin-botton:-20px">Select required Product Name, Part/BSP Name and Version to display corresponding CVEs</small>
+					</td>
+				</tr>
+			</table>
 		</div>
-	</header>
+	</div>
+	
+	
 	<div id="content" class="flex-content">
-		<div class="bg-white border-bottom text-webfont-one m-b-md">
-			<div class="container position-relative">
-				<nav id="bread" class="breadcrumb item-flex-main">
-					<ol>
-					<!-- BREADCRUMB -->
-						<li class="breadcrumb1 first">
-							<a href="https://www.mentor.com/">
-								<svg class="icon icon-home2" aria-hidden="true"><use xlink:href="#icon-home2"></use></svg>
-								<span class="sr-only">
-									<span>Home</span>
-								</span>
-							</a>
-						</li>
-						<li class="breadcrumb2 first">
-							<a href="https://www.mentor.com/embedded-software/">
-								<span>Embedded Software</span>
-							</a>
-						</li>
-						<li class="breadcrumb3 first">
-							<a href="#">
-								<span>Security Vulnerabilities</span>
-							</a>
-						</li>
-					</ol>
-				</nav>
-			</div>
-		</div>
-		<div  id="copy" class="container">
-		<br>
-		<div class="row row-flex" style="width:110%;!important">
-			<div id="sidebar" class="col-md-2 col-xs-12 last-xs first-md content-sidebar">
-				<h2 class="hidden-lg-up header-group"><span><a href="#" title="Security Vulnerabilities">Security Vulnerabilities</a></span></h2>
-				<div class="card callout callout-callout" id="product_div">		
-					<div class="card-header">
-						<h2 class="text-uc text-gray-dark m-b-0">Products</h2>
-					</div>
-				</div>
-				<div class="card callout callout-callout">
-					<div class="card-header">
-						<h2 class="text-uc text-gray-dark m-b-0">Contact Embedded</h2>
-					</div>
-					<div class="card-block">
-						<ul class="list-unstyled">
-							<li class="list-icon text-sm">
-								<svg class="icon icon-envelope" aria-hidden="true"><use xlink:href="#icon-envelope"></use></svg>
-								<a href="/embedded-software/iot/security/contactme" rel="600||500" class="mgclightbox lb_iframe position-static"><b>Email Us</b></a>
-							</li>
-							<li class="list-icon text-sm mgc-chat-available hide">
-								<svg class="icon icon-bubbles2" aria-hidden="true"><use xlink:href="#icon-bubbles2"></use></svg>
-								<a href="/embedded-software/iot/security" class="mgc-chat-btn" rel="600||500 nofollow" data-context="%2Fembedded%2Dsoftware%2Fiot%2Fsecurity"><b>Chat Online</b></a>
-							</li>
-							<li class="list-icon text-sm mgc-chat-unavailable hide">
-								<svg class="icon icon-bubbles2" aria-hidden="true"><use xlink:href="#icon-bubbles2"></use></svg>
-								<b>Chat Online</b><br /><span class="text-xs">No agents are available</span>
-							</li>
-							<li class="list-icon text-sm">
-								<svg class="icon icon-phone" aria-hidden="true"><use xlink:href="#icon-phone"></use></svg>
-								<strong class="text-xs">1-800-547-3000</strong>
-								<br><span class="text-xs">Direct: (503) 685-8000</span></li>
-						</ul>
-					</div>
-				</div>
-			</div>
-			<div class="col-md-10 col-xs-12 first-xs last-md content-main">
-				<div class="card">
-				    <div class="card-header card-header-secondary  card-page-title">
-                            <h1 class="fontSize1_4rem"><span>Common Vulnerabilities and Exposures (CVE)</span></h1>
-                    </div>
-					
-					<div class="card-block">
-						<div class="row-container  ">
-							<div class="row row-fluid ">
-								<div class="col-md-12 col-xs-12">
-									<p class="text-lg">Select required Product Name, Part/BSP Name and Version to
-										display corresponding CVEs</p>
-								</div>
-							</div>
-							<div class="row">
-								<div class="col-sm-3 customDropdown">
-									<div class="form-select form-select-sm display-block">
-										<select id="select_group" class="select-options"></select>
-									</div>
-								</div>
-					
-								<div class="col-sm-3 customDropdown">
-									<div class="form-select form-select-sm display-block">
-										<select id="select_product" class="select-options"></select>
-									</div>
-								</div>
-					
-								<div class="col-sm-3 customDropdown">
-									<div class="form-select form-select-sm display-block">
-										<select id="select_version" class="select-options"></select>
-									</div>
-								</div>
-							</div>
-							<p></p>
-							<div id="vulnerability-table">
-					
-							</div>
-							<div id="loadingDiv">
-								<div class="loadingMsg">Loading</div>
-							</div>				
+		<div  id="copy" style="width:92%; margin: auto;" class="container1">
+			<br>
+			<div class="row row-flex" style="width:100%;!important">
+				<div id="sidebar" class="col-md-2 col-xs-12 last-xs first-md content-sidebar">
+					<div class="card callout callout-callout" id="product_div">		
+						<div class="card-header">
+							<h2 class="text-uc text-gray-dark m-b-0">Products</h2>
 						</div>
 					</div>
 				</div>
+				<div class="col-md-10 col-xs-12 first-xs last-md content-main">
+					<div id="vulnerability-table"></div>
+					<div id="loadingDiv">
+						<div class="loadingMsg">Loading</div>
+					</div>				
+				</div>
 			</div>
 		</div>
 	</div>
 	
-	<!--pageElement:FOOTER-->
-	<footer class="footer-site flex-none">
-		<div class="container">
-			<div class="row-flex middle-md">
-				<div class="col-md-8 col-xs-12 text-center text-lg-left">
-					<p class="text-xs">
-						<a href="/sitemap">Site Map</a> <span class="text-pipe">|</span>
-						<a href="/company/news/">News & Press</a> <span class="text-pipe">|</span>
-						<a href="/company/careers/">Careers</a> <span class="text-pipe">|</span>
-						<a href="/consulting/">Consulting</a> <span class="text-pipe">|</span>
-						<a href="/company/partner_programs/">Partners/Foundry Support</a> <span class="text-pipe">|</span>
-						<a href="/company/international">International Websites</a>
-					</p>
-					<p class="text-xs">
-						<a class="text-muted" href="/terms_conditions">Terms</a>  <span class="text-pipe">|</span>
-						<a class="text-muted" href="/terms_conditions/privacy">Privacy Policy</a>
-					</p>
-					<p class="text-xs m-b-md m-lg-b-0">&copy; Mentor, a Siemens Business, All rights reserved</p>
-				</div>
-				<div class="col-md-4 col-xs-12 text-center text-lg-right text-xs">
-					<div class="m-b" id="footer-site-social-links">
-						<h3 class="text-uc m-b-sm">Follow Mentor</h3>
-						<a href="http://www.linkedin.com/company/mentor_graphics" class="circle circle-md bg-opaque-light m-x-xs"><svg class="icon icon-linkedin2"><use xlink:href="#icon-linkedin2"></use></svg></a>
-						<a href="https://twitter.com/mentor_graphics" class="circle circle-md bg-opaque-light m-x-xs"><svg class="icon icon-twitter"><use xlink:href="#icon-twitter"></use></svg></a>
-						<a href="https://www.facebook.com/pages/Mentor-Graphics/362609027104610" class="circle circle-md bg-opaque-light m-x-xs"><svg class="icon icon-facebook"><use xlink:href="#icon-facebook"></use></svg></a>
-						<a href="http://www.youtube.com/channel/UC6glMEaanKWD86NEjwbtgfg" class="circle circle-md bg-opaque-light m-x-xs"><svg class="icon icon-youtube"><use xlink:href="#icon-youtube"></use></svg></a>
-						<a href="https://plus.google.com/b/102197424811444669688/102197424811444669688/posts" class="circle circle-md bg-opaque-light m-x-xs"><svg class="icon icon-google-plus"><use xlink:href="#icon-google-plus"></use></svg></a>
-					</div>
-					<p class="m-b-0"><a class="text-white p-r-sm text-emphasis text-no-underline" href="tel:+18005473000">1-800-547-3000</a> <a href="/company/contact_us" class="btn btn-sm btn-info">Contact Mentor</a></p>
-				</div>
-			</div>
-		</div>
-	</footer>
-	<script src="//cdn.jsdelivr.net/bluebird/3.5.0/bluebird.min.js"></script>
+	<disw-footer slug="global-footer"></disw-footer>
+	
+	<script src="https://cdn.jsdelivr.net/bluebird/3.5.0/bluebird.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.js"></script>
-	<script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>
-	<script src="{{ asset('libs/sheetjs/xlsx.full.min.js')}}" ></script>
 	<script src="js/svg.js"></script>
 	<script src="jquery/jquery.min.js"></script>
 	<script src="tabulator/js/tabulator.min.js" ></script>
@@ -236,9 +149,9 @@
 	{
 		columns = [
 			{ title: "CVE", field: "cve", sorter: "string", width: "14%" },
-            { title: "Description", field: "description", sorter: "string", width: "42%" },
+            { title: "Description", field: "title", sorter: "string", width: "42%" },
             { title: "Package", field: "component", sorter: "string", width: "12%" },
-            { title: "Status", field: "status", sorter: "string", width: "12%",
+            { title: "Status", field: "status", sorter: "string", width: "12%",visible:false,
 				formatter:function(cell, formatterParams, onRendered)
 				{	
 					var val = cell.getValue();
@@ -247,8 +160,9 @@
 					return cell.getValue();
 				}
 			},
-            { title: "Severity", field: "severity", sorter: "string", width: "10%" },
-            { title: "Modified", field: "modified", sorter: "string", width: "10%" }
+            { title: "Priority", field: "_priority", sorter: "string", width: "10%"},
+			{ title: "CVSS", field:"basescore", width:100},
+            { title: "Modified", field: "last_update", sorter: "string", width: "10%" ,visible:true},
 		];
 		return columns;
 	}
@@ -256,8 +170,10 @@
 	{
 		columns = [
 			{ title: "CVE", field: "cve", sorter: "string", width: "14%" },
-            { title: "Description", field: "description", sorter: "string", width: "42%" },
-            { title: "Package", field: "component", sorter: "string", width: "12%" },
+            { title: "Description", field: "title", sorter: "string", width: "42%" },
+            { title: "Package", field: "component", sorter: "string", width: "12%"},
+			{ title: "Version", field: "component_version", sorter: "string", width: "10%" },
+			{ title: "Priority", field: "_priority", sorter: "string", width: "10%" },
             { title: "Status", field: "status", sorter: "string", width: "12%",
 				formatter:function(cell, formatterParams, onRendered)
 				{	
@@ -267,14 +183,13 @@
 					return cell.getValue();
 				}
 			},
-            { title: "Severity", field: "severity", sorter: "string", width: "10%" },
-            { title: "Modified", field: "modified", sorter: "string", width: "10%" }
+            
 		];
 		return columns;
 	}
 	function AddOption(id,optionText,optionValue,selected) 
 	{ 
-	    if(!selected)
+		if(!selected)
 			$('#'+id).append('<option value="'+optionValue+'">'+ optionText +"</option>"); 
 		else							
 			$('#'+id).append('<option value="'+optionValue+'" selected>'+ optionText +"</option>");							
@@ -329,43 +244,55 @@
 		console.log(url);
 		CreateTable(url,columns);
 	}
+	function CleanFileName(file)
+	{
+		return file.replace(":", "_"); 
+	}
 	function CreateTable(url,columns)
 	{
+		url = CleanFileName(url);
 		$('#loadingDiv').show();
-		$.getJSON("./data/"+url+".json", function (data) 
+		$.getJSON("./data/"+url+".json?as=2", function (data) 
 		{
 		    //console.log(data);
 			for(i=0;i<data.length;i++)
 			{
 				cve = data[i];
-				for(j=0;j<cve.product.length;j++)
+				for(j=0;j<cve.products.length;j++)
 				{
-					product=cve.product[j];
-					
-					for(k=0;k<product.component.length;k++)
+					var pid=cve.products[j];
+					var product=cve.product[pid];
+					var del = '';
+					cve.component = '';
+					for (var cid in product.component)
 					{
-						component  = product.component[k];
-						cve.component = component.name;
-						
+						component  = product.component[cid];
+						cve.component += del+component.name+" "+component.version;
+						del = ' / ';
 					}
-					//cve.status = product.status.state;
 				}
-				if(cve.status.source !== undefined)
-				{
-					cve.jira = '';
-					if(cve.status.source != 'manual')
-					{
-						cve.jira = cve.status.source;
-					}
-					
-				}
+				if(cve.status == undefined)
+					cve.status = 'Not Applicable';
+				if(cve.priority == 1) 
+					cve._priority = 'Critical';
+				else if(cve.priority == 2) 
+					cve._priority = 'Major';
+				else if(cve.priority == 3) 
+					cve._priority = 'Minor';
+				else 
+					cve._priority = cve.priority;
 			}
-			table.setData(data)
+			table.setData(data);
+			table.setSort([
+			{column:"basescore", dir:"dsc"},
+			{column:"priority", dir:"asc"}
+			]);
 		});
 		
 		var table = new Tabulator("#vulnerability-table", {
 			columns:columns,
 			pagination:"local",
+			tooltips:true,
 			paginationSize:10,
 			paginationSizeSelector: [10, 25, 50, 100],
 			layout: "fitDataStretch",
@@ -387,6 +314,11 @@
 				}
 			}
 		});
+		$.getJSON("./data/meta.json?as=2", function (data) 
+		{
+			var publishdate=data.updatedon;
+			$('.tabulator-footer').append('<small style="float:left">'+publishdate+'</small>');
+		});
 		$('#loadingDiv').hide();
 	}
 	function PopulateModal(data)
@@ -394,25 +326,20 @@
 		console.log(data);
 		
 		$('#cve_title').text(data.cve);
-		$('#cve_description').text(data.description);
-		var published = new Date(data.published);
+		$('#cve_description').text(data.title);
+		var published = new Date(data.publish_dates);
 		var published = published.toString().slice(4,15);
 		$('#cve_published').text(published);
 		
-		var modified = new Date(data.modified);
+		var modified = new Date(data.last_update);
 		var modified = modified.toString().slice(4,15);
 		$('#cve_modified').text(modified);
 		
-		$('#cvss_vector').text(data.cvss.vectorString);
-		$('#cvss_basescore').text(data.cvss.baseScore);
+		$('#cvss_vector').text(data.vector);
+		$('#cvss_basescore').text(data.basescore);
 		
-		if(data.cvss.accessVector !== undefined)
-			$('#cvss_attackvector').text(data.cvss.accessVector);
+		$('#cvss_attackvector').text(data.priority);
 		
-		if(data.cvss.attackVector !== undefined)
-			$('#cvss_attackvector').text(data.cvss.attackVector);
-		
-		if(data.cvss.baseSeverity !== undefined)
 			$('#cvss_severity').text(data.severity);
 		
 		$('#cve_number').text(data.cve);
@@ -461,7 +388,7 @@
 	});
 	$(document).ready(function()
 	{
-		$.getJSON("./data/product.json", function (data) 
+		$.getJSON("./data/product.json?as=2", function (data) 
 		{
 			group_names = data.group_names;
 			product_names = data.product_names;

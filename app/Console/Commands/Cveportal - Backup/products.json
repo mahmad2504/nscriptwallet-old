@@ -42,35 +42,65 @@
 			}
 		},
 		"Mentor® Flex OS" : {
-			"i.MX6Quad Sabre" : {
+			"BSP: NXP i.MX 6Quad SABRE" : {
 				"12.0.0" : {
 					"id" : "223A6F58",
 					"active" : "1",
 					"external" : "1",
 					"notify" : "mumtaz_ahmad@mentor.com",
-					"admin" : [ "ahsann", "snaaz", "hmsadiq", "bbhola", "khula", "chombour" ],
+					"admin" : [
+						"ahsann",
+						"snaaz",
+						"himp",
+						"hmsadiq",
+						"bbhola",
+						"khula",
+						"chombour",
+						"abelal",
+						"ransar"
+					],
 					"parents" : [ "60E18454" ],
 					"publish" : "1"
 				}
 			},
-			"i.MX ULL" : {
+			"BSP: NXP i.MX 6ULL" : {
 				"12.0.0" : {
 					"id" : "172E171C",
 					"active" : "1",
 					"external" : "1",
 					"notify" : "mumtaz_ahmad@mentor.com",
-					"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq", "bbhola", "khula", "chombour" ],
+					"admin" : [
+						"ahsann",
+						"snaaz",
+						"himp",
+						"hmsadiq",
+						"bbhola",
+						"khula",
+						"chombour",
+						"abelal",
+						"ransar"
+					],
 					"parents" : [ "60E18454" ],
 					"publish" : "1"
 				}
 			},
-			"i.MX8M NANO" : {
+			"BSP: NXP i.MX 8M Nano" : {
 				"12.0.0" : {
 					"id" : "558C6FBF",
 					"active" : "1",
 					"external" : "1",
 					"notify" : "mumtaz_ahmad@mentor.com",
-					"admin" : [ "ahsann", "snaaz", "himp", "hmsadiq", "bbhola", "khula", "chombour" ],
+					"admin" : [
+						"ahsann",
+						"snaaz",
+						"himp",
+						"hmsadiq",
+						"bbhola",
+						"khula",
+						"chombour",
+						"abelal",
+						"ransar"
+					],
 					"parents" : [ "60E18454" ],
 					"publish" : "1"
 				}

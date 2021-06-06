@@ -8,38 +8,30 @@ use App\Email;
 use App\Apps\Cveportal\Product;
 
 class Svm extends Cveportal{
-	public $svmurl='https://svm.cert.siemens.com/portal/api/v1';
-	public $svmproxyserver='http://cyp-fsrprx.net.plm.eds.com:2020';
+	//public $svmurl='https://svm.cert.siemens.com/portal/api/v1';
+	//public $svmproxyserver='http://cyp-fsrprx.net.plm.eds.com:2020';
 	public $options = 0;
-	public $scriptname = "cveportal:svm";
-	public function __construct($options=null)
+	public $scriptname = "cveportal_svm";
+	public function __construct($options)
     {
-		$product = new Product();
-		$this->monitoring_list_ids = $product->MonitoringLists();
-		if($this->monitoring_list_ids  == null)
+		$product = new Product($options);
+		$this->monitoring_list_ids = [];
+		$products = $product->GetProducts([],['_id'=>0,'id'=>1,'parents'=>1,'lock'=>1]);
+		foreach($products as $p)
 		{
-			dump("Monitoring lists not found");
-		}
-		foreach($this->monitoring_list_ids as $monitoring_list_id)
-		{
-			$p = $product->DbGet($monitoring_list_id);
-			if($p == null)
-				continue;
+			$this->monitoring_list_ids[$p->id]=$p->id;
 			if(count($p->parents)>0)
-				$this->sublists[$monitoring_list_id]=$p->parents->jsonSerialize();
+			{
+				$this->sublists[$p->id]=$p->parents->jsonSerialize();
+				foreach($this->sublists[$p->id] as $sid)
+					$this->monitoring_list_ids[$sid] = $sid;
+			}
 		}
-		
 		$this->namespace = __NAMESPACE__;
-		$this->mongo_server = env("MONGO_DB_SERVER", "mongodb://127.0.0.1");
-		$this->options = $options;
-		parent::__construct($this);
-		
-		
-
+		parent::__construct($options);
     }
-	public function TimeToRun($update_every_xmin=10)
+	public function TimeToRun($update_every_xmin=1440)
 	{
-		return true;
 		return parent::TimeToRun($update_every_xmin);
 	}
 	public function Rebuild()
@@ -93,8 +85,185 @@ class Svm extends Cveportal{
 	{
 		return $this->db->cpe->find(['id'=>['$in' => $components]]);
 	}
+	public function GetComponents($monitoring_list_id)
+	{
+		echo "Fetching component list ";
+		$components =  $this->getContentBycURL('/common/monitoring_lists/'.$monitoring_list_id.'/components');
+		echo "\r\n" . count($components)." components found\r\n";
+		$output = [];
+		foreach($components as $componentid)
+		{
+			$query =['id'=>$componentid];
+			$projection = ['projection'=>['_id'=>0]];
+			$component = $this->db->components->findOne($query,$projection);
+			if($component == null)
+			{
+				echo "Fetching Component [id=".$componentid."] details from svm"."\r\n";
+				$component = $this->getContentBycURL('/public/components/'.$componentid);
+				$component->id = $componentid;
+				$this->db->components->updateOne($query,['$set'=>$component],['upsert'=>true]);
+			}
+			$output[$componentid]=$component;
+		}
+		return $output;
+	}
+	public function GetNotifications($monitoring_list_id)
+	{
+		echo "Fetching list notifications ";
+		$notifications = $this->getContentBycURL('/common/monitoring_lists/'.$monitoring_list_id.'/notifications');
+		echo "\r\n" . count($notifications)." notifications found\r\n";	
+		$output = [];
+		foreach($notifications as $notification)
+		{
+			$query =['id'=>$notification->id];
+			$projection = ['projection'=>['_id'=>0]];
+			$n = $this->db->notifications->findOne($query,$projection);
+			//$n = null;
+			if($n == null)
+			{
+				dump("Fetching new notification ".$notification->id);
+				//$notification->id = 2694;
+				$notification->data = $this->getContentBycURL('/public/notifications/'.$notification->id);
+				$this->db->notifications->updateOne($query,['$set'=>$notification],['upsert'=>true]);
+				$output[] = $notification;
+				//dd($notification);
+				continue;
+			}
+			
+			if(isset($notification->last_update))
+			{
+				/*if($notification->id == 68891)
+				{
+					dump($n);
+					dd($notification);
+				}*/
+				if($notification->last_update != $n->last_update)
+				{
+					dump("Fetching notification updates ".$notification->id);
+					$notification->data = $this->getContentBycURL('/public/notifications/'.$notification->id);
+					
+					$this->db->notifications->updateOne($query,['$set'=>$notification],['upsert'=>true]);
+				}
+			}
+			else
+			{
+				if($notification->publish_date != $n->publish_date)
+				{
+					dump("Fetching notification updated ".$notification->id);
+					$notification->data = $this->getContentBycURL('/public/notifications/'.$notification->id);
+					$this->db->notifications->updateOne($query,['$set'=>$notification],['upsert'=>true]);
+
+				}
+			}
+			$output[] = $n;
+		}
+		return $output;
+	}
+	function GetComponentsWithCVE($notifications,$components)
+	{
+		$output = [];
+		foreach($notifications as $notification)
+		{
+			foreach($notification->data->assigned_components as $acid)
+			{
+				if(isset($components[$acid]))
+				{
+					$components[$acid]->notifications[$notification->id]=$notification;
+					$output[$acid]=$components[$acid];
+				}
+			}
+		}
+		return $output;
+	}
+	function ParseNotifications($component)
+	{
+		$component->cve = [];
+	    //if(count($component->notifications) > 0)
+		//	dd($component->notifications);
+		foreach($component->notifications as $notification)
+		{
+			$base_score = 0;
+			$vector = '';
+			$cvss_version=0;
+			if(isset($notification->data->cvss_v3_metrics->base_score))
+			{
+				$base_score = $notification->data->cvss_v3_metrics->base_score;
+				$vector = $notification->data->cvss_v3_metrics->vector;
+				$cvss_version=3;
+			}
+			else 
+			{
+				if(isset($notification->data->cvss_v2_metrics->base_score))
+				{
+					$base_score = $notification->data->cvss_v2_metrics->base_score; 
+					$vector = $notification->data->cvss_v2_metrics->vector;
+					$cvss_version=2;
+				}
+			}
+			
+			if(isset($notification->data->cve_references))
+			{
+				foreach($notification->data->cve_references as $cve)
+				{
+					if($cve->number < 100)
+					{
+						$cve->number="00".$cve->number;
+						
+					}
+					else if($cve->number < 1000)
+					{
+						$cve->number="0".$cve->number;
+						
+					}
+					$cve = 'CVE-'.$cve->year."-".$cve->number;
+					$component->cve[$cve] = $cve;
+					//if(13829 == $notification->id)
+					//	dd($notification);
+					if(isset($notification->data->solution_status))
+						$sol = $notification->data->solution_status;//.":".$notification->data->solution_details;
+					else
+						$sol = $notification->data->solution_details;
+					
+					$component->title[$cve][$notification->id] = $notification->data->title;
+					$component->notification_ids[$cve][$notification->id]=$notification->id;
+					
+					$component->publish_date[$cve][$notification->id] = explode("T",$notification->data->publish_date)[0];
+					if($notification->data->last_update==null)
+						$component->last_update[$cve][$notification->id] = $component->publish_date[$cve][$notification->id];
+					else
+						$component->last_update[$cve][$notification->id] = explode("T",$notification->data->last_update)[0];
+					
+					$component->solution[$cve][$notification->id] = $sol;
+					
+					$component->basescore[$cve][$notification->id] = $base_score;
+					$component->vector[$cve][$notification->id] = $vector;
+					$component->cvss_version[$cve][$notification->id] = $cvss_version;
+					$component->priority[$cve][$notification->id] = $notification->data->priority;
+				}
+			}
+		}
+		$component->cve = array_values($component->cve);
+		foreach($component->cve as $cve)
+		{
+			$component->notification_ids[$cve] = array_values($component->notification_ids[$cve]);
+		}
+		//if(count($component->notification_ids[$cve])>1)
+		//	dd($component);
+		return $component;
+	}
+	function Components($id)
+	{
+		$query=['id'=>$id];
+		$obj = $this->db->monitoring_lists->findOne($query);
+		if($obj == null)
+			return null;
+		$obj =  $obj->jsonSerialize();
+		unset($obj->_id);
+		return $obj->components;
+	}
 	public function Script()
 	{
+		$updated=0;
 		$this->db->cpe2->drop();
 		$monitoring_lists = [];
 		if($this->monitoring_list_ids  == null)
@@ -106,104 +275,40 @@ class Svm extends Cveportal{
 		foreach($this->monitoring_list_ids as $monitoring_list_id)
 		{
 			echo "Processing monitoring list [id=".$monitoring_list_id."]\r\n";
-			echo "Fetching component list ";
-			$components =  $this->getContentBycURL('/common/monitoring_lists/'.$monitoring_list_id.'/components');
-			
-			echo "\r\n" . count($components)." Found\r\n";
-			echo "Fetching list notifications ";
-			$notifications = $this->getContentBycURL('/common/monitoring_lists/'.$monitoring_list_id.'/notifications');
-			echo "\r\n" . count($notifications)." Found\r\n";
+			$components = $this->GetComponents($monitoring_list_id);
+			if(count($components)==0)
+			{
+				dump($monitoring_list_id." has zero components");
+			}
+			$notifications =  $this->GetNotifications($monitoring_list_id);
+			$components = $this->GetComponentsWithCVE($notifications,$components);
+			echo count($components)." components found with CVEs\r\n";
 			$count = count($components);
 			$i=0;
 			$monitoring_list = new \StdClass();
 			$monitoring_list->id = $monitoring_list_id;
 			$monitoring_list->components = [];
-			foreach($components as $componentid)
+			foreach($components as $componentid=>$component)
 			{
-					$monitoring_list->components[$componentid] = $componentid;
-					$query =['id'=>$componentid];
-					$projection = ['projection'=>['_id'=>0]];
-					$component = $this->db->cpe2->findOne($query,$projection);
-					$i++;
-					if($component != null)
-					{
-							echo $i."/".$count." Scanning  ".$component->component_name."[".$component->version."] notifications   ".$component->notifications_count." Found\r\n";
-							continue;
-					}
-
-					$query =['id'=>$componentid];
-					$projection = ['projection'=>['_id'=>0]];
-					$component = $this->db->components->findOne($query,$projection);
-					if($component == null)
-					{
-							echo "Fetching Component [id=".$componentid."] details from svm"."\r\n";
-							$component = $this->getContentBycURL('/public/components/'.$componentid);
-							$component->id = $componentid;
-							$this->db->components->updateOne($query,['$set'=>$component],['upsert'=>true]);
-					}
-					echo $i."/".$count." Scanning  ".$component->component_name."[".$component->version."] notifications";
-					$component->notifications =  $this->getContentBycURL('/public/components/'.$componentid.'/notifications');
-					$component->_notifications = [];
-					$component->notifications_count = count($component->notifications);
-					echo "    ".count($component->notifications)." Found\r\n";
-					foreach($component->notifications as $notification)
-					{
-							$query =['id'=>$notification->id];
-							$projection = ['projection'=>['_id'=>0]];
-							$n = $this->db->notifications->findOne($query,$projection);
-							if($n == null)
-							{
-									echo "Fetching Notification [id=".$notification->id."] data"."\r\n";
-									$notification->data = $this->getContentBycURL('/public/notifications/'.$notification->id);
-									$this->db->notifications->updateOne($query,['$set'=>$notification],['upsert'=>true]);
-							}
-							else
-							{
-									if($notification->last_update!=$n->last_update)
-									{
-											echo "Fetching Notification ".$notification->id." details from svm"."\r\n";
-											$notification->data = $this->getContentBycURL('/public/notifications/'.$notification->id);
-											$this->db->notifications->updateOne($query,['$set'=>$notification],['upsert'=>true]);
-									}
-									else
-											$notification = $n;
-							}
-							$component->_notifications[] = $notification;
-					}
-					$component->notifications = $component->_notifications;
-					unset($component->_notifications);
-
-					$component->cve = [];
-
-					foreach($component->notifications as $notification)
-					{
-						if(isset($notification->data->cve_references))
-						{
-							foreach($notification->data->cve_references as $cve)
-							{
-								$cve = 'CVE-'.$cve->year."-".$cve->number;
-								$component->cve[$cve] = $cve;
-								if(isset($notification->data->solution_status))
-									$sol = $notification->data->solution_status.":".$notification->data->solution_details;
-								else
-									$sol = $notification->data->solution_details;
-								$component->solution[$cve][] = $sol;
-							}
-						}
-					}
-					$component->cve = array_values($component->cve);
-					unset($component->notifications);
-					$component->valid = 1;
-					$query =['id'=>$componentid];
-					$this->db->cpe2->updateOne($query,['$set'=>$component],['upsert'=>true]);
+				$monitoring_list->components[$componentid] = $componentid;
+				$i++;
+				echo $i."/".$count." Scanning  ".$component->component_name."[".$component->version."] notifications";
+				echo "    ".count($component->notifications)." Found\r\n";
+				$this->ParseNotifications($component);
+				unset($component->notifications);
+				$component->valid = 1;
+				$query =['id'=>$componentid];
+				$this->db->cpe2->updateOne($query,['$set'=>$component],['upsert'=>true]);
+				$updated=1;
 			}
 			$query =['id'=>$monitoring_list->id];
 			if(count($monitoring_list->components) > 0)
 			{
-					$components = $monitoring_list->components;
-					$monitoring_list->components = array_values($monitoring_list->components);
-					$this->db->monitoring_lists->updateOne($query,['$set'=>$monitoring_list],['upsert'=>true]);
-					$monitoring_list->components = $components;
+				$components = $monitoring_list->components;
+				$monitoring_list->components = array_values($monitoring_list->components);
+				$this->db->monitoring_lists->updateOne($query,['$set'=>$monitoring_list],['upsert'=>true]);
+				$monitoring_list->components = $components;
+				$updated=1;
 			}
 			$monitoring_lists[$monitoring_list->id] = $monitoring_list;
 		}
@@ -230,24 +335,27 @@ class Svm extends Cveportal{
 				}
 				else
 				{
-						dump("ERROR :: monitoring list  ".$sublist_id." is not included in monitorin list");
+					dump("ERROR :: monitoring list  ".$sublist_id." is not included in monitorin list");
 				}
 			}
 			if(count($monitoring_list->components) > 0)
 			{
-					$components = $monitoring_list->components;
-					$monitoring_list->components = array_values($monitoring_list->components);
-					$query =['id'=>$id];
-					$this->db->monitoring_lists->updateOne($query,['$set'=>$monitoring_list],['upsert'=>true]);
-					$monitoring_list->components = $components;
+				$components = $monitoring_list->components;
+				$monitoring_list->components = array_values($monitoring_list->components);
+				$query =['id'=>$id];
+				$this->db->monitoring_lists->updateOne($query,['$set'=>$monitoring_list],['upsert'=>true]);
+				$monitoring_list->components = $components;
 			}
 			//$monitoring_lists[$id]->
 		}
-		$this->db->cpe->drop();
-		$cpe2 = $this->db->cpe2->findOne([]);	
-		if($cpe2 != null)
+		if($updated == 1)
 		{
-			$this->mongo->admin->command(['renameCollection'=>$this->dbname.'.cpe2','to'=>$this->dbname.'.cpe']);
+			$this->db->cpe->drop();
+			$cpe2 = $this->db->cpe2->findOne([]);	
+			if($cpe2 != null)
+			{
+				$this->mongo->admin->command(['renameCollection'=>$this->dbname.'.cpe2','to'=>$this->dbname.'.cpe']);
+			}
 		}
 	}
 }
