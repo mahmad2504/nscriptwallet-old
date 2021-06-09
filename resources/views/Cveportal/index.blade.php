@@ -184,7 +184,7 @@
 			index = group_names.indexOf(this.value);
 			$('#select_product').children().remove();
 			$('#select_version').children().remove();
-			AddOption('select_product','All Products','all',0);
+			AddOption('select_product','All Parts','all',0);
 			AddOption('select_version','All Versions','all',0);
 			if(index >= 0)
 			{

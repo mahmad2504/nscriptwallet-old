@@ -6,6 +6,7 @@ use App\Libs\Jira\Jira;
 use Carbon\Carbon;
 use App\Email;
 use App\Apps\Cveportal\Product;
+use App\Apps\Cveportal\Cve;
 
 class Cvestatus extends Cveportal{
 	public $timezone='Asia/Karachi';
@@ -59,7 +60,12 @@ class Cvestatus extends Cveportal{
 			],
             ['upsert' => true]
         );
-		$this->db->logs->insertOne($log);
+		$cve =  new Cve($this->options);
+		
+		$cve->UpdateStatus($s->cve);
+		
+		if(isset($s->user))
+			$this->db->logs->insertOne($log);
 	}
 	public function GetAllStatus($cve)
 	{

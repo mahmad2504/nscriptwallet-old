@@ -269,7 +269,13 @@ class CveportalController extends Controller
 		$cur_product_id = null;
 		if($version != null)// there should be only 1 id
 			$cur_product_id = $ids[0];
-		$data = $cve->Get($ids,$limit,$skip,$cur_product_id,$admin_ids);
+		
+		if($admin==null)
+		{
+			$data = $cve->Get($ids,$limit,$skip,$cur_product_id,$admin_ids,1);
+		}
+		else
+			$data = $cve->Get($ids,$limit,$skip,$cur_product_id,$admin_ids);
 		$total = $data['total'];
 		unset($data['total']);
 		$output['total']=$total;

@@ -130,6 +130,11 @@ class Nvd extends Cveportal{
 		//echo memory_get_usage()."\n";
 		$json = json_decode($data);
 		//echo memory_get_usage()."\n";
+		if(!isset($json->CVE_Items))
+		{
+			unlink($filename.".zip");
+			dd($filename." invalid data");
+		}
 		foreach($json->CVE_Items as $cve)
 		{
 			$date = new \DateTime($cve->publishedDate);

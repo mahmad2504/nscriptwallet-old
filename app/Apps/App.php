@@ -40,7 +40,6 @@ class App
 	public function __construct($app)
 	{
 		$this->InitOption();
-		
 		$this->app = $app;
 		if(app()->runningInConsole())
 		{
@@ -166,7 +165,6 @@ class App
 	}
 	public function Run()
 	{
-		
 		if($this->app->TimeToRun())
 		{
 			if($this->options['rebuild'])
@@ -218,7 +216,7 @@ class App
 		$now = Carbon::now($this->timezone);
 		if($now->isWeekend())
 			return false;
-
+		
 		
 		$sec = $this->SecondsSinceLastUpdate();
 		

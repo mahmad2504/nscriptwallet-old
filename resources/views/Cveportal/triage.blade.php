@@ -30,7 +30,7 @@
 </head>
 
 
-<body class=" mgc flex-body products">
+<body>
 	<!-- The Modal -->
 	<div id="tmodal" class="modal">
 		<!-- Modal content -->
@@ -69,8 +69,7 @@
 	<BR>
 	<BR>
 	
-	
-	<header style="background-color:orange!important" id="header-warning" class="bg-warning-darker p-y" >
+	<header style="background-color:orange!important" id="header-secondary" class="bg-secondary-darker p-y" role="banner">
 		<div class="container">
 			<div class="">
 				<a style="font-size:25px;font-weight:bold" href="#" title="Security Vulnerabilities">Security Vulnerabilities</a>
@@ -329,7 +328,7 @@
 		index = group_names.indexOf(this.value);
 		$('#select_product').children().remove();
 		$('#select_version').children().remove();
-		AddOption('select_product','All Products','all',0);
+		AddOption('select_product','All Parts','all',0);
 		AddOption('select_version','All Versions','all',0);
 		if(index >= 0)
 		{

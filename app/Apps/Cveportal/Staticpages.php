@@ -104,7 +104,7 @@ class Staticpages extends Cveportal{
 			
 		while(1)
 		{
-			$data = $c->Get($ids,$limit,$skip,$cur_product_id);
+			$data = $c->Get($ids,$limit,$skip,$cur_product_id,[],1,1);
 			unset($data['total']);
 			if(count($data)==0)
 				break;

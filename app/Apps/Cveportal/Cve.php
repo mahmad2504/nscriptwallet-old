@@ -63,18 +63,20 @@ class Cve extends Cveportal{
 		}
 		return $severity;
 	}
-	public function GetCVETriageStatus($cve,$productid,$publish)
+	public function GetCVETriageStatus($cve,$productid)
 	{
 		$cvestatus = new CVEStatus($this->options);
-		$status = $cvestatus->GetStatus($cve,$productid,$publish);
+		$status = $cvestatus->GetStatus($cve,$productid);
 		$status = $status->Jsonserialize();
 		return $status;
 	}
-	function Get($ids,$limit=0,$skip=0,$cur_product_id=null,$admin_ids=[])
+	function Get($ids,$limit=0,$skip=0,$cur_product_id=null,$admin_ids=[],$valid_only=0,$publishable_only=0)
 	{
 		$p = new Product($this->options);
+		
 		$options = [
 			'sort' => ['priority' => 1],
+			
 		];
 		
 		$query = [];
@@ -82,6 +84,14 @@ class Cve extends Cveportal{
 			$query['products']=['$in'=>$ids];
 		
 		$query['priority']= ['$lt'=>4];
+		
+		if($valid_only==1)
+			$query['not_applicable'] = 0;
+		
+		if($publishable_only==1)
+			$query['publishable'] = 1;
+	
+		
 		$total = $this->db->cverecords->count($query,$options);
 		if($limit > 0)
 			$options['limit']=$limit;
@@ -105,7 +115,7 @@ class Cve extends Cveportal{
 				if($pdata->id == $cur_product_id)
 					$pdata->current = 1;
 				
-				$pdata->status = $this->GetCVETriageStatus($cve->cve,$pid,$details[0]->publish);
+				$pdata->status = $this->GetCVETriageStatus($cve->cve,$pid);
 				$pdata->status->readonly=1;
 				
 				if(in_array($pid,$admin_ids))
@@ -127,6 +137,7 @@ class Cve extends Cveportal{
 	{
 		$nvd = new Nvd($this->options);
 		$svm =  new Svm($this->options);
+		
 		
 		$product_id = $product->id;
 		$query = ['id'=>$product_id];
@@ -197,9 +208,41 @@ class Cve extends Cveportal{
 				$cverecord->product[$product_id]->component[$component_id]->valid = 1;
 				$cverecord->product[$product_id]->valid=1;
 				
-				$this->db->cverecords->updateOne(['cve'=>$cve],['$set'=>$cverecord],['upsert'=>true]);
+				$this->UpdateStatus($cverecord);
+				
+				//$this->db->cverecords->updateOne(['cve'=>$cve],['$set'=>$cverecord],['upsert'=>true]);
 			}
 		}
+	}
+	public function UpdateStatus($cve)
+	{
+		$status =  new Cvestatus($this->options);
+		if(is_string($cve))
+			$cverecord = $this->db->cverecords->findOne( ['cve'=>$cve]);
+		else
+			$cverecord = $cve;
+		if($cverecord == null)
+			dd($cve." data not found");
+		
+		$cverecord->publishable=0;
+		$cverecord->not_applicable=1;
+		
+		foreach($cverecord->product as $pid=>$data)
+		{
+			$st = $status->GetStatus($cverecord->cve,$pid);
+			if(($st->publish == 1)||($st->publish == "1"))
+				$cverecord->publishable=1;
+			if($st->triage != 'Not Applicable')
+				$cverecord->not_applicable=0;
+		}
+		
+		
+		$this->db->cverecords->updateOne(['cve'=>$cverecord->cve],['$set'=>$cverecord],['upsert'=>true]);
+		
+	}
+	public function GetCve($cve)
+	{
+		return $this->db->cverecords->findOne( ['cve'=>$cve]);
 	}
 	public function Script()
 	{
@@ -273,6 +316,9 @@ class Cve extends Cveportal{
 			else
 				$this->db->cverecords->updateOne(['cve'=>$cve->cve],['$set'=>$cve],['upsert'=>true]);
 		}
+		dump("Creating index");
+		$this->db->cverecords->createIndex(["cve"=>'text']);
+			
 	}
 	function IsItPublished($cve)
 	{

@@ -39,7 +39,7 @@
 
 </head>
 
-<body class=" mgc flex-body products">
+<body>
 	
 	<!-- The Modal -->
 	<div id="modal" class="modal">
@@ -52,7 +52,7 @@
 		<div  class="card card-block" style="margin-bottom:0px;">
 			<div>
 				<small style="float:left;margin-top:-10px;"><span style="font-weight:bold;">Vector: </span><span id="cvss_vector"></span></small>
-				<small style="float:right;margin-top:-10px;"><span style="font-weight:bold;">Attack Vector: </span><small id="cvss_attackvector"></small></small>
+				<small style="float:right;margin-top:-10px;"><span style="font-weight:bold;">Priority: </span><small id="cvss_attackvector"></small></small>
 			</div>
 			<br>
 			<div>
@@ -78,12 +78,14 @@
 	<BR>
 	<BR>
 	
-	<div class="card-header-secondary  card-page-title" >
-		<div class="row" style="margin:25px;margin-bottom:5px">
-			<table style="width: 100%;border: none;margin-left:20px">
+	
+	
+	<header id="header-secondary" class="bg-secondary-darker p-y" role="banner">
+		<div class="">
+			<table style="width: 100%;border: none;margin-left:50px">
 				<tr style="border: none;">
 					<td style="border: none;">
-						<h1 class="fontSize1_4rem"><span>Common Vulnerabilities and Exposures (CVE)</span></h1>
+						<h1 class="fontSize1_4rem"><span style="color:white;">Common Vulnerabilities and Exposures (CVE)</span></h1>
 					</td style="border: none;">
 					<td style="border: none;">
 						<div class="row" style="margin:0px;margin-bottom:5px">
@@ -108,7 +110,7 @@
 				</tr>
 			</table>
 		</div>
-	</div>
+	</header>
 	
 	
 	<div id="content" class="flex-content">
@@ -199,7 +201,7 @@
 		index = group_names.indexOf(this.value);
 		$('#select_product').children().remove();
 		$('#select_version').children().remove();
-		AddOption('select_product','All Products','all',0);
+		AddOption('select_product','All Parts','all',0);
 		AddOption('select_version','All Versions','all',0);
 		if(index >= 0)
 		{
@@ -327,10 +329,10 @@
 		
 		$('#cve_title').text(data.cve);
 		$('#cve_description').text(data.title);
-		var published = new Date(data.publish_dates);
+		var published = new Date(data.publish_date);
 		var published = published.toString().slice(4,15);
 		$('#cve_published').text(published);
-		
+			
 		var modified = new Date(data.last_update);
 		var modified = modified.toString().slice(4,15);
 		$('#cve_modified').text(modified);
@@ -348,7 +350,16 @@
 		link = "https://nvd.nist.gov/vuln/detail/"+data.cve;
 		$("#nvd_link").attr("href",link);
 		
-		html='<table>';
+		html='<table style="table-layout: auto; width: 100%;">';
+		html+='<colgroup>';
+		html+='<col span="1" style="width: 25%;">';
+		html+='<col span="1" style="width: 25%;">';
+		html+='<col span="1" style="width: 5%;">';
+		html+='<col span="1" style="width: 25%;">';
+		html+='<col span="1" style="width: 15%;">';
+		html+='<col span="1" style="width: 5%;">';
+		html+='</colgroup>';
+		
 		html+='<tr>';
 		html+='<th>Product</th>';
 		html+='<th>Part</th>';
@@ -358,17 +369,22 @@
 		html+='<th>Published</th>';
 		html+='</tr>';
 		
-		for(i=0;i<data.product.length;i++)
+		for(i=0;i<data.products.length;i++)
 		{
+			var pid = data.products[i];
 			html+='<tr>';
-			product = data.product[i];
+			product = data.product[pid];
 			html += '<td>'+product.group+'</td><td>'+product.name+"</td><td>"+product.version+'</td>';
 			html += '<td>';
-			for(j=0;j<product.component.length;j++)
+			var del = '';
+			cve.component = '';
+			for (var cid in product.component)
 			{
-				component=product.component[j];
-				html += component.name+component.version+' ';
+				component  = product.component[cid];
+				html += del+component.name+component.version;
+				del = ' / ';
 			}
+					
 			html += '</td>';
 			html += '<td>'+product.status.triage+'</td>';
 			if(product.status.publish)
@@ -388,6 +404,8 @@
 	});
 	$(document).ready(function()
 	{
+		$.ajaxSetup({ cache: false });
+		
 		$.getJSON("./data/product.json?as=2", function (data) 
 		{
 			group_names = data.group_names;

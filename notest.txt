@@ -8,3 +8,5 @@ Force delete
 E:\OSS\IOS1.5.5>rd /s "\\?\E:\OSS\IOS1.5.5\tbd - lvm2-2.02.168-34"
 
 D:\xampp\htdocs\nscriptwallet\app\Apps\Cveportal\staticpages>aws s3 cp index.html s3://eps.mentorcloudservices.com/cveportal/ --acl public-read
+
+mongodump.exe --out=backup --db=cveportal
